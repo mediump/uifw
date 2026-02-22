@@ -23,6 +23,8 @@ TEST_CASE("Basic entity")
   const ecs::Entity entity =
       ecs::createEntity(&root, X, Y, WIDTH, HEIGHT, NAME);
 
+  CHECK(entity.has<ecs::BaseComponents>() == true);
+
   // Get and check data
   const auto component = entity.get<ecs::BaseComponents>();
   CHECK(component.rect.x == X);
@@ -50,5 +52,9 @@ TEST_CASE("Basic entity")
   // Check name
   const char* entityName = entity.name();
   CHECK(strcmp(entityName, NAME) == 0);
+
+  // Remove component
+  entity.remove<ecs::BaseComponents>();
+  CHECK(entity.has<ecs::BaseComponents>() == false);
 }
 

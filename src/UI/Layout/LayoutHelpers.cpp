@@ -25,7 +25,7 @@ void layoutChildren(const ecs::Entity &parent)
 
   const size_t nChildren = parentBaseComponent.transformRel.nChildren;
   const LayoutMargins margins = parentLayoutComponent.margins;
-  const float spacing = parentLayoutComponent.spacing;
+  const uint16_t spacing = parentLayoutComponent.spacing;
 
   std::vector<UI_REF(ecs::BaseComponent)> children(nChildren);
   auto currentComponent =
@@ -43,7 +43,7 @@ void layoutChildren(const ecs::Entity &parent)
   }
 
   // Pair of min/max values for the layout axis
-  std::vector<std::pair<float, float>> inSizeConstraints(nChildren);
+  std::vector<std::pair<uint16_t, uint16_t>> inSizeConstraints(nChildren);
 
   for (size_t i = 0; i < nChildren; ++i) {
     switch (layoutType) {
@@ -60,38 +60,39 @@ void layoutChildren(const ecs::Entity &parent)
   }
 
   // Fit components to available space
-  float availableSpace = 0.0f;
-  float currentPosition = 0.0f;
+  uint16_t availableSpace = 0;
+  uint16_t currentPosition = 0;
 
   switch (layoutType) {
     case LayoutType_Horizontal:
       availableSpace = parentBaseComponent.rect.width - margins.left -
                        margins.right -
-                       spacing * static_cast<float>(nChildren - 1);
+                       spacing * (nChildren - 1);
 
       currentPosition = parentBaseComponent.rect.x + margins.left;
       break;
     case LayoutType_Vertical:
       availableSpace = parentBaseComponent.rect.height - margins.top -
                        margins.bottom -
-                       spacing * static_cast<float>(nChildren - 1);
+                       spacing * (nChildren - 1);
 
       currentPosition = parentBaseComponent.rect.y + margins.top;
       break;
     default: break;
   }
 
-  const float initialSpace = availableSpace;
-  std::vector<float> computedSizes(nChildren);
+  const uint16_t initialSpace = availableSpace;
+  std::vector<uint16_t> computedSizes(nChildren);
 
   for (size_t i = 0; i < nChildren; ++i) {
     const size_t remainingComponents = nChildren - i;
 
-    float inferredSize =
-        availableSpace / static_cast<float>(remainingComponents);
+    uint16_t inferredSize =
+        availableSpace / remainingComponents;
 
-    const float minSize = std::max(0.0f, inSizeConstraints[i].first);
-    const float maxSize = std::min(inSizeConstraints[i].second, availableSpace);
+    const uint16_t minSize = inSizeConstraints[i].first;
+    const uint16_t maxSize =
+        std::min(inSizeConstraints[i].second, availableSpace);
 
     if (inferredSize < minSize) {
       inferredSize = minSize;
@@ -105,8 +106,8 @@ void layoutChildren(const ecs::Entity &parent)
     availableSpace -= inferredSize;
   }
 
-  float secondaryAxisSize = 0.0f;
-  float secondaryAxisPosition = 0.0f;
+  uint16_t secondaryAxisSize = 0.0f;
+  uint16_t secondaryAxisPosition = 0.0f;
 
   switch (layoutType) {
     case LayoutType_Horizontal:

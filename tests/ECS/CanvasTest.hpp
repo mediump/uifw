@@ -44,10 +44,10 @@ TEST_CASE("Basic horizontal layout")
   constexpr int WINDOW_WIDTH = 180;
   constexpr int WINDOW_HEIGHT = 110;
 
-  constexpr float X = 15.0f;
-  constexpr float Y = 20.0f;
-  constexpr float WIDTH = 250.0f;
-  constexpr float HEIGHT = 350.0f;
+  constexpr uint16_t X = 15;
+  constexpr uint16_t Y = 20;
+  constexpr uint16_t WIDTH = 250;
+  constexpr uint16_t HEIGHT = 350;
 
   const char *CHILD_1_NAME = "Child1";
   const char *CHILD_2_NAME = "Child2";
@@ -65,8 +65,8 @@ TEST_CASE("Basic horizontal layout")
   auto canvasLayout = canvas.entity.get_ref<ui::LayoutComponent>();
 
   canvasLayout->type = LayoutType_Horizontal;
-  canvasLayout->margins = {5.0f, 5.0f, 5.0f, 5.0f};
-  canvasLayout->spacing = 10.0f;
+  canvasLayout->margins = {5, 5, 5, 5};
+  canvasLayout->spacing = 10;
 
   auto child1 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
                                   CHILD_1_NAME, &canvas.entity);
@@ -82,8 +82,8 @@ TEST_CASE("Basic horizontal layout")
 
   auto validateComponent = [](ecs::Entity entity) {
     const auto baseComponent = entity.get<ui::ecs::BaseComponent>();
-    CHECK(baseComponent.rect.width == 50.0f);
-    CHECK(baseComponent.rect.height == 100.0f);
+    CHECK(baseComponent.rect.width == 50);
+    CHECK(baseComponent.rect.height == 100);
   };
 
   validateComponent(child1);
@@ -96,10 +96,10 @@ TEST_CASE("Horizontal layout with constraint")
   constexpr int WINDOW_WIDTH = 180;
   constexpr int WINDOW_HEIGHT = 110;
 
-  constexpr float X = 15.0f;
-  constexpr float Y = 20.0f;
-  constexpr float WIDTH = 250.0f;
-  constexpr float HEIGHT = 350.0f;
+  constexpr uint16_t X = 15.0f;
+  constexpr uint16_t Y = 20.0f;
+  constexpr uint16_t WIDTH = 250.0f;
+  constexpr uint16_t HEIGHT = 350.0f;
 
   const char *CHILD_1_NAME = "Child1";
   const char *CHILD_2_NAME = "Child2";
@@ -117,7 +117,7 @@ TEST_CASE("Horizontal layout with constraint")
   auto canvasLayout = canvas.entity.get_ref<ui::LayoutComponent>();
 
   canvasLayout->type = LayoutType_Horizontal;
-  canvasLayout->margins = {5.0f, 5.0f, 5.0f, 5.0f};
+  canvasLayout->margins = {5, 5, 5, 5};
   canvasLayout->spacing = 10.0f;
 
   auto child1 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
@@ -140,13 +140,13 @@ TEST_CASE("Horizontal layout with constraint")
   // Apply layout
   ui::layoutChildren(canvas.entity);
 
-  auto validateComponent = [](ecs::Entity entity, float expectedWidth) {
+  auto validateComponent = [](ecs::Entity entity, uint16_t expectedWidth) {
     const auto baseComponent = entity.get<ui::ecs::BaseComponent>();
     CHECK(baseComponent.rect.width == expectedWidth);
-    CHECK(baseComponent.rect.height == 100.0f);
+    CHECK(baseComponent.rect.height == 100);
   };
 
-  validateComponent(child1, 100.0f);
-  validateComponent(child2, 25.0f);
-  validateComponent(child3, 25.0f);
+  validateComponent(child1, 100);
+  validateComponent(child2, 25);
+  validateComponent(child3, 25);
 }

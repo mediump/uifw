@@ -134,10 +134,10 @@ TEST_CASE("Multiple components")
 
 TEST_CASE("Transform hierarchy")
 {
-  constexpr float X = 15.0f;
-  constexpr float Y = 20.0f;
-  constexpr float WIDTH = 250.0f;
-  constexpr float HEIGHT = 350.0f;
+  constexpr uint16_t X = 15;
+  constexpr uint16_t Y = 20;
+  constexpr uint16_t WIDTH = 250;
+  constexpr uint16_t HEIGHT = 350;
 
   const char *PARENT_NAME = "Parent";
   const char *CHILD_1_NAME = "Child1";

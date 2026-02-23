@@ -12,10 +12,10 @@ namespace ui::ecs {
 typedef flecs::entity Entity;
 
 Entity createEntity(const ECSRoot *root,
-                    float x,
-                    float y,
-                    float width = 128.0f,
-                    float height = 128.0f,
+                    uint16_t x,
+                    uint16_t y,
+                    uint16_t width = 128.0f,
+                    uint16_t height = 128.0f,
                     const char *name = "",
                     const Entity *parent = nullptr);
 

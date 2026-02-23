@@ -11,10 +11,10 @@ struct Canvas
 };
 
 Canvas createCanvas(const ecs::ECSRoot *root,
-                    float x,
-                    float y,
-                    float width,
-                    float height,
+                    uint16_t x,
+                    uint16_t y,
+                    uint16_t width,
+                    uint16_t height,
                     const char *name);
 
 }  // namespace ui

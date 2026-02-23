@@ -152,10 +152,10 @@ ui::Rect ui::getWindowBounds(const Window *window)
   SDL_GetWindowSize(window->ptr, &width, &height);
 
   return Rect {
-    .x = static_cast<float>(x),
-    .y = static_cast<float>(y),
-    .width = static_cast<float>(width),
-    .height = static_cast<float>(height)
+    .x = static_cast<uint16_t>(x),
+    .y = static_cast<uint16_t>(y),
+    .width = static_cast<uint16_t>(width),
+    .height = static_cast<uint16_t>(height)
   };
 }
 

@@ -11,30 +11,25 @@ enum LayoutType
 
 struct LayoutMargins
 {
-  float top;
-  float right;
-  float bottom;
-  float left;
+  uint16_t top;
+  uint16_t right;
+  uint16_t bottom;
+  uint16_t left;
 };
 
 struct Rect
 {
-  float x;
-  float y;
-  float width;
-  float height;
+  uint16_t x;
+  uint16_t y;
+  uint16_t width;
+  uint16_t height;
 };
 
 struct LayoutComponent
 {
   LayoutType type;
   LayoutMargins margins;
-  float spacing;
-
-  float minWidth;
-  float minHeight;
-  float maxWidth;
-  float maxHeight;
+  uint16_t spacing;
 };
 
 }

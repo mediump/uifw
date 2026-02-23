@@ -22,17 +22,17 @@ inline ui::ecs::Entity find_last_child(
 }
 
 ui::ecs::Entity ui::ecs::createEntity(const ECSRoot *root,
-                                      const float x,
-                                      const float y,
-                                      const float width,
-                                      const float height,
+                                      const uint16_t x,
+                                      const uint16_t y,
+                                      const uint16_t width,
+                                      const uint16_t height,
                                       const char *name,
                                       const Entity *parent)
 {
   const Entity entity = root->world.entity(name);
 
   entity.set<BaseComponent>({.rect = {x, y, width, height},
-                             .zOrder = 0.0f,
+                             .zOrder = 0,
                              .inLayout = false,
                              .needsUpdate = true});
 

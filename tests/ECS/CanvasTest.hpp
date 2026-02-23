@@ -17,7 +17,7 @@ TEST_CASE("Construct window with canvas")
   ui::Window window;
   ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
 
-  ui::Canvas& canvas = window.canvas;
+  ui::Canvas &canvas = window.canvas;
 
   CHECK(canvas.entity.has<ui::LayoutComponent>());
   CHECK(canvas.entity.name() == "Canvas");
@@ -58,7 +58,7 @@ TEST_CASE("Basic horizontal layout")
   ui::Window window;
   ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
 
-  ui::Canvas& canvas = window.canvas;
+  ui::Canvas &canvas = window.canvas;
   CHECK(canvas.entity.has<ui::LayoutComponent>());
   CHECK(canvas.entity.name() == "Canvas");
 
@@ -110,7 +110,7 @@ TEST_CASE("Horizontal layout with constraint")
   ui::Window window;
   ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
 
-  ui::Canvas& canvas = window.canvas;
+  ui::Canvas &canvas = window.canvas;
   CHECK(canvas.entity.has<ui::LayoutComponent>());
   CHECK(canvas.entity.name() == "Canvas");
 
@@ -170,7 +170,7 @@ TEST_CASE("Basic vertical layout")
   ui::Window window;
   ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
 
-  ui::Canvas& canvas = window.canvas;
+  ui::Canvas &canvas = window.canvas;
   CHECK(canvas.entity.has<ui::LayoutComponent>());
   CHECK(canvas.entity.name() == "Canvas");
 
@@ -222,7 +222,7 @@ TEST_CASE("Vertical layout with constraint")
   ui::Window window;
   ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
 
-  ui::Canvas& canvas = window.canvas;
+  ui::Canvas &canvas = window.canvas;
   CHECK(canvas.entity.has<ui::LayoutComponent>());
   CHECK(canvas.entity.name() == "Canvas");
 

@@ -150,3 +150,115 @@ TEST_CASE("Horizontal layout with constraint")
   validateComponent(child2, 25);
   validateComponent(child3, 25);
 }
+
+TEST_CASE("Basic vertical layout")
+{
+  constexpr int WINDOW_WIDTH = 110;
+  constexpr int WINDOW_HEIGHT = 180;
+
+  constexpr uint16_t X = 15;
+  constexpr uint16_t Y = 20;
+  constexpr uint16_t WIDTH = 250;
+  constexpr uint16_t HEIGHT = 350;
+
+  const char *CHILD_1_NAME = "Child1";
+  const char *CHILD_2_NAME = "Child2";
+  const char *CHILD_3_NAME = "Child3";
+
+  ui::initPlatform();
+
+  ui::Window window;
+  ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
+
+  ui::Canvas& canvas = window.canvas;
+  CHECK(canvas.entity.has<ui::LayoutComponent>());
+  CHECK(canvas.entity.name() == "Canvas");
+
+  auto canvasLayout = canvas.entity.get_ref<ui::LayoutComponent>();
+
+  canvasLayout->type = LayoutType_Vertical;
+  canvasLayout->margins = {5, 5, 5, 5};
+  canvasLayout->spacing = 10;
+
+  auto child1 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
+                                  CHILD_1_NAME, &canvas.entity);
+  auto child2 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
+                                  CHILD_2_NAME, &canvas.entity);
+  auto child3 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
+                                  CHILD_3_NAME, &canvas.entity);
+
+  CHECK(canvas.entity.get<ecs::BaseComponent>().transformRel.nChildren == 3);
+
+  // Apply layout
+  ui::layoutChildren(canvas.entity);
+
+  auto validateComponent = [](ecs::Entity entity) {
+    const auto baseComponent = entity.get<ui::ecs::BaseComponent>();
+    CHECK(baseComponent.rect.width == 100);
+    CHECK(baseComponent.rect.height == 50);
+  };
+
+  validateComponent(child1);
+  validateComponent(child2);
+  validateComponent(child3);
+}
+
+TEST_CASE("Vertical layout with constraint")
+{
+  constexpr int WINDOW_WIDTH = 110;
+  constexpr int WINDOW_HEIGHT = 180;
+
+  constexpr uint16_t X = 15.0f;
+  constexpr uint16_t Y = 20.0f;
+  constexpr uint16_t WIDTH = 250.0f;
+  constexpr uint16_t HEIGHT = 350.0f;
+
+  const char *CHILD_1_NAME = "Child1";
+  const char *CHILD_2_NAME = "Child2";
+  const char *CHILD_3_NAME = "Child3";
+
+  ui::initPlatform();
+
+  ui::Window window;
+  ui::initializeWindow("Test", WINDOW_WIDTH, WINDOW_HEIGHT, &window);
+
+  ui::Canvas& canvas = window.canvas;
+  CHECK(canvas.entity.has<ui::LayoutComponent>());
+  CHECK(canvas.entity.name() == "Canvas");
+
+  auto canvasLayout = canvas.entity.get_ref<ui::LayoutComponent>();
+
+  canvasLayout->type = LayoutType_Vertical;
+  canvasLayout->margins = {5, 5, 5, 5};
+  canvasLayout->spacing = 10.0f;
+
+  auto child1 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
+                                  CHILD_1_NAME, &canvas.entity);
+
+  // Constrain child1 width to 100px
+  auto child1BaseComponent = child1.get_ref<ui::ecs::BaseComponent>();
+
+  child1BaseComponent->minHeight = 100.0f;
+  child1BaseComponent->maxHeight = 100.0f;
+  // ----
+
+  auto child2 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
+                                  CHILD_2_NAME, &canvas.entity);
+  auto child3 = ecs::createEntity(&window.ecsRoot, X, Y, WIDTH, HEIGHT,
+                                  CHILD_3_NAME, &canvas.entity);
+
+  CHECK(canvas.entity.get<ecs::BaseComponent>().transformRel.nChildren == 3);
+
+  // Apply layout
+  ui::layoutChildren(canvas.entity);
+
+  auto validateComponent = [](ecs::Entity entity, uint16_t expectedHeight) {
+    const auto baseComponent = entity.get<ui::ecs::BaseComponent>();
+    CHECK(baseComponent.rect.width == 100);
+    CHECK(baseComponent.rect.height == expectedHeight);
+  };
+
+  validateComponent(child1, 100);
+  validateComponent(child2, 25);
+  validateComponent(child3, 25);
+}

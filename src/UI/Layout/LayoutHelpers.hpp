@@ -22,6 +22,8 @@ public:
 private:
   static void layout_children(const ecs::Entity &parent,
                               std::queue<ecs::Entity> &entityQueue);
+
+  static void clamp_value(uint16_t *value, uint16_t min, uint16_t max);
 };
 
 }  // namespace ui

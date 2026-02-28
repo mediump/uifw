@@ -106,26 +106,44 @@ void Layout::layout_children(const ecs::Entity &parent,
 
   const uint16_t initialSpace = availableSpace;
   std::vector<uint16_t> computedSizes(nChildren);
+  size_t nRemainingComponents = nChildren;
 
+  // Calculate fixed-sized components first
   for (size_t i = 0; i < nChildren; ++i) {
-    const size_t remainingComponents = nChildren - i;
-
-    uint16_t inferredSize = availableSpace / remainingComponents;
-
     const uint16_t minSize = inSizeConstraints[i].first;
-    const uint16_t maxSize =
-        std::min(inSizeConstraints[i].second, availableSpace);
+    const uint16_t maxSize = inSizeConstraints[i].second;
 
-    if (inferredSize < minSize) {
-      inferredSize = minSize;
+    if (minSize == 0 && maxSize == std::numeric_limits<uint16_t>::max()) {
+      // Min/max size not set, skip entity
+      continue;
     }
 
-    if (inferredSize > maxSize) {
-      inferredSize = maxSize;
-    }
+    uint16_t inferredSize = availableSpace / nRemainingComponents;
+    clamp_value(&inferredSize, minSize, maxSize);
 
     computedSizes[i] = inferredSize;
     availableSpace -= inferredSize;
+
+    nRemainingComponents--;
+  }
+
+  // Then calculate everything else
+  for (size_t i = 0; i < nChildren; ++i) {
+    const uint16_t minSize = inSizeConstraints[i].first;
+    const uint16_t maxSize = inSizeConstraints[i].second;
+
+    if (minSize > 0 && maxSize < std::numeric_limits<uint16_t>::max()) {
+      // Min/max size value specified, skip entity
+      continue;
+    }
+
+    uint16_t inferredSize = availableSpace / nRemainingComponents;
+    clamp_value(&inferredSize, minSize, maxSize);
+
+    computedSizes[i] = inferredSize;
+    availableSpace -= inferredSize;
+
+    nRemainingComponents--;
   }
 
   uint16_t secondaryAxisSize = 0.0f;
@@ -162,5 +180,22 @@ void Layout::layout_children(const ecs::Entity &parent,
     }
     children[i]->needsUpdate = false;
     currentPosition += computedSizes[i] + spacing;
+  }
+}
+
+void Layout::clamp_value(uint16_t *value,
+                         const uint16_t min,
+                         const uint16_t max)
+{
+  if (value == nullptr) {
+    return;
+  }
+
+  if (*value < min) {
+    *value = min;
+  }
+
+  if (*value > max) {
+    *value = max;
   }
 }

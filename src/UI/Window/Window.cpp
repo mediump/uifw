@@ -77,7 +77,7 @@ void ui::relayout(const Window *window)
     .height = windowBounds.height
   };
 
-  ui::layoutChildren(canvasRoot);
+  Layout::traverseAndApplyLayout(canvasRoot);
 }
 
 bool ui::updateWindow(Window *window)

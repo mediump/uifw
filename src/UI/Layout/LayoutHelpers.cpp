@@ -5,9 +5,22 @@
 
 #define UI_SIZE_UNSET -1.0f;
 
-namespace ui {
+using namespace ui;
 
-void layoutChildren(const ecs::Entity &parent)
+void Layout::traverseAndApplyLayout(const ecs::Entity &rootEntity)
+{
+  std::queue<ecs::Entity> queue;
+  queue.push(rootEntity);
+
+  while (!queue.empty()) {
+    const ecs::Entity currentEntity = queue.front();
+    layout_children(currentEntity, queue);
+    queue.pop();
+  }
+}
+
+void Layout::layout_children(const ecs::Entity &parent,
+                             std::queue<ecs::Entity> &entityQueue)
 {
   if (!parent.has<LayoutComponent>()) {
     return;
@@ -24,6 +37,11 @@ void layoutChildren(const ecs::Entity &parent)
   const auto parentBaseComponent = parent.get<ecs::BaseComponent>();
 
   const size_t nChildren = parentBaseComponent.transformRel.nChildren;
+
+  if (nChildren == 0) {
+    return;
+  }
+
   const LayoutMargins margins = parentLayoutComponent.margins;
   const uint16_t spacing = parentLayoutComponent.spacing;
 
@@ -32,7 +50,12 @@ void layoutChildren(const ecs::Entity &parent)
       parentBaseComponent.transformRel.first.get_ref<ecs::BaseComponent>();
 
   for (size_t i = 0; i < nChildren; ++i) {
+    const auto currentEntity = currentComponent.entity();
     children[i] = currentComponent;
+
+    if (currentEntity.has<LayoutComponent>()) {
+      entityQueue.push(currentEntity);
+    }
 
     if (currentComponent->transformRel.next == UI_NULL_ENTITY) {
       break;
@@ -55,7 +78,8 @@ void layoutChildren(const ecs::Entity &parent)
         inSizeConstraints[i] =
             std::make_pair(children[i]->minHeight, children[i]->maxHeight);
         break;
-      default: break;
+      default:
+        break;
     }
   }
 
@@ -66,19 +90,18 @@ void layoutChildren(const ecs::Entity &parent)
   switch (layoutType) {
     case LayoutType_Horizontal:
       availableSpace = parentBaseComponent.rect.width - margins.left -
-                       margins.right -
-                       spacing * (nChildren - 1);
+                       margins.right - spacing * (nChildren - 1);
 
       currentPosition = parentBaseComponent.rect.x + margins.left;
       break;
     case LayoutType_Vertical:
       availableSpace = parentBaseComponent.rect.height - margins.top -
-                       margins.bottom -
-                       spacing * (nChildren - 1);
+                       margins.bottom - spacing * (nChildren - 1);
 
       currentPosition = parentBaseComponent.rect.y + margins.top;
       break;
-    default: break;
+    default:
+      break;
   }
 
   const uint16_t initialSpace = availableSpace;
@@ -87,8 +110,7 @@ void layoutChildren(const ecs::Entity &parent)
   for (size_t i = 0; i < nChildren; ++i) {
     const size_t remainingComponents = nChildren - i;
 
-    uint16_t inferredSize =
-        availableSpace / remainingComponents;
+    uint16_t inferredSize = availableSpace / remainingComponents;
 
     const uint16_t minSize = inSizeConstraints[i].first;
     const uint16_t maxSize =
@@ -120,33 +142,25 @@ void layoutChildren(const ecs::Entity &parent)
           parentBaseComponent.rect.width - margins.left - margins.right;
       secondaryAxisPosition = parentBaseComponent.rect.x + margins.left;
       break;
-    default: break;
+    default:
+      break;
   }
 
   // Set sizes
   for (size_t i = 0; i < nChildren; ++i) {
     switch (layoutType) {
       case LayoutType_Horizontal:
-        children[i]->rect = {
-          currentPosition,
-          secondaryAxisPosition,
-          computedSizes[i],
-          secondaryAxisSize
-        };
+        children[i]->rect = {currentPosition, secondaryAxisPosition,
+                             computedSizes[i], secondaryAxisSize};
         break;
       case LayoutType_Vertical:
-        children[i]->rect = {
-          secondaryAxisPosition,
-          currentPosition,
-          secondaryAxisSize,
-          computedSizes[i]
-        };
+        children[i]->rect = {secondaryAxisPosition, currentPosition,
+                             secondaryAxisSize, computedSizes[i]};
         break;
-      default: break;
+      default:
+        break;
     }
     children[i]->needsUpdate = false;
     currentPosition += computedSizes[i] + spacing;
   }
 }
-
-}  // namespace ui

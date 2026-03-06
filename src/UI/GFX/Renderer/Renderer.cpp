@@ -14,6 +14,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <algorithm>
 #include <vector>
 
 #ifdef UI_DEBUG_ENABLED
@@ -24,6 +25,9 @@
 
 // Unicode Character (U+0020) Space (SP)
 #define GLYPH_CHARACTER_SPACE 0x20
+
+// Space character advance multiplier (fraction of fontSize)
+constexpr float SPACE_ADVANCE_MULTIPLIER = 0.6f;
 
 constexpr uint32_t MAX_SPRITE_COUNT = 8192;
 constexpr uint32_t MAX_GLYPH_COUNT = 8192;
@@ -84,6 +88,22 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
   constexpr auto TEXT_VS_PATH = "res/shaders/_compiled/SPIRV/batch_render_font.vert.spv";
   constexpr auto TEXT_FS_PATH = "res/shaders/_compiled/SPIRV/batch_render_font.frag.spv";
 
+  // Load image data for font
+  //
+  // TODO: Find a way to load fonts into a global registry so we are not required
+  //  to manually provide a path here.
+  //
+  SDL_Surface *imageData = Image::loadImageFromPath(
+    "res/fonts/_generated/JetBrainsMono.png",
+    SDL_PIXELFORMAT_ARGB8888);
+
+  if (imageData == nullptr) {
+    UI_LOG_MSG("No font atlas could be loaded. Exiting...");
+    // Cleanup shaders before exiting
+    // Note: Shaders haven't been created yet at this point
+    exit(0); // FIXME: Fix dumb idiot exit
+  }
+
   SDL_GPUShader *textVertexShader =
     createShader(renderer, TEXT_VS_PATH, ShaderStage_Vertex, 0, 1, 1, 0);
   SDL_GPUShader *textFragmentShader =
@@ -113,20 +133,6 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
   // Cleanup shaders
   destroyShader(textVertexShader, renderer);
   destroyShader(textFragmentShader, renderer);
-
-  // Load image data for font
-  //
-  // TODO: Find a way to load fonts into a global registry so we are not required
-  //  to manually provide a path here.
-  //
-  SDL_Surface *imageData = Image::loadImageFromPath(
-    "res/fonts/_generated/JetBrainsMono.png",
-    SDL_PIXELFORMAT_ARGB8888);
-
-  if (imageData == nullptr) {
-    UI_LOG_MSG("No font atlas could be loaded. Exiting...");
-    exit(0); // FIXME: Fix dumb idiot exit
-  }
 
   const auto imageDataSize = static_cast<uint32_t>(imageData->w * imageData->h * 4);
 
@@ -294,10 +300,17 @@ std::vector<FontGlyphInstance> Renderer::record_glyph_draw_list(const Canvas *ca
 
     while (strLen > 0) {
       const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
-      const auto &glyphData = fontData->glyphs[unicodeValue];
+      
+      // Check if glyph exists in the font atlas
+      auto glyphIt = fontData->glyphs.find(unicodeValue);
+      if (glyphIt == fontData->glyphs.end()) {
+        // Skip missing glyphs (fallback behavior)
+        continue;
+      }
+      const auto &glyphData = glyphIt->second;
 
       if (unicodeValue == GLYPH_CHARACTER_SPACE) {
-        currentAdvance += 0.59999999999999998f * fontSize;
+        currentAdvance += SPACE_ADVANCE_MULTIPLIER * fontSize;
         continue;
       }
 
@@ -473,10 +486,17 @@ void Renderer::draw(const Window *window)
 
     // Upload sprite instances
     const auto spriteDrawList = record_sprite_draw_list(&window->canvas);
+    
+    if (spriteDrawList.size() > MAX_SPRITE_COUNT) {
+      UI_LOG_MSG("Warning: Sprite count (%zu) exceeds MAX_SPRITE_COUNT (%u). Clamping.",
+                 spriteDrawList.size(), MAX_SPRITE_COUNT);
+    }
+    const size_t spriteCountToRender = std::min(spriteDrawList.size(), static_cast<size_t>(MAX_SPRITE_COUNT));
+    
     const auto spriteDataPtr = static_cast<SpriteInstance *>(
       SDL_MapGPUTransferBuffer(gpuDevice, drawPipeline.spriteDataTransferBuffer, true));
 
-    for (uint32_t i = 0; i < spriteDrawList.size(); i++) {
+    for (size_t i = 0; i < spriteCountToRender; i++) {
       spriteDataPtr[i] = spriteDrawList[i];
     }
 
@@ -484,10 +504,17 @@ void Renderer::draw(const Window *window)
 
     // Upload font glyph instances
     const auto textDrawList = record_glyph_draw_list(&window->canvas);
+    
+    if (textDrawList.size() > MAX_GLYPH_COUNT) {
+      UI_LOG_MSG("Warning: Glyph count (%zu) exceeds MAX_GLYPH_COUNT (%u). Clamping.",
+                 textDrawList.size(), MAX_GLYPH_COUNT);
+    }
+    const size_t glyphCountToRender = std::min(textDrawList.size(), static_cast<size_t>(MAX_GLYPH_COUNT));
+    
     const auto textDataPtr = static_cast<FontGlyphInstance *>(
       SDL_MapGPUTransferBuffer(gpuDevice, drawPipeline.textTransferBuffer, true));
 
-    for (uint32_t i = 0; i < textDrawList.size(); i++) {
+    for (size_t i = 0; i < glyphCountToRender; i++) {
       textDataPtr[i] = textDrawList[i];
     }
 
@@ -502,7 +529,7 @@ void Renderer::draw(const Window *window)
     const SDL_GPUBufferRegion spriteBufferRegion = {
       .buffer = drawPipeline.spriteDataBuffer,
       .offset = 0,
-      .size = static_cast<uint32_t>(spriteDrawList.size() * sizeof(SpriteInstance))};
+      .size = static_cast<uint32_t>(spriteCountToRender * sizeof(SpriteInstance))};
 
     SDL_UploadToGPUBuffer(spriteCopyPass, &spriteTransferBufferLocation,
                           &spriteBufferRegion, true);
@@ -519,7 +546,7 @@ void Renderer::draw(const Window *window)
     const SDL_GPUBufferRegion textBufferRegion = {
       .buffer = drawPipeline.textBuffer,
       .offset = 0,
-      .size = static_cast<uint32_t>(textDrawList.size() * sizeof(FontGlyphInstance))};
+      .size = static_cast<uint32_t>(glyphCountToRender * sizeof(FontGlyphInstance))};
 
     SDL_UploadToGPUBuffer(fontCopyPass, &textTransferBufferLocation, &textBufferRegion,
                           true);
@@ -543,7 +570,7 @@ void Renderer::draw(const Window *window)
     // SPRITE RENDERING ////////////////////////
     SDL_BindGPUGraphicsPipeline(renderPass, drawPipeline.spriteDataPipeline);
     SDL_BindGPUVertexStorageBuffers(renderPass, 0, &drawPipeline.spriteDataBuffer, 1);
-    SDL_DrawGPUPrimitives(renderPass, spriteDrawList.size() * 6, 1, 0, 0);
+    SDL_DrawGPUPrimitives(renderPass, spriteCountToRender * 6, 1, 0, 0);
     // END SPRITE RENDERING ////////////////////////
 
     // TEXT RENDERING ////////////////////////
@@ -556,7 +583,7 @@ void Renderer::draw(const Window *window)
     };
     SDL_BindGPUFragmentSamplers(renderPass, 0, &fontAtlasTexBinding, 1);
 
-    SDL_DrawGPUPrimitives(renderPass, textDrawList.size() * 6, 1, 0, 0);
+    SDL_DrawGPUPrimitives(renderPass, glyphCountToRender * 6, 1, 0, 0);
     // END TEXT RENDERING ////////////////////////
 
     SDL_EndGPURenderPass(renderPass);

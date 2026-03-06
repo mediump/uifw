@@ -59,7 +59,7 @@ void ui::initializeWindow(const char *title,
   const Rect bounds = getWindowBounds(window);
   window->canvas = createCanvas(&window->ecsRoot, bounds.x, bounds.y,
                                 bounds.width, bounds.height, "Canvas");
-  
+
   // Create ui::Renderer
   window->renderer = Renderer::createRenderer(window, &window->canvas);
 }

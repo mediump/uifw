@@ -112,26 +112,32 @@ void Layout::layout_children(const ecs::Entity &parent,
     const uint16_t maxSize = inSizeConstraints[i].second;
 
     if (minSize == 0 && maxSize == std::numeric_limits<uint16_t>::max()) {
-      // Min/max size not set, skip entity
+      // Min/max size not set, skip entity in this pass
       continue;
     }
 
-    uint16_t inferredSize = availableSpace / nRemainingComponents;
-    clamp_value(&inferredSize, minSize, maxSize);
+    // Fixed size: use minSize as the target (min and max are set to the same value)
+    uint16_t fixedSize = minSize;
+    clamp_value(&fixedSize, minSize, maxSize);
 
-    computedSizes[i] = inferredSize;
-    availableSpace -= inferredSize;
+    computedSizes[i] = fixedSize;
+    availableSpace -= fixedSize;
 
     nRemainingComponents--;
   }
 
-  // Then calculate everything else
+  // Then calculate flexible-size entities
   for (size_t i = 0; i < nChildren; ++i) {
     const uint16_t minSize = inSizeConstraints[i].first;
     const uint16_t maxSize = inSizeConstraints[i].second;
 
-    if (minSize > 0 && maxSize < std::numeric_limits<uint16_t>::max()) {
-      // Min/max size value specified, skip entity
+    if (minSize > 0 || maxSize < std::numeric_limits<uint16_t>::max()) {
+      // Min/max size value specified, already handled in first pass
+      continue;
+    }
+
+    if (nRemainingComponents == 0) {
+      computedSizes[i] = 0;
       continue;
     }
 
@@ -144,8 +150,8 @@ void Layout::layout_children(const ecs::Entity &parent,
     nRemainingComponents--;
   }
 
-  uint16_t secondaryAxisSize = 0.0f;
-  uint16_t secondaryAxisPosition = 0.0f;
+  uint16_t secondaryAxisSize = 0;
+  uint16_t secondaryAxisPosition = 0;
 
   switch (layoutType) {
   case LayoutType_Horizontal:

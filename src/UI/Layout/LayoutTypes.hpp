@@ -13,10 +13,10 @@ enum LayoutType
 
 struct LayoutMargins
 {
-  uint16_t top;
-  uint16_t right;
-  uint16_t bottom;
-  uint16_t left;
+  uint16_t top = 0;
+  uint16_t right = 0;
+  uint16_t bottom = 0;
+  uint16_t left = 0;
 };
 
 struct Rect
@@ -29,9 +29,9 @@ struct Rect
 
 struct LayoutComponent
 {
-  LayoutType type;
-  LayoutMargins margins;
-  uint16_t spacing;
+  LayoutType type = LayoutType_None;
+  LayoutMargins margins = {0, 0, 0, 0};
+  uint16_t spacing = 0;
 };
 
 }

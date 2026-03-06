@@ -71,7 +71,7 @@ int main()
   e6Base->minWidth = 100;
   e6Base->maxWidth = 100;
 
-  constexpr ui::ecs::Color red = {0.0, 0.0, 0.0, 1.0};
+  constexpr ui::ecs::Color red = {0.25, 0.25, 0.25, 1.25};
   constexpr ui::ecs::Color green = {0.1, 0.1, 0.1, 1.0};
   constexpr ui::ecs::Color blue = {0.75, 0.75, 1.75, 1.0};
   constexpr ui::ecs::Color white = {0.5, 0.5, 0.5, 1.0};
@@ -88,6 +88,9 @@ int main()
   e5.get_ref<ui::ecs::QuadRenderer>()->color = white;
   e6.get_ref<ui::ecs::QuadRenderer>()->color = red;
   /* --------------------------------------------------------------------- */
+
+  // Run initial layout after all entities are created
+  ui::relayout(&window);
 
   auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
   auto lastFrameTime = std::chrono::high_resolution_clock::now();

@@ -7,14 +7,10 @@
 
 #include <chrono>
 
-static ui::Color4f lerpColor(const ui::Color4f& a, const ui::Color4f& b, const float t)
+static ui::Color4f lerpColor(const ui::Color4f &a, const ui::Color4f &b, const float t)
 {
-  return {
-    a.r + (b.r - a.r) * t,
-    a.g + (b.g - a.g) * t,
-    a.b + (b.b - a.b) * t,
-    a.a + (b.a - a.a) * t
-  };
+  return {a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t,
+          a.a + (b.a - a.a) * t};
 }
 
 int main()
@@ -49,7 +45,8 @@ int main()
   });
 
   const auto framerateEntity = ui::TextHelpers::createTextEntity(
-    &window.ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 50, 250, "FramerateText");
+    &window.ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 50, 250,
+    "FramerateText");
 
   size_t currentY = 36;
 
@@ -108,9 +105,6 @@ int main()
   e5.get_ref<ui::ecs::QuadRenderer>()->color = white;
   e6.get_ref<ui::ecs::QuadRenderer>()->color = red;
   /* --------------------------------------------------------------------- */
-
-  // Run initial layout after all entities are created
-  ui::relayout(&window);
 
   auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
   auto lastFrameTime = std::chrono::high_resolution_clock::now();

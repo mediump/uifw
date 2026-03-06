@@ -19,11 +19,17 @@ void Input::pollEvents(InputState *inputState, const Window *window)
       break;
     case SDL_EVENT_WINDOW_RESIZED:
       inputState->windowResized = true;
-      inputState->windowSize = get_window_size(window);
+      inputState->windowSize = {
+        .x = static_cast<uint16_t>(event.window.data1),
+        .y = static_cast<uint16_t>(event.window.data2)
+      };
       break;
     case SDL_EVENT_MOUSE_MOTION:
       inputState->mouseMoved = true;
-      inputState->mousePosition = get_mouse_position(window);
+      inputState->mousePosition = {
+        .x = static_cast<uint16_t>(event.motion.x),
+        .y = static_cast<uint16_t>(event.motion.y)
+      };
       break;
     case SDL_EVENT_MOUSE_BUTTON_DOWN:
       inputState->mouseDown = true;

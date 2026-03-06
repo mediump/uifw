@@ -5,6 +5,7 @@
 
 #include <SDL3/SDL.h>
 
+#include "UI/IO/Input/Input.hpp"
 #include "UI/Layout/LayoutTypes.hpp"
 
 namespace ui {
@@ -15,6 +16,7 @@ struct Window
   RendererData renderer;
   Canvas canvas;
   ecs::ECSRoot ecsRoot;
+  InputState inputState;
   bool needsRelayout = true;
 };
 

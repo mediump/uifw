@@ -53,6 +53,8 @@ target_include_directories(uifw PUBLIC
 
 add_executable(sdl3-ui-test
   main.cpp
+  src/UI/IO/Input/Input.cpp
+  src/UI/IO/Input/Input.hpp
 )
 
 target_link_libraries(sdl3-ui-test PRIVATE

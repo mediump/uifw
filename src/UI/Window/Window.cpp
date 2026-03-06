@@ -3,6 +3,7 @@
 #include "UI/Canvas/Canvas.hpp"
 #include "UI/GFX/Renderer/Renderer.hpp"
 #include "UI/GFX/Shader.hpp"
+#include "UI/IO/Input/Input.hpp"
 #include "UI/Layout/LayoutHelpers.hpp"
 
 #include <SDL3/SDL_gpu.h>
@@ -62,19 +63,22 @@ void ui::initializeWindow(const char *title,
 
   // Create ui::Renderer
   window->renderer = Renderer::createRenderer(window, &window->canvas);
+
+  // Apply initial window layout
+  relayout(window);
 }
 
 void ui::relayout(const Window *window)
 {
-  const auto windowBounds = ui::getWindowBounds(window);
-  const auto canvasRoot = window->canvas.entity;
+  const auto& canvasRoot = window->canvas.entity;
+  const auto& inputState = window->inputState;
 
-  auto baseComponent = canvasRoot.get_ref<ui::ecs::BaseComponent>();
+  auto baseComponent = canvasRoot.get_ref<ecs::BaseComponent>();
   baseComponent->rect = {
     .x = 0,
     .y = 0,
-    .width = windowBounds.width,
-    .height = windowBounds.height
+    .width = inputState.windowSize.x,
+    .height = inputState.windowSize.y,
   };
 
   Layout::traverseAndApplyLayout(canvasRoot);
@@ -82,24 +86,29 @@ void ui::relayout(const Window *window)
 
 bool ui::updateWindow(Window *window)
 {
-  SDL_Event event;
+  Input::pollEvents(&window->inputState, window);
 
-  while (SDL_PollEvent(&event)) {
-    switch (event.type) {
-      case SDL_EVENT_WINDOW_RESIZED:
-        window->needsRelayout = true;
-        break;
-      case SDL_EVENT_QUIT:
-        SDL_DestroyWindow(window->ptr);
-        return false;
-      default:
-        break;
-    }
+  const auto& inputState = window->inputState;
+
+  if (inputState.shouldQuit) {
+    return false;
   }
 
-  if (window->needsRelayout) {
+  if (inputState.windowResized) {
     relayout(window);
-    window->needsRelayout = false;
+  }
+
+  if (inputState.mouseMoved) {
+    UI_LOG_MSG("[INPUT EVENT]: Mouse moved: [%i, %i]", inputState.mousePosition.x,
+               inputState.mousePosition.y);
+  }
+
+  if (inputState.mouseDown) {
+    UI_LOG_MSG("[INPUT EVENT]: Mouse down");
+  }
+
+  if (inputState.mouseUp) {
+    UI_LOG_MSG("[INPUT EVENT]: Mouse up");
   }
 
   Renderer::draw(window);

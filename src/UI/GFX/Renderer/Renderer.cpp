@@ -300,19 +300,21 @@ std::vector<FontGlyphInstance> Renderer::record_glyph_draw_list(const Canvas *ca
 
     while (strLen > 0) {
       const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
-      
-      // Check if glyph exists in the font atlas
-      auto glyphIt = fontData->glyphs.find(unicodeValue);
-      if (glyphIt == fontData->glyphs.end()) {
-        // Skip missing glyphs (fallback behavior)
-        continue;
-      }
-      const auto &glyphData = glyphIt->second;
 
+      // Handle space character separately
       if (unicodeValue == GLYPH_CHARACTER_SPACE) {
         currentAdvance += SPACE_ADVANCE_MULTIPLIER * fontSize;
         continue;
       }
+
+      // Check if glyph exists in the font atlas
+      auto glyphIt = fontData->glyphs.find(unicodeValue);
+      if (glyphIt == fontData->glyphs.end()) {
+        // Skip missing glyphs
+        // TODO: show missing character glyph
+        continue;
+      }
+      const auto &glyphData = glyphIt->second;
 
       const float pl = glyphData.planeBounds.left * fontSize;
       const float pt = glyphData.planeBounds.top * fontSize;

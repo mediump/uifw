@@ -16,6 +16,9 @@
 
 #include <algorithm>
 
+#include "UI/ECS/Components/InputComponents.hpp"
+#include "UI/IO/Input/InputHelpers.hpp"
+
 #ifdef UI_DEBUG_ENABLED
 #define UI_VALIDATION_ENABLED true
 #else
@@ -179,10 +182,13 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
   SDL_ReleaseGPUTransferBuffer(gpuDevice, textureTransferBuffer);
 }
 
-size_t Renderer::record_sprite_draw_list(const Canvas *canvas,
+size_t Renderer::record_sprite_draw_list(const Window *window,
                                          std::vector<SpriteInstance> &outInstances)
 {
-  const auto world = canvas->entity.world();
+  const Canvas &canvas = window->canvas;
+  const InputState &inputState = window->inputState;
+
+  const auto world = canvas.entity.world();
   const auto quadQuery = world.query<ecs::BaseComponent, ecs::QuadRenderer>();
 
   // Reserve space to avoid reallocations
@@ -194,11 +200,28 @@ size_t Renderer::record_sprite_draw_list(const Canvas *canvas,
 
   size_t counter = 0;
 
-  quadQuery.each([&outInstances, &counter](ecs::Entity e,
-                                           const ecs::BaseComponent &baseComponent,
-                                           const ecs::QuadRenderer &quadRenderer) {
-    if (counter >= MAX_SPRITE_COUNT)
+  quadQuery.each([&inputState, &outInstances, &counter](
+                   ecs::Entity e, const ecs::BaseComponent &baseComponent,
+                   const ecs::QuadRenderer &quadRenderer) {
+    if (counter >= MAX_SPRITE_COUNT) {
       return;
+    }
+
+    Color4f color = {
+      quadRenderer.color.r,
+      quadRenderer.color.g,
+      quadRenderer.color.b,
+      quadRenderer.color.a,
+    };
+
+    if (e.has<ecs::HoverHandlerComponent>()) {
+      const auto &hoverHandler = e.get<ecs::HoverHandlerComponent>();
+
+      if (hoverHandler.overridesColor &&
+          InputHelpers::isMouseInRectComponent(inputState, baseComponent.rect)) {
+        color = hoverHandler.colorOverride;
+      }
+    }
 
     outInstances.emplace_back(SpriteInstance{
       .position = {static_cast<float>(baseComponent.rect.x),
@@ -210,19 +233,14 @@ size_t Renderer::record_sprite_draw_list(const Canvas *canvas,
           static_cast<float>(baseComponent.rect.width),
           static_cast<float>(baseComponent.rect.height),
         },
-      .color =
-        {
-          quadRenderer.color.r,
-          quadRenderer.color.g,
-          quadRenderer.color.b,
-          quadRenderer.color.a,
-        },
+      .color = color,
     });
     counter++;
   });
 
   return counter;
 }
+
 
 size_t Renderer::record_glyph_draw_list(const Canvas *canvas,
                                         std::vector<FontGlyphInstance> &outInstances)
@@ -464,7 +482,7 @@ void Renderer::draw(Window *window)
 
   // Record sprite draw list into pre-allocated storage
   const size_t spriteCountToRender =
-    record_sprite_draw_list(&window->canvas, storage.spriteInstances);
+    record_sprite_draw_list(window, storage.spriteInstances);
 
   // Record glyph draw list into pre-allocated storage
   const size_t glyphCountToRender =

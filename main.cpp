@@ -7,6 +7,8 @@
 
 #include <chrono>
 
+#include "UI/ECS/Components/InputComponents.hpp"
+
 static ui::Color4f lerpColor(const ui::Color4f &a, const ui::Color4f &b, const float t)
 {
   return {a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t,
@@ -88,10 +90,10 @@ int main()
   e6Base->minWidth = 100;
   e6Base->maxWidth = 100;
 
-  constexpr ui::ecs::Color red = {0.25, 0.25, 0.25, 1.25};
-  constexpr ui::ecs::Color green = {0.1, 0.1, 0.1, 1.0};
-  constexpr ui::ecs::Color blue = {0.75, 0.75, 1.75, 1.0};
-  constexpr ui::ecs::Color white = {0.5, 0.5, 0.5, 1.0};
+  constexpr ui::ecs::Color red = {0.25f, 0.25f, 0.25f, 1.0f};
+  constexpr ui::ecs::Color green = {0.1f, 0.1f, 0.1f, 1.0f};
+  constexpr ui::ecs::Color blue = {0.75f, 0.75f, 1.75f, 1.0f};
+  constexpr ui::ecs::Color white = {0.5f, 0.5f, 0.5f, 1.0f};
 
   e1.add<ui::ecs::QuadRenderer>();
   e2.add<ui::ecs::QuadRenderer>();
@@ -104,6 +106,11 @@ int main()
   e4.get_ref<ui::ecs::QuadRenderer>()->color = blue;
   e5.get_ref<ui::ecs::QuadRenderer>()->color = white;
   e6.get_ref<ui::ecs::QuadRenderer>()->color = red;
+
+  e6.set<ui::ecs::HoverHandlerComponent>({
+    .overridesColor = true,
+    .colorOverride = {0.75f, 0.75f, 1.75f, 1.0f},
+  });
   /* --------------------------------------------------------------------- */
 
   auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();

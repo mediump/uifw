@@ -76,7 +76,7 @@ private:
                                            const Canvas *canvas);
 
   // Direct recording into pre-allocated buffers (no vector allocation)
-  static size_t record_sprite_draw_list(const Canvas *canvas,
+  static size_t record_sprite_draw_list(const Window *window,
                                         std::vector<SpriteInstance> &outInstances);
 
   static size_t record_glyph_draw_list(const Canvas *canvas,

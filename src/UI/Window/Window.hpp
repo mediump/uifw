@@ -31,7 +31,7 @@ void initPlatform();
 
 void initializeWindow(const char *title, int width, int height, Window *window);
 
-void relayout(const Window *window);
+void relayout(const Window *window, uint16_t width = 0, uint16_t height = 0);
 
 bool updateWindow(Window *window);
 

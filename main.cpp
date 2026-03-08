@@ -10,6 +10,9 @@
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/Layout/LayoutHelpers.hpp"
 
+#define DEMO_WINDOW_WIDTH 1280
+#define DEMO_WINDOW_HEIGHT 720
+
 static ui::Color4f lerpColor(const ui::Color4f &a, const ui::Color4f &b, const float t)
 {
   return {a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t,
@@ -21,7 +24,7 @@ int main()
   ui::initPlatform();
 
   ui::Window window;
-  ui::initializeWindow("UIFW Window", 1280, 720, &window);
+  ui::initializeWindow("UIFW Window", DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT, &window);
 
   ui::FontData fontData = ui::FontLoader::loadFont(
     "res/fonts/_generated/JetBrainsMono.png", "res/fonts/_generated/JetBrainsMono.json");
@@ -154,6 +157,8 @@ int main()
   e5.get_ref<ui::ecs::QuadRendererComponent>()->color = white;
   e6.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   /* --------------------------------------------------------------------- */
+
+  ui::relayout(&window, DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT);
 
   auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
   auto lastFrameTime = std::chrono::high_resolution_clock::now();

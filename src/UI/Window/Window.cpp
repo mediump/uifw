@@ -74,17 +74,25 @@ void ui::initializeWindow(const char *title,
   relayout(window);
 }
 
-void ui::relayout(const Window *window)
+void ui::relayout(const Window *window, const uint16_t width, const uint16_t height)
 {
-  const auto& canvasRoot = window->canvas.entity;
-  const auto& inputState = window->inputState;
+  const auto &canvasRoot = window->canvas.entity;
+  Vector2i windowSize = {width, height};
+
+  if (width < 1 || height < 1) {
+    const auto &inputState = window->inputState;
+    windowSize = {
+      .x = inputState.windowSize.x,
+      .y = inputState.windowSize.y,
+    };
+  }
 
   auto baseComponent = canvasRoot.get_ref<ecs::BaseComponent>();
   baseComponent->rect = {
     .x = 0,
     .y = 0,
-    .width = inputState.windowSize.x,
-    .height = inputState.windowSize.y,
+    .width = windowSize.x,
+    .height = windowSize.y,
   };
 
   Layout::traverseAndApplyLayout(canvasRoot);
@@ -93,7 +101,6 @@ void ui::relayout(const Window *window)
 bool ui::updateWindow(Window *window)
 {
   Input::pollEvents(&window->inputState, window);
-
   const auto& inputState = window->inputState;
 
   if (inputState.shouldQuit) {

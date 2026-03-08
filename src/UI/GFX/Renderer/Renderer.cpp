@@ -229,6 +229,12 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
     counter++;
   });
 
+  // TODO: Do this using a GPU depth texture
+  std::ranges::sort(outInstances,
+    [](const SpriteInstance &a, const SpriteInstance &b) {
+      return a.position.z < b.position.z;
+    });
+
   return counter;
 }
 

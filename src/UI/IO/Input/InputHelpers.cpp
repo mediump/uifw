@@ -30,9 +30,11 @@ void InputHelpers::processEvents(const Window *window)
     world.query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent, ecs::HoverHandlerComponent>();
 
   buttonQuery.each([&cursorShape, &appStyle, &mousePos](
-                     ecs::Entity entity, ecs::ButtonComponent button,
-                     ecs::QuadRendererComponent quadRenderer, ecs::BaseComponent base,
-                     ecs::HoverHandlerComponent hoverHandler) {
+                     const ecs::Entity &entity,
+                     const ecs::ButtonComponent &button,
+                     ecs::QuadRendererComponent &quadRenderer,
+                     const ecs::BaseComponent &base,
+                     const ecs::HoverHandlerComponent hoverHandler) {
     if (is_mouse_in_rect_component(mousePos, base.rect)) {
       const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
       ecs::Color bgColor;
@@ -52,15 +54,10 @@ void InputHelpers::processEvents(const Window *window)
       //  although this should be reworked later since the initial data provided by the
       //  user is lost in this process.
       if (quadRenderer.color != bgColor) {
-        quadRenderer.color = {
-          1.0f,
-          0.0f,
-          0.0f,
-          1.0f,
-        };
-
-        cursorShape = hoverHandler.cursorShape;
+        quadRenderer.color = bgColor;
       }
+
+      cursorShape = hoverHandler.cursorShape;
     } else {
       const auto bgColorOpt = appStyle.buttonStyle->backgroundColor;
       ecs::Color bgColor;
@@ -78,12 +75,7 @@ void InputHelpers::processEvents(const Window *window)
 
       // FIXME (See above)
       if (quadRenderer.color != bgColor) {
-        quadRenderer.color = {
-          bgColor.r,
-          bgColor.g,
-          bgColor.b,
-          bgColor.a,
-        };
+        quadRenderer.color = bgColor;
       }
     }
   });

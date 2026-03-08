@@ -129,13 +129,13 @@ int main()
 
   e1.add<ui::ecs::QuadRendererComponent>();
   e2.add<ui::ecs::QuadRendererComponent>();
-  //e4.add<ui::ecs::QuadRendererComponent>();
+  e4.add<ui::ecs::QuadRendererComponent>();
   e5.add<ui::ecs::QuadRendererComponent>();
   e6.add<ui::ecs::QuadRendererComponent>();
 
   e1.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   e2.get_ref<ui::ecs::QuadRendererComponent>()->color = green;
-  //e4.get_ref<ui::ecs::QuadRendererComponent>()->color = blue;
+  e4.get_ref<ui::ecs::QuadRendererComponent>()->color = blue;
   e5.get_ref<ui::ecs::QuadRendererComponent>()->color = white;
   e6.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   /* --------------------------------------------------------------------- */

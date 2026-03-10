@@ -1,5 +1,7 @@
 add_executable(01-demo
-  main.cpp
+  main.c
 )
 
-target_link_libraries(01-demo PRIVATE uifw)
+target_link_libraries(01-demo PUBLIC
+  uifw
+)

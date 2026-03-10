@@ -1,8 +1,12 @@
 #pragma once
 
-struct uifw_Application
-{
+#include "uifw/GFX/GFX.h"
+#include "uifw/Core/Types.h"
 
-};
+[[nodiscard]] ui_Application ui_initApplication(void);
+
+void ui_updateApplication(ui_Application *app);
+
+void ui_destroyApplication(ui_Application *app);
 
 

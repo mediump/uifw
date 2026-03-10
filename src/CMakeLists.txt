@@ -7,6 +7,10 @@ add_library(uifw STATIC
   uifw/GFX/GFX.c
   uifw/Core/Utils/Log.h
   uifw/Core/Utils/Defs.h
+  uifw/uifw.h
+  uifw/Platform/Window.h
+  uifw/Platform/Window.c
+  uifw/Core/Types.h
 )
 
 target_link_libraries(uifw PUBLIC

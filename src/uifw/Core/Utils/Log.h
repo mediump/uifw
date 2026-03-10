@@ -49,28 +49,36 @@ static void uifw_InternalLog(const uifw_LogLevel level, const char *fmt, ...)
 }
 
 /* ---- LOG MACROS ---- */
-#define uifw_Log(level, ...) uifw_InternalLog(level, __VA_ARGS__)
+#define ui_Log(level, ...) uifw_InternalLog(level, __VA_ARGS__)
 
-#define uifw_LogInfo(...)    uifw_InternalLog(UIFW_LOG_LEVEL_INFO, __VA_ARGS__)
-#define uifw_LogWarn(...)    uifw_InternalLog(UIFW_LOG_LEVEL_WARN, __VA_ARGS__)
-#define uifw_LogError(...)   uifw_InternalLog(UIFW_LOG_LEVEL_ERROR, __VA_ARGS__)
-#define uifw_LogFatal(...)   uifw_InternalLog(UIFW_LOG_LEVEL_FATAL, __VA_ARGS__)
+#define ui_LogInfo(...)    uifw_InternalLog(UIFW_LOG_LEVEL_INFO, __VA_ARGS__)
+#define ui_LogWarn(...)    uifw_InternalLog(UIFW_LOG_LEVEL_WARN, __VA_ARGS__)
+#define ui_LogError(...)   uifw_InternalLog(UIFW_LOG_LEVEL_ERROR, __VA_ARGS__)
+#define ui_LogFatal(...)   uifw_InternalLog(UIFW_LOG_LEVEL_FATAL, __VA_ARGS__)
 /* -------------------- */
+
+/* ---- DEBUG BREAKPOINT ---- */
+#if defined(UIFW_DEBUG)
+#define ui_TriggerBreakpoint() SDL_TriggerBreakpoint()
+#else
+#define ui_TriggerBreakpoint() ((void)0)
+#endif
+/* -------------------------- */
 
 /* ---- ASSERTIONS ---- */
 #if defined(UIFW_DEBUG)
-#define uifw_Assert(condition, ...)                                                 \
+#define ui_Assert(condition, ...)                                                   \
   do {                                                                              \
     if (!(condition)) {                                                             \
-      uifw_LogFatal(                                                                \
+      ui_LogFatal(                                                                \
         "ASSERT FAILED:\n ├─ File: %s\n ├─ Line: %d\n ├─ Condition: (" #condition   \
         ")\n └─ Message: " __VA_ARGS__,                                             \
         __FILE__, __LINE__);                                                        \
-      SDL_TriggerBreakpoint();                                                      \
+      ui_TriggerBreakpoint();                                                       \
     }                                                                               \
   }                                                                                 \
   while (0)
 #else
-#define uifw_Assert(condition, ...) ((void)0);
+#define ui_Assert(condition, ...) ((void)0);
 #endif
 /* -------------------- */

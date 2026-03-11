@@ -11,6 +11,7 @@ add_library(uifw STATIC
   uifw/Platform/Window.h
   uifw/Platform/Window.c
   uifw/Core/Types.h
+  uifw/Core/Utils/Memory.h
 )
 
 target_link_libraries(uifw PUBLIC

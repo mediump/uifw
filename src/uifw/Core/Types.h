@@ -3,6 +3,15 @@
 #include <SDL3/SDL.h>
 
 /**
+ * Hardware cursor types
+ */
+typedef enum
+{
+  ui_CursorShape_Default = 0,
+  ui_CursorShape_Pointer = 1,
+} ui_CursorShape;
+
+/**
  * Structure of cursors for the SDL instance. Available types:
  *   - Default (arrow) cursor
  *   - Pointer cursor
@@ -29,6 +38,7 @@ typedef struct
 typedef struct
 {
   SDL_Window *sdlWindow;
+  size_t id;
 } ui_Window;
 
 /**

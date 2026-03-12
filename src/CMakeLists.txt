@@ -12,6 +12,11 @@ add_library(uifw STATIC
   uifw/Platform/Window.c
   uifw/Core/Types.h
   uifw/Core/Utils/Memory.h
+  uifw/ECS/Entity.h
+  uifw/ECS/World.h
+  uifw/Core/Coordinates.h
+  uifw/ECS/Entity.c
+  uifw/ECS/Components.h
 )
 
 target_link_libraries(uifw PUBLIC

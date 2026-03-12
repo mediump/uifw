@@ -13,4 +13,6 @@ int main()
     .height = 720,
   };
   ui_Window *window = ui_createWindow(winParams, &app);
+
+  ui_destroyWindow(window);
 }

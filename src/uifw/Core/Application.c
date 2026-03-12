@@ -17,6 +17,8 @@ void ui_updateApplication(ui_Application *app)
   if (app->numWindows < 1 || app->windowList == nullptr) {
     return;
   }
+
+
 }
 
 void ui_destroyApplication(ui_Application *app)

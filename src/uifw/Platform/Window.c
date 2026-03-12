@@ -43,6 +43,18 @@ ui_Window *ui_createWindow(const ui_WindowParams params, ui_Application *app)
   return currentWindow;
 }
 
+void ui_updateWindow(ui_Window *window)
+{
+
+}
+
+void ui_destroyWindow(ui_Window *window)
+{
+  SDL_DestroyWindow(window->sdlWindow);
+  ui_LogInfo("Destroying window - ID: %i", window->id);
+  window->id = 0;
+}
+
 void ui_getWindowPosition(const ui_Window *window, uint16_t *x, uint16_t *y)
 {
   int outX, outY;

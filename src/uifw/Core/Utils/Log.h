@@ -15,7 +15,7 @@ typedef enum
   UIFW_LOG_LEVEL_FATAL
 } uifw_LogLevel;
 
-static void uifw_InternalLog(const uifw_LogLevel level, const char *fmt, ...)
+static inline void uifw_InternalLog(const uifw_LogLevel level, const char *fmt, ...)
 {
 #ifndef UIFW_DEBUG
   if (level == UIFW_LOG_LEVEL_INFO) {
@@ -70,7 +70,7 @@ static void uifw_InternalLog(const uifw_LogLevel level, const char *fmt, ...)
 #define ui_Assert(condition, ...)                                                   \
   do {                                                                              \
     if (!(condition)) {                                                             \
-      ui_LogFatal(                                                                \
+      ui_LogFatal(                                                                  \
         "ASSERT FAILED:\n ├─ File: %s\n ├─ Line: %d\n ├─ Condition: (" #condition   \
         ")\n └─ Message: " __VA_ARGS__,                                             \
         __FILE__, __LINE__);                                                        \

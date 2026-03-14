@@ -6,5 +6,6 @@
 
 /**
  * Initialize the SDL video subsystem (do before window initialization)
+ * Returns true on success, false on failure
  */
-void ui_initGFX(ui_Application *app);
+bool ui_initGFX(ui_Application *app);

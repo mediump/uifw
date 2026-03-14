@@ -1,5 +1,7 @@
 #pragma once
 
+#include "uifw/Core/Coordinates.h"
+
 #include <SDL3/SDL.h>
 
 /**
@@ -33,12 +35,26 @@ typedef struct
 } ui_WindowParams;
 
 /**
+ * Input state for the current window
+ */
+typedef struct
+{
+  bool shouldQuit;
+  bool windowResized;
+  bool mouseMoved;
+  bool mouseDown;
+  ui_Vector2i windowSize;
+  ui_Vector2i mousePosition;
+} ui_InputState;
+
+/**
  * Native OS window
  */
 typedef struct
 {
-  SDL_Window *sdlWindow;
   size_t id;
+  SDL_Window *sdlWindow;
+  ui_InputState inputState;
 } ui_Window;
 
 /**

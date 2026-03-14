@@ -17,6 +17,14 @@ add_library(uifw STATIC
   uifw/Core/Coordinates.h
   uifw/ECS/Entity.c
   uifw/ECS/Components.h
+  uifw/Platform/Input.h
+  uifw/Platform/Input.c
+  uifw/UI/Canvas/Canvas.h
+  uifw/UI/Canvas/Canvas.c
+  uifw/UI/Layout/Layout.c
+  uifw/UI/Layout/Layout.h
+  uifw/Core/Containers/Queue.h
+  uifw/Core/Containers/Queue.c
 )
 
 target_link_libraries(uifw PUBLIC

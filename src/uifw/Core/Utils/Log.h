@@ -71,6 +71,7 @@ static inline void uifw_InternalLog(const uifw_LogLevel level, const char *fmt, 
   do {                                                                              \
     if (!(condition)) {                                                             \
       ui_LogFatal(                                                                  \
+        "////////////////////////////////////////////////////\n"                    \
         "ASSERT FAILED:\n ├─ File: %s\n ├─ Line: %d\n ├─ Condition: (" #condition   \
         ")\n └─ Message: " __VA_ARGS__,                                             \
         __FILE__, __LINE__);                                                        \

@@ -1,8 +1,9 @@
 #include "Window.h"
 
-#include <stdlib.h>
-
 #include "uifw/Core/Utils/Log.h"
+#include "uifw/Platform/Input.h"
+
+#include <stdlib.h>
 
 ui_Window *ui_createWindow(const ui_WindowParams params, ui_Application *app)
 {
@@ -29,6 +30,14 @@ ui_Window *ui_createWindow(const ui_WindowParams params, ui_Application *app)
 
   currentWindow->sdlWindow =
     SDL_CreateWindow(params.title, params.width, params.height, SDL_WINDOW_RESIZABLE);
+
+  if (!currentWindow->sdlWindow) {
+    ui_LogFatal("Failed to create window: %s", SDL_GetError());
+    return nullptr;
+  }
+
+  SDL_ShowWindow(currentWindow->sdlWindow);
+
   currentWindow->id = currentIndex;
 
   // Assert window created correctly
@@ -40,12 +49,26 @@ ui_Window *ui_createWindow(const ui_WindowParams params, ui_Application *app)
   ui_Assert(params.height == height, "Window height incorrect");
 #endif
 
+  // Zero initialize input state
+  ui_resetWindowInputState(currentWindow);
+
   return currentWindow;
 }
 
 void ui_updateWindow(ui_Window *window)
 {
+  // Poll input events
+  ui_pollWindowEvents(window);
 
+  const ui_InputState *inputState = &window->inputState;
+
+  if (inputState->mouseDown) {
+    ui_LogInfo("Mouse down event");
+  }
+
+  if (inputState->windowResized) {
+    ui_LogInfo("Window resized event");
+  }
 }
 
 void ui_destroyWindow(ui_Window *window)

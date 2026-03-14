@@ -30,3 +30,17 @@ typedef struct
   uint16_t zOrder;
   bool needsUpdate;
 } ui_ECS_BaseComponent;
+
+/**
+ * Canvas component (root of UI scene)
+ */
+typedef struct
+{
+} ui_ECS_CanvasComponent;
+
+typedef struct
+{
+  ui_LayoutType type;
+  ui_LayoutPadding margins;
+  uint16_t spacing;
+} ui_ECS_LayoutComponent;

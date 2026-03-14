@@ -19,7 +19,7 @@ void init_hardware_cursors(ui_Application *app)
   ui_LogInfo("Initialized hardware cursors");
 }
 
-void ui_initGFX(ui_Application *app)
+bool ui_initGFX(ui_Application *app)
 {
   const int sdlVersion = SDL_GetVersion();
   const char *sdlRevision = SDL_GetRevision();
@@ -30,8 +30,9 @@ void ui_initGFX(ui_Application *app)
 
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     ui_LogFatal("Unable to initialize SDL: %s", SDL_GetError());
-    return;
+    return false;
   }
 
   init_hardware_cursors(app);
+  return true;
 }

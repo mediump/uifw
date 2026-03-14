@@ -5,7 +5,7 @@
 
 [[nodiscard]] ui_Application ui_initApplication(void);
 
-void ui_updateApplication(ui_Application *app);
+bool ui_updateApplication(ui_Application *app);
 
 void ui_destroyApplication(ui_Application *app);
 

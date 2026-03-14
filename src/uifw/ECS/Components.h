@@ -38,9 +38,20 @@ typedef struct
 {
 } ui_ECS_CanvasComponent;
 
+/**
+ * Defines layout properties for child components
+ */
 typedef struct
 {
   ui_LayoutType type;
   ui_LayoutPadding margins;
   uint16_t spacing;
 } ui_ECS_LayoutComponent;
+
+/**
+ * Calculated render data (should not be user-modified)
+ */
+typedef struct
+{
+
+} ui_ECS_RenderDataComponent;

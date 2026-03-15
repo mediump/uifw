@@ -18,6 +18,6 @@ ui_Shader *ui_shaderCreate(const char *bytecodePath,
                            uint32_t uniformBufferCount,
                            uint32_t storageBufferCount,
                            uint32_t storageTextureCount,
-                           const ui_Window *window);
+                           const ui_Renderer *renderer);
 
-void ui_shaderDestroy(ui_Shader *shader, ui_Window *window);
+void ui_shaderDestroy(ui_Shader *shader, const ui_Renderer *renderer);

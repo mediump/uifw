@@ -26,6 +26,7 @@ typedef enum
 typedef struct
 {
   ui_Renderer_DrawPipelineType type;
+  bool is_dirty;
   size_t size;
 
   SDL_GPUGraphicsPipeline *pipeline;

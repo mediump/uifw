@@ -57,7 +57,7 @@ void ui_rendererCreate(ui_Window *window)
   ui_Renderer_pickWindowPresentMode(renderer);
 
   // Create draw pipelines
-  // ...
+  ui_Renderer_createSpriteDrawPipeline(renderer, MAX_INSTANCE_COUNT);
 
   window->renderer = renderer;
 }

@@ -8,7 +8,7 @@ ui_Shader *ui_shaderCreate(const char *bytecodePath,
                            const uint32_t uniformBufferCount,
                            const uint32_t storageBufferCount,
                            const uint32_t storageTextureCount,
-                           const ui_Window *window)
+                           const ui_Renderer *renderer)
 {
   SDL_GPUShaderStage sdlStage = SDL_GPU_SHADERSTAGE_VERTEX;
 
@@ -36,13 +36,13 @@ ui_Shader *ui_shaderCreate(const char *bytecodePath,
   createInfo.num_storage_textures = storageTextureCount;
   createInfo.num_storage_buffers = storageBufferCount;
 
-  const auto shader = SDL_CreateGPUShader(window->renderer->gpu_device, &createInfo);
+  const auto shader = SDL_CreateGPUShader(renderer->gpu_device, &createInfo);
   SDL_free(code);
 
   return shader;
 }
 
-void ui_shaderDestroy(ui_Shader *shader, ui_Window *window)
+void ui_shaderDestroy(ui_Shader *shader, const ui_Renderer *renderer)
 {
-
+  SDL_ReleaseGPUShader(renderer->gpu_device, shader);
 }

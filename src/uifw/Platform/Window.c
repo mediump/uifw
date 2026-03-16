@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 
+#include "uifw/Core/Utils/Time.h"
 #include "uifw/GFX/Renderer/Renderer.h"
 #include "uifw/UI/Canvas/Canvas.h"
 #include "uifw/UI/Layout/Layout.h"
@@ -62,6 +63,9 @@ ui_Window *ui_createWindow(const ui_WindowParams params, ui_Application *app)
   // Zero initialize input state
   ui_resetWindowInputState(currentWindow, true);
 
+  // Zero initialize time state
+  ui_Time_init(&currentWindow->time_state);
+
   // Init ECS world
   currentWindow->scene.world = ecs_init();
   currentWindow->scene.root_canvas = UI_NULL_ENTITY;
@@ -95,6 +99,8 @@ void ui_updateWindow(ui_Window *window)
     relayout_window_contents(window);
   }
 
+  ui_Time_recordFrameStart(&window->time_state);
+
   // Poll input events
   ui_pollWindowEvents(window);
 
@@ -108,6 +114,17 @@ void ui_updateWindow(ui_Window *window)
   }
 
   ui_rendererDraw(window);
+
+  ui_Time_recordFrameEnd(&window->time_state);
+
+  // Display FPS in titlebar in debug mode
+#if defined(UIFW_DEBUG)
+  char buffer[100];
+  const uint16_t fps = window->time_state.fps;
+  sprintf(buffer, "uifw [FPS: %i]", fps);
+
+  SDL_SetWindowTitle(window->sdl_window, buffer);
+#endif
 }
 
 void ui_destroyWindow(ui_Window *window)

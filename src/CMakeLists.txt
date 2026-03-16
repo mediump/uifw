@@ -34,6 +34,7 @@ add_library(uifw STATIC
   uifw/Platform/IO/FileUtils.c
   uifw/GFX/Shader.h
   uifw/GFX/Shader.c
+  uifw/Core/Utils/Time.h
 )
 
 target_link_libraries(uifw PUBLIC

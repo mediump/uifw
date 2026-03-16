@@ -57,6 +57,13 @@ typedef struct
   ui_ECS_Entity root_canvas;
 } ui_Scene;
 
+typedef struct
+{
+  clock_t current_ticks;
+  clock_t delta_ticks;
+  clock_t fps;
+} ui_Time;
+
 /**
  * Native OS window
  */
@@ -67,6 +74,7 @@ typedef struct
   ui_Scene scene;
   ui_Renderer *renderer;
   ui_InputState input_state;
+  ui_Time time_state;
 } ui_Window;
 
 /**

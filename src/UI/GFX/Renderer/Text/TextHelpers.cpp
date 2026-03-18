@@ -5,7 +5,7 @@ using namespace ui;
 ecs::Entity TextHelpers::createTextEntity(const ecs::ECSRoot *root,
                                           FontData *fontData,
                                           const char *text,
-                                          Color4f color,
+                                          const Color4f color,
                                           const uint16_t pixelSize,
                                           const uint16_t x,
                                           const uint16_t y,

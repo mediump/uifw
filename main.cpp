@@ -59,17 +59,21 @@ int main()
   constexpr ui::Color4f gradientStart = {1.0f, 1.0f, 1.0f, 1.0f};
   constexpr ui::Color4f gradientEnd = {0.5f, 0.5f, 0.5f, 1.0f};
 
-  for (uint32_t i = 0; i < 20; ++i) {
-    const std::string name = std::string("TextEntity") + std::to_string(i);
-    const float t = static_cast<float>(i) / 19.0f;
-    const ui::Color4f color = lerpColor(gradientStart, gradientEnd, t);
+  ui::TextHelpers::createTextEntity(&window.ecsRoot, &fontData,
+                                      "Pack my box with five-dozen liquor jugs.", {1.0f, 1.0f, 1.0f, 1.0f},
+                                      72, 16, currentY, 128, 128, "BigText");
 
-    ui::TextHelpers::createTextEntity(&window.ecsRoot, &fontData,
-                                      "Pack my box with five-dozen liquor jugs.", color,
-                                      20, 16, currentY, 128, 128, name.c_str());
-
-    currentY += 26 * static_cast<uint32_t>(fontData.metrics.lineHeight); // Font size = 20
-  }
+  // for (uint32_t i = 0; i < 20; ++i) {
+  //   const std::string name = std::string("TextEntity") + std::to_string(i);
+  //   const float t = static_cast<float>(i) / 19.0f;
+  //   const ui::Color4f color = lerpColor(gradientStart, gradientEnd, t);
+  //
+  //   ui::TextHelpers::createTextEntity(&window.ecsRoot, &fontData,
+  //                                     "Pack my box with five-dozen liquor jugs.", color,
+  //                                     20, 16, currentY, 128, 128, name.c_str());
+  //
+  //   currentY += 26 * static_cast<uint32_t>(fontData.metrics.lineHeight); // Font size = 20
+  // }
 
   const auto e2 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity2",
                                         &window.canvas.entity);

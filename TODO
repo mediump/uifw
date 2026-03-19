@@ -1,7 +1,16 @@
   ======================= TODOS =======================
 
 Components:
- - Font hinting
+ - Multisampling
+ - Fonts
+   - Returns
+   - Text alignment
+     - Horizontal Left aligned
+     - Horizontal Middle aligned
+     - Horizontal Right aligned
+     - Vertical Left aligned
+     - Vertical Middle aligned
+     - Vertical Right aligned
  - Corner rounding
  - Rectangle outlines
  - Gradients

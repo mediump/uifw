@@ -75,7 +75,6 @@ private:
   static DrawPipeline create_draw_pipeline(const RendererData *renderer,
                                            const Canvas *canvas);
 
-  // Direct recording into pre-allocated buffers (no vector allocation)
   static size_t record_sprite_draw_list(const Window *window,
                                         std::vector<SpriteInstance> &outInstances);
 
@@ -85,8 +84,7 @@ private:
   static void create_text_render_pipeline(const RendererData *renderer,
                                           const Canvas *canvas,
                                           DrawPipeline *pipeline);
-  
-  // Cached camera matrix
+
   static const glm::mat4& get_camera_matrix(DrawDataStorage &storage, 
                                             uint16_t windowWidth, 
                                             uint16_t windowHeight);

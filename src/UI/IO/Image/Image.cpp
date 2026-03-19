@@ -1,6 +1,6 @@
 #include "Image.hpp"
 
-#include "UI/IO/FileUtils.hpp"
+#include "../../Utils/FileUtils.hpp"
 #include "Utils.hpp"
 
 using namespace ui;

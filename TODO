@@ -1,39 +1,41 @@
   ======================= TODOS =======================
 
 Components:
- - Multisampling
- - Fonts
-   - Returns
-   - Text alignment
-     - Horizontal Left aligned
-     - Horizontal Middle aligned
-     - Horizontal Right aligned
-     - Vertical Left aligned
-     - Vertical Middle aligned
-     - Vertical Right aligned
- - Corner rounding
- - Rectangle outlines
- - Gradients
- - Multiple windows
- - Drop shadows/inner shadows
- - Functional callbacks/event handler
- - Bold/italic fonts
- - Font alignment
- - Scrollable contents
- - Tabs
- - Docking layouts
- - Images/icons
- - SVG rendering (maybe)
+ [-] Multisampling
+ [-] Fonts
+   [X] Returns
+   [-] Improve smoothing function
+   [-] Wrapping
+   [-] Text alignment
+     [-] Horizontal Left aligned
+     [-] Horizontal Middle aligned
+     [-] Horizontal Right aligned
+     [-] Vertical Left aligned
+     [-] Vertical Middle aligned
+     [-] Vertical Right aligned
+ [-] Corner rounding
+ [-] Rectangle outlines
+ [-] Gradients
+ [-] Multiple windows
+ [-] Drop shadows/inner shadows
+ [-] Functional callbacks/event handler
+ [-] Bold/italic fonts
+ [-] Font alignment
+ [-] Scrollable contents
+ [-] Tabs
+ [-] Docking layouts
+ [-] Images/icons
+ [-] SVG rendering (maybe)
 
  Widgets:
- - Console
- - Input field
- - Multi-line input field
- - Scroll box
- - List view
- - Dropdown menu/context menu
- - Slider
- - Spin box
- - Radio button
- - Checkbox
- - Color picker
+ [-] Console
+ [-] Input field
+ [-] Multi-line input field
+ [-] Scroll box
+ [-] List view
+ [-] Dropdown menu/context menu
+ [-] Slider
+ [-] Spin box
+ [-] Radio button
+ [-] Checkbox
+ [-] Color picker

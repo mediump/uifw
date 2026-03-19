@@ -59,9 +59,9 @@ int main()
   constexpr ui::Color4f gradientStart = {1.0f, 1.0f, 1.0f, 1.0f};
   constexpr ui::Color4f gradientEnd = {0.5f, 0.5f, 0.5f, 1.0f};
 
-  ui::TextHelpers::createTextEntity(&window.ecsRoot, &fontData,
-                                      "Pack my box\nwith five-\ndozen liquor\njugs.", {1.0f, 1.0f, 1.0f, 1.0f},
-                                      68, 16, currentY, 128, 128, "BigText");
+  ui::TextHelpers::createTextEntity(
+    &window.ecsRoot, &fontData, "Pack my box\nwith five-\ndozen liquor\njugs.",
+    {1.0f, 1.0f, 1.0f, 1.0f}, 68, 16, currentY, 128, 128, "BigText");
 
   // for (uint32_t i = 0; i < 20; ++i) {
   //   const std::string name = std::string("TextEntity") + std::to_string(i);

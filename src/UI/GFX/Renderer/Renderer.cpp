@@ -336,20 +336,20 @@ inline void record_word(const std::string &wordText,
 
 /**
  * Calculate the width of a wrapped line, handling word wrapping
- * Returns the width of the line and advances baselineY if wrapping occurs
+ * Returns the width of the line and the number of wrapped lines created
  */
 inline float calculate_line_width(const std::string &lineText,
                                   const TextComponent &textComponent,
                                   const FontData *fontData,
                                   float availableWidth,
-                                  float *outLineAdvance = nullptr)
+                                  int *outLineCount = nullptr)
 {
   const float fontSize = textComponent.pixelSize;
   const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
   
   float currentAdvance = 0.0f;
   float maxLineWidth = 0.0f;
-  float lineStartAdvance = 0.0f;
+  int lineCount = 1; // Start with 1 line
 
   const std::vector<std::string> words = StringUtils::split(lineText, " ");
 
@@ -366,7 +366,7 @@ inline float calculate_line_width(const std::string &lineText,
       // Track the maximum width of any line
       maxLineWidth = std::max(maxLineWidth, currentAdvance - spaceWidth);
       // Wrap to next line
-      lineStartAdvance = currentAdvance;
+      lineCount++;
       currentAdvance = 0.0f;
     }
 
@@ -376,8 +376,8 @@ inline float calculate_line_width(const std::string &lineText,
   // Final line width
   maxLineWidth = std::max(maxLineWidth, currentAdvance - spaceWidth);
 
-  if (outLineAdvance) {
-    *outLineAdvance = currentAdvance;
+  if (outLineCount) {
+    *outLineCount = lineCount;
   }
 
   return maxLineWidth;
@@ -441,20 +441,30 @@ inline void record_text_component(ecs::Entity e,
     fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
   const float availableWidth = static_cast<float>(baseComponent.rect.width);
 
-  // First pass: calculate line widths and count lines (including wrapped lines)
+  // First pass: calculate line widths and count total rendered lines (including wrapped lines)
   const auto textString = std::string(textComponent.text);
   const std::vector<std::string> inputLines = StringUtils::split(textString, "\n");
   
-  // Store calculated line widths for alignment
-  std::vector<float> lineWidths;
-  lineWidths.reserve(inputLines.size());
+  // Store calculated line widths and line counts for alignment
+  struct LineInfo {
+    float width;
+    int renderLineCount; // Number of lines this input line wraps into
+  };
+  
+  std::vector<LineInfo> lineInfos;
+  lineInfos.reserve(inputLines.size());
+  
+  int totalRenderLineCount = 0;
   
   for (const auto &line : inputLines) {
-    lineWidths.push_back(calculate_line_width(line, textComponent, fontData, availableWidth));
+    int renderLineCount = 1;
+    float lineWidth = calculate_line_width(line, textComponent, fontData, availableWidth, &renderLineCount);
+    lineInfos.push_back({lineWidth, renderLineCount});
+    totalRenderLineCount += renderLineCount;
   }
 
-  // Calculate vertical alignment offset
-  const float totalTextHeight = lineWidths.size() * lineHeight;
+  // Calculate vertical alignment offset based on total rendered line count
+  const float totalTextHeight = totalRenderLineCount * lineHeight;
   float verticalOffset = 0.0f;
   
   switch (textComponent.verticalAlignment) {
@@ -475,7 +485,7 @@ inline void record_text_component(ecs::Entity e,
 
   // Second pass: record lines with alignment offsets
   for (size_t i = 0; i < inputLines.size(); i++) {
-    const float lineWidth = lineWidths[i];
+    const float lineWidth = lineInfos[i].width;
     
     // Calculate horizontal alignment offset
     float alignmentOffset = 0.0f;

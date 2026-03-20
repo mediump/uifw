@@ -79,9 +79,15 @@ int main()
     .spacing = 3
   });
 
-  ui::TextHelpers::createTextEntity(
+  /* ---- TEXT DISPLAY ---- */
+  const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
     &window.ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\n!@#$%^&*()_+=",
     {1.0f, 1.0f, 1.0f, 1.0f}, 52, 16, currentY, 128, 128, "BigText", &e2);
+
+  auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();
+  textComponent->horizontalAlignment = ui::TextHAlignment_Center;
+  textComponent->verticalAlignment = ui::TextVAlignment_Middle;
+  /* ---------------------- */
 
   const auto e3 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity3",
                                         &window.canvas.entity);
@@ -125,7 +131,8 @@ int main()
       .font = &fontData,
       .color = {0.94f, 0.94f, 0.94f, 1.0f},
       .pixelSize = 14,
-      .horizontalAlignment = ui::TextHAlignment_Center
+      .horizontalAlignment = ui::TextHAlignment_Center,
+      .verticalAlignment = ui::TextVAlignment_Middle
     });
 
     auto buttonBaseComponent = button.get_ref<ui::ecs::BaseComponent>();

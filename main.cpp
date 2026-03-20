@@ -125,6 +125,7 @@ int main()
       .font = &fontData,
       .color = {0.94f, 0.94f, 0.94f, 1.0f},
       .pixelSize = 14,
+      .horizontalAlignment = ui::TextHAlignment_Center
     });
 
     auto buttonBaseComponent = button.get_ref<ui::ecs::BaseComponent>();

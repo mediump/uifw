@@ -334,22 +334,72 @@ inline void record_word(const std::string &wordText,
   }
 }
 
+/**
+ * Calculate the width of a wrapped line, handling word wrapping
+ * Returns the width of the line and advances baselineY if wrapping occurs
+ */
+inline float calculate_line_width(const std::string &lineText,
+                                  const TextComponent &textComponent,
+                                  const FontData *fontData,
+                                  float availableWidth,
+                                  float *outLineAdvance = nullptr)
+{
+  const float fontSize = textComponent.pixelSize;
+  const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
+  
+  float currentAdvance = 0.0f;
+  float maxLineWidth = 0.0f;
+  float lineStartAdvance = 0.0f;
+
+  const std::vector<std::string> words = StringUtils::split(lineText, " ");
+
+  for (size_t i = 0; i < words.size(); i++) {
+    const std::string &word = words[i];
+    const float wordLength = get_word_length(word, textComponent, fontData);
+    
+    // Calculate total width needed for this word (including preceding space if not at line start)
+    const float totalWordWidth = (currentAdvance > 0.0f) ? (wordLength + spaceWidth) : wordLength;
+
+    // Check if word would overflow the line
+    if (i > 0 && textComponent.lineWrapping &&
+        currentAdvance + totalWordWidth > availableWidth) {
+      // Track the maximum width of any line
+      maxLineWidth = std::max(maxLineWidth, currentAdvance - spaceWidth);
+      // Wrap to next line
+      lineStartAdvance = currentAdvance;
+      currentAdvance = 0.0f;
+    }
+
+    currentAdvance += totalWordWidth;
+  }
+
+  // Final line width
+  maxLineWidth = std::max(maxLineWidth, currentAdvance - spaceWidth);
+
+  if (outLineAdvance) {
+    *outLineAdvance = currentAdvance;
+  }
+
+  return maxLineWidth;
+}
+
+/**
+ * Record a single line of text with horizontal alignment offset
+ */
 inline void record_line(const std::string &lineText,
                           ecs::Entity e,
                           const ecs::BaseComponent &baseComponent,
                           const TextComponent &textComponent,
                           std::vector<FontGlyphInstance> *outInstances,
                           size_t *counter,
-                          float *currentBaselineY)
+                          float *currentBaselineY,
+                          float alignmentOffset)
 {
   const FontData *fontData = textComponent.font;
-  float currentAdvance = 0.0f;
+  float currentAdvance = alignmentOffset;
 
   const float fontSize = textComponent.pixelSize;
-  const float lineHeight =
-    fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
-
-  const auto rectLeft = static_cast<float>(baseComponent.rect.x);
+  const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
   const float availableWidth = baseComponent.rect.width;
 
   const std::vector<std::string> words = StringUtils::split(lineText, " ");
@@ -358,17 +408,16 @@ inline void record_line(const std::string &lineText,
     const std::string &word = words[i];
 
     const float wordLength = get_word_length(word, textComponent, fontData);
-    const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
-    
+
     // Calculate total width needed for this word (including preceding space if not at line start)
-    const float totalWordWidth = (currentAdvance > 0.0f) ? (wordLength + spaceWidth) : wordLength;
-    
+    const float totalWordWidth = (currentAdvance > alignmentOffset) ? (wordLength + spaceWidth) : wordLength;
+
     // Check if word would overflow the line
     if (i > 0 && textComponent.lineWrapping &&
-        currentAdvance + totalWordWidth > availableWidth) {
+        (currentAdvance - alignmentOffset) + totalWordWidth > availableWidth) {
       // Wrap to next line
-      *currentBaselineY += lineHeight;
-      currentAdvance = 0.0f;
+      *currentBaselineY += fontSize * fontData->metrics.lineHeight;
+      currentAdvance = alignmentOffset;
     }
 
     // Record word
@@ -390,16 +439,61 @@ inline void record_text_component(ecs::Entity e,
   const auto fontSize = static_cast<float>(textComponent.pixelSize);
   const auto lineHeight =
     fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
+  const float availableWidth = static_cast<float>(baseComponent.rect.width);
+
+  // First pass: calculate line widths and count lines (including wrapped lines)
+  const auto textString = std::string(textComponent.text);
+  const std::vector<std::string> inputLines = StringUtils::split(textString, "\n");
+  
+  // Store calculated line widths for alignment
+  std::vector<float> lineWidths;
+  lineWidths.reserve(inputLines.size());
+  
+  for (const auto &line : inputLines) {
+    lineWidths.push_back(calculate_line_width(line, textComponent, fontData, availableWidth));
+  }
+
+  // Calculate vertical alignment offset
+  const float totalTextHeight = lineWidths.size() * lineHeight;
+  float verticalOffset = 0.0f;
+  
+  switch (textComponent.verticalAlignment) {
+    case TextVAlignment_Middle:
+      verticalOffset = (baseComponent.rect.height - totalTextHeight) / 2.0f;
+      break;
+    case TextVAlignment_Bottom:
+      verticalOffset = baseComponent.rect.height - totalTextHeight;
+      break;
+    case TextVAlignment_Top:
+    default:
+      verticalOffset = 0.0f;
+      break;
+  }
 
   float currentBaselineY =
-    static_cast<float>(baseComponent.rect.y) + (fontData->metrics.ascender * fontSize);
+    static_cast<float>(baseComponent.rect.y) + (fontData->metrics.ascender * fontSize) + verticalOffset;
 
-  const auto textString = std::string(textComponent.text);
-  const std::vector<std::string> strings = StringUtils::split(textString, "\n");
+  // Second pass: record lines with alignment offsets
+  for (size_t i = 0; i < inputLines.size(); i++) {
+    const float lineWidth = lineWidths[i];
+    
+    // Calculate horizontal alignment offset
+    float alignmentOffset = 0.0f;
+    switch (textComponent.horizontalAlignment) {
+      case TextHAlignment_Center:
+        alignmentOffset = (availableWidth - lineWidth) / 2.0f;
+        break;
+      case TextHAlignment_Right:
+        alignmentOffset = availableWidth - lineWidth;
+        break;
+      case TextHAlignment_Left:
+      default:
+        alignmentOffset = 0.0f;
+        break;
+    }
 
-  for (const auto &line: strings) {
-    record_line(line, e, baseComponent, textComponent, outInstances, counter,
-                &currentBaselineY);
+    record_line(inputLines[i], e, baseComponent, textComponent, outInstances, counter,
+                &currentBaselineY, alignmentOffset);
 
     currentBaselineY += lineHeight;
   }

@@ -239,35 +239,55 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
   return counter;
 }
 
-inline void record_line(const std::string &lineText,
+/**
+ * Get the width of a word based on glyph character sizing
+ */
+inline float get_word_length(const std::string &wordText,
+                             const TextComponent &textComponent,
+                             const FontData *fontData)
+{
+  float currentAdvance = 0.0f;
+  const float fontSize = textComponent.pixelSize;
+
+  const char *strPtr = wordText.data();
+  size_t strLen = wordText.size();
+
+  while (strLen > 0) {
+    const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
+    auto glyphIt = fontData->glyphs.find(unicodeValue);
+
+    if (glyphIt == fontData->glyphs.end()) {
+      continue;
+    }
+
+    const auto &glyphData = glyphIt->second;
+    currentAdvance += glyphData.advance * fontSize;
+  }
+
+  return currentAdvance;
+}
+
+inline void record_word(const std::string &wordText,
                         ecs::Entity e,
                         const ecs::BaseComponent &baseComponent,
                         const TextComponent &textComponent,
                         std::vector<FontGlyphInstance> *outInstances,
                         size_t *counter,
-                        float currentBaselineY)
+                        float currentBaselineY,
+                        float *currentAdvance)
 {
   const FontData *fontData = textComponent.font;
-  float currentAdvance = 0.0f;
 
-  const float fontSize = textComponent.pixelSize;
-  const float lineHeight =
-    fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
+  const auto fontSize = static_cast<float>(textComponent.pixelSize);
   const auto textureSize =
     Vector2f{static_cast<float>(fontData->atlas.atlasDimensions.x),
              static_cast<float>(fontData->atlas.atlasDimensions.y)};
 
-  const char *strPtr = lineText.data();
-  size_t strLen = lineText.size();
+  const char *strPtr = wordText.data();
+  size_t strLen = wordText.size();
 
   while (strLen > 0 && *counter < MAX_GLYPH_COUNT) {
     const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
-
-    // Handle space character separately (no glyph bounds, only advance)
-    if (unicodeValue == GLYPH_CHARACTER_SPACE) {
-      currentAdvance += SPACE_ADVANCE_MULTIPLIER * fontSize;
-      continue;
-    }
 
     // Check if glyph exists in the font atlas
     auto glyphIt = fontData->glyphs.find(unicodeValue);
@@ -296,7 +316,7 @@ inline void record_line(const std::string &lineText,
     outInstances->emplace_back(FontGlyphInstance{
       .position =
         {
-          .x = static_cast<float>(baseComponent.rect.x) + currentAdvance + pl,
+          .x = static_cast<float>(baseComponent.rect.x) + *currentAdvance + pl,
           .y = currentBaselineY - pt,
           .z = static_cast<float>(baseComponent.zOrder),
         },
@@ -309,8 +329,48 @@ inline void record_line(const std::string &lineText,
       .color = textComponent.color,
     });
 
-    currentAdvance += glyphData.advance * fontSize;
+    *currentAdvance += glyphData.advance * fontSize;
     (*counter)++;
+  }
+}
+
+inline void record_line(const std::string &lineText,
+                          ecs::Entity e,
+                          const ecs::BaseComponent &baseComponent,
+                          const TextComponent &textComponent,
+                          std::vector<FontGlyphInstance> *outInstances,
+                          size_t *counter,
+                          float *currentBaselineY)
+{
+  const FontData *fontData = textComponent.font;
+  float currentAdvance = 0.0f;
+
+  const float fontSize = textComponent.pixelSize;
+  const float lineHeight =
+    fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
+
+  const auto rectMaximum =
+    static_cast<float>(baseComponent.rect.x + baseComponent.rect.width);
+
+  const std::vector<std::string> words = StringUtils::split(lineText, " ");
+
+  for (const auto &word : words) {
+    const float wordLength = get_word_length(word, textComponent, fontData);
+    const float wordOffset =
+      static_cast<float>(baseComponent.rect.x) + currentAdvance + wordLength;
+
+    if (textComponent.lineWrapping && wordOffset > rectMaximum) {
+      // Insert return if line wrapping is requested
+      *currentBaselineY += lineHeight;
+      currentAdvance = 0;
+    }
+
+    // Record word
+    record_word(word, e, baseComponent, textComponent, outInstances, counter,
+                *currentBaselineY, &currentAdvance);
+
+    // Add space
+    currentAdvance += SPACE_ADVANCE_MULTIPLIER * fontSize;
   }
 }
 
@@ -333,7 +393,7 @@ inline void record_text_component(ecs::Entity e,
 
   for (const auto &line: strings) {
     record_line(line, e, baseComponent, textComponent, outInstances, counter,
-                currentBaselineY);
+                &currentBaselineY);
 
     currentBaselineY += lineHeight;
   }

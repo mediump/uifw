@@ -59,10 +59,6 @@ int main()
   constexpr ui::Color4f gradientStart = {1.0f, 1.0f, 1.0f, 1.0f};
   constexpr ui::Color4f gradientEnd = {0.5f, 0.5f, 0.5f, 1.0f};
 
-  ui::TextHelpers::createTextEntity(
-    &window.ecsRoot, &fontData, "Pack my box\nwith five-\ndozen liquor\njugs.\n!@#$%^&*()_+=",
-    {1.0f, 1.0f, 1.0f, 1.0f}, 68, 16, currentY, 128, 128, "BigText");
-
   // for (uint32_t i = 0; i < 20; ++i) {
   //   const std::string name = std::string("TextEntity") + std::to_string(i);
   //   const float t = static_cast<float>(i) / 19.0f;
@@ -77,6 +73,15 @@ int main()
 
   const auto e2 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity2",
                                         &window.canvas.entity);
+  e2.set<ui::LayoutComponent>({
+    .type = ui::LayoutType_Vertical,
+    .margins = { 5, 5, 5, 5 },
+    .spacing = 3
+  });
+
+  ui::TextHelpers::createTextEntity(
+    &window.ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\n!@#$%^&*()_+=",
+    {1.0f, 1.0f, 1.0f, 1.0f}, 52, 16, currentY, 128, 128, "BigText", &e2);
 
   const auto e3 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity3",
                                         &window.canvas.entity);

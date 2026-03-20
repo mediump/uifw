@@ -33,6 +33,7 @@ struct TextComponent
 
   TextHAlignment horizontalAlignment = TextHAlignment_Left;
   TextVAlignment verticalAlignment = TextVAlignment_Top;
+  bool lineWrapping = true;
 
   bool needsUpdate = true;
 };

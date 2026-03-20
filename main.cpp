@@ -86,7 +86,7 @@ int main()
 
   auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();
   textComponent->horizontalAlignment = ui::TextHAlignment_Center;
-  textComponent->verticalAlignment = ui::TextVAlignment_Middle;
+  textComponent->verticalAlignment = ui::TextVAlignment_Top;
   /* ---------------------- */
 
   const auto e3 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity3",

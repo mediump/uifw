@@ -349,28 +349,34 @@ inline void record_line(const std::string &lineText,
   const float lineHeight =
     fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
 
-  const auto rectMaximum =
-    static_cast<float>(baseComponent.rect.x + baseComponent.rect.width);
+  const auto rectLeft = static_cast<float>(baseComponent.rect.x);
+  const float availableWidth = baseComponent.rect.width;
 
   const std::vector<std::string> words = StringUtils::split(lineText, " ");
 
-  for (const auto &word : words) {
-    const float wordLength = get_word_length(word, textComponent, fontData);
-    const float wordOffset =
-      static_cast<float>(baseComponent.rect.x) + currentAdvance + wordLength;
+  for (size_t i = 0; i < words.size(); i++) {
+    const std::string &word = words[i];
 
-    if (textComponent.lineWrapping && wordOffset > rectMaximum) {
-      // Insert return if line wrapping is requested
+    const float wordLength = get_word_length(word, textComponent, fontData);
+    const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
+    
+    // Calculate total width needed for this word (including preceding space if not at line start)
+    const float totalWordWidth = (currentAdvance > 0.0f) ? (wordLength + spaceWidth) : wordLength;
+    
+    // Check if word would overflow the line
+    if (i > 0 && textComponent.lineWrapping &&
+        currentAdvance + totalWordWidth > availableWidth) {
+      // Wrap to next line
       *currentBaselineY += lineHeight;
-      currentAdvance = 0;
+      currentAdvance = 0.0f;
     }
 
     // Record word
     record_word(word, e, baseComponent, textComponent, outInstances, counter,
                 *currentBaselineY, &currentAdvance);
 
-    // Add space
-    currentAdvance += SPACE_ADVANCE_MULTIPLIER * fontSize;
+    // Add space after word (will be on same line after potential wrap)
+    currentAdvance += spaceWidth;
   }
 }
 

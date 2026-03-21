@@ -5,11 +5,15 @@ struct SpriteData
   float2 size;
   float2 _padding; // Padding variable to satisfy GLSL std140 layout requirement (extra 16 bytes)
   float4 color;
+  float4 borderRadius;
 };
 
 struct Output
 {
   float4 color : TEXCOORD0;
+  float4 borderRadius : TEXCOORD1;
+  float4 spriteBounds : TEXCOORD2;
+  float3 fragmentPosition : TEXCOORD3;
   float4 position : SV_Position;
 };
 
@@ -53,6 +57,9 @@ Output main(uint id : SV_VertexID)
 
     output.position = mul(viewProjectionMatrix, float4(coordWithDepth, 1.0f));
     output.color = sprite.color;
+    output.borderRadius = sprite.borderRadius;
+    output.spriteBounds = float4(sprite.position.xy, sprite.size);
+    output.fragmentPosition = coordWithDepth;
 
     return output;
 }

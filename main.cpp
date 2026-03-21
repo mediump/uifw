@@ -122,6 +122,7 @@ int main()
 
     button.set<ui::ecs::QuadRendererComponent>({
       .color = {0.36f, 0.36f, 0.36f, 1.0f},
+      .borderRadius = {4, 4, 4, 4}
     });
     button.add<ui::ecs::HoverHandlerComponent>();
     button.add<ui::ecs::ButtonComponent>();
@@ -162,13 +163,15 @@ int main()
   constexpr ui::ecs::Color blue = {0.75f, 0.75f, 1.75f, 1.0f};
   constexpr ui::ecs::Color white = {0.5f, 0.5f, 0.5f, 1.0f};
 
-  e1.add<ui::ecs::QuadRendererComponent>();
+  e1.set<ui::ecs::QuadRendererComponent>({
+    .color = red,
+    .borderRadius = {10, 20, 15, 30}
+  });
   e2.add<ui::ecs::QuadRendererComponent>();
   e4.add<ui::ecs::QuadRendererComponent>();
   e5.add<ui::ecs::QuadRendererComponent>();
   e6.add<ui::ecs::QuadRendererComponent>();
 
-  e1.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   e2.get_ref<ui::ecs::QuadRendererComponent>()->color = green;
   e4.get_ref<ui::ecs::QuadRendererComponent>()->color = blue;
   e5.get_ref<ui::ecs::QuadRendererComponent>()->color = white;

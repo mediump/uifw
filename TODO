@@ -2,17 +2,17 @@
 
 Components:
  [-] Multisampling
- [-] Fonts
+ [X] Fonts
    [X] Returns
-   [-] Improve smoothing function
-   [-] Wrapping
-   [-] Text alignment
-     [-] Horizontal Left aligned
-     [-] Horizontal Middle aligned
-     [-] Horizontal Right aligned
-     [-] Vertical Left aligned
-     [-] Vertical Middle aligned
-     [-] Vertical Right aligned
+   [X] Improve smoothing function
+   [X] Wrapping
+   [X] Text alignment
+     [X] Horizontal Left aligned
+     [X] Horizontal Middle aligned
+     [X] Horizontal Right aligned
+     [X] Vertical Left aligned
+     [X] Vertical Middle aligned
+     [X] Vertical Right aligned
  [-] Corner rounding
  [-] Rectangle outlines
  [-] Gradients

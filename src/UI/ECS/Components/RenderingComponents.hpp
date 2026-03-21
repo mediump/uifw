@@ -1,4 +1,5 @@
 #pragma once
+#include "UI/GFX/Renderer/RendererTypes.hpp"
 
 namespace ui::ecs {
 
@@ -18,6 +19,7 @@ struct Color
 struct QuadRendererComponent
 {
   Color color;
+  Vector4i borderRadius = {0, 0, 0, 0};
 };
 
 }

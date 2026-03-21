@@ -227,6 +227,12 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
           static_cast<float>(baseComponent.rect.height),
         },
       .color = color,
+      .borderRadius = {
+        .x = static_cast<float>(quadRenderer.borderRadius.x),
+        .y = static_cast<float>(quadRenderer.borderRadius.y),
+        .z = static_cast<float>(quadRenderer.borderRadius.z),
+        .w = static_cast<float>(quadRenderer.borderRadius.w),
+      },
     });
     counter++;
   });

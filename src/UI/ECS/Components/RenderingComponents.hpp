@@ -20,6 +20,8 @@ struct QuadRendererComponent
 {
   Color color;
   Vector4i borderRadius = {0, 0, 0, 0};
+  Color borderColor = {0.5f, 0.5f, 0.5f, 1.0f};
+  Vector4f borderWidths = {0.0f, 0.0f, 0.0f, 0.0f};
 };
 
 }

@@ -165,17 +165,22 @@ int main()
 
   e1.set<ui::ecs::QuadRendererComponent>({
     .color = red,
-    .borderRadius = {10, 20, 15, 30}
+    .borderRadius = {30, 30, 30, 30},
+    .borderColor = {1.0f, 0.0f, 0.0f, 1.0f},
+    .borderWidths = {15.0f, 15.0f, 15.0f, 15.0f},
   });
-  e2.add<ui::ecs::QuadRendererComponent>();
+  e2.set<ui::ecs::QuadRendererComponent>({
+    .color = green,
+    .borderWidths = {0.0f, 5.0f, 0.0f, 5.0f},
+  });
   e4.set<ui::ecs::QuadRendererComponent>({
     .color = blue,
-    .borderRadius = {9, 9, 9, 9}
+    .borderRadius = {9, 9, 9, 9},
+    .borderColor = {0.25f, 0.25f, 0.25f, 1.0f},
+    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f}
   });
   e5.add<ui::ecs::QuadRendererComponent>();
   e6.add<ui::ecs::QuadRendererComponent>();
-
-  e2.get_ref<ui::ecs::QuadRendererComponent>()->color = green;
   e5.get_ref<ui::ecs::QuadRendererComponent>()->color = white;
   e6.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   /* --------------------------------------------------------------------- */

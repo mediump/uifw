@@ -13,14 +13,13 @@ Components:
      [X] Vertical Left aligned
      [X] Vertical Middle aligned
      [X] Vertical Right aligned
- [-] Corner rounding
+ [X] Corner rounding
  [-] Rectangle outlines
  [-] Gradients
  [-] Multiple windows
  [-] Drop shadows/inner shadows
  [-] Functional callbacks/event handler
  [-] Bold/italic fonts
- [-] Font alignment
  [-] Scrollable contents
  [-] Tabs
  [-] Docking layouts

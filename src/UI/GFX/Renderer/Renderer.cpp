@@ -233,6 +233,13 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
         .z = static_cast<float>(quadRenderer.borderRadius.z),
         .w = static_cast<float>(quadRenderer.borderRadius.w),
       },
+      .borderColor = {
+        .r = static_cast<float>(quadRenderer.borderColor.r),
+        .g = static_cast<float>(quadRenderer.borderColor.g),
+        .b = static_cast<float>(quadRenderer.borderColor.b),
+        .a = static_cast<float>(quadRenderer.borderColor.a),
+      },
+      .borderWidths = quadRenderer.borderWidths,
     });
     counter++;
   });

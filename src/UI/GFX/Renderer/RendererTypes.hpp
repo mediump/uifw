@@ -75,6 +75,8 @@ struct SpriteInstance
   UI_PAD_FLOAT(2);
   Color4f color;
   Vector4f borderRadius;
+  Color4f borderColor;
+  Vector4f borderWidths;
 };
 
 struct FontGlyphInstance

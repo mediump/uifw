@@ -8,6 +8,8 @@ struct SpriteData
   float4 borderRadius;
   float4 borderColor;
   float4 borderWidths;
+  float4 parentBounds;
+  float4 parentRadius;
 };
 
 struct Output
@@ -18,6 +20,8 @@ struct Output
   float4 borderWidths : TEXCOORD3;
   float2 localPos : TEXCOORD4;
   float2 size : TEXCOORD5;
+  float4 parentBounds : TEXCOORD6;
+  float4 parentRadius : TEXCOORD7;
   float4 position : SV_Position;
 };
 
@@ -63,6 +67,8 @@ Output main(uint id : SV_VertexID)
   output.borderWidths = sprite.borderWidths;
   output.localPos = localPos * sprite.size;
   output.size = sprite.size;
+  output.parentBounds = sprite.parentBounds;
+  output.parentRadius = sprite.parentRadius;
 
   return output;
 }

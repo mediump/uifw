@@ -6,6 +6,8 @@ struct Input
   float4 borderWidths : TEXCOORD3;
   float2 localPos : TEXCOORD4;
   float2 size : TEXCOORD5;
+  float4 parentBounds : TEXCOORD6;
+  float4 parentRadius : TEXCOORD7;
 };
 
 float sdBox(float2 p, float2 b)

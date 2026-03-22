@@ -193,6 +193,8 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
   const auto world = canvas.entity.world();
   const auto quadQuery = world.query<ecs::BaseComponent, ecs::QuadRendererComponent>();
 
+  const auto windowDimensions = window->inputState.windowSize;
+
   // Reserve space to avoid reallocations
   const size_t estimatedCount = quadQuery.count();
   if (outInstances.capacity() < estimatedCount) {
@@ -202,14 +204,33 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
 
   size_t counter = 0;
 
-  quadQuery.each([&inputState, &outInstances, &counter](
+  quadQuery.each([&inputState, &outInstances, &counter, &windowDimensions](
                    ecs::Entity e, const ecs::BaseComponent &baseComponent,
                    const ecs::QuadRendererComponent &quadRenderer) {
     if (counter >= MAX_SPRITE_COUNT) {
       return;
     }
 
-    Color4f color = {
+    Rect mask = {
+      0, 0, windowDimensions.x, windowDimensions.y
+    };
+    Vector4i borderRadii = {0, 0, 0, 0};
+
+    const auto currentParent = baseComponent.transformRel.parent;
+
+    if (currentParent != UI_NULL_ENTITY &&
+        currentParent.has<ecs::BaseComponent, ecs::QuadRendererComponent>()) {
+      const auto parentQuadRenderer = currentParent.get<ecs::QuadRendererComponent>();
+
+      if (parentQuadRenderer.clipContents) {
+        const auto parentBase = currentParent.get<ecs::BaseComponent>();
+
+        mask = parentBase.rect;
+        borderRadii = parentQuadRenderer.borderRadius;
+      }
+    }
+
+    const Color4f color = {
       quadRenderer.color.r,
       quadRenderer.color.g,
       quadRenderer.color.b,
@@ -240,6 +261,18 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
         .a = static_cast<float>(quadRenderer.borderColor.a),
       },
       .borderWidths = quadRenderer.borderWidths,
+      .parentBounds = {
+        .x = static_cast<float>(mask.x),
+        .y = static_cast<float>(mask.y),
+        .z = static_cast<float>(mask.width),
+        .w = static_cast<float>(mask.height),
+      },
+      .parentRadii = {
+        .x = static_cast<float>(borderRadii.x),
+        .y = static_cast<float>(borderRadii.y),
+        .z = static_cast<float>(borderRadii.z),
+        .w = static_cast<float>(borderRadii.w),
+      },
     });
     counter++;
   });

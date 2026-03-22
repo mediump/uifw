@@ -77,6 +77,8 @@ struct SpriteInstance
   Vector4f borderRadius;
   Color4f borderColor;
   Vector4f borderWidths;
+  Vector4f parentBounds;
+  Vector4f parentRadii;
 };
 
 struct FontGlyphInstance

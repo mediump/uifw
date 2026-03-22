@@ -2,6 +2,8 @@
 
 Components:
  [-] Multisampling
+ [-] Parent masking
+ [-] Content scaling (DPI-correction)
  [X] Fonts
    [X] Returns
    [X] Improve smoothing function
@@ -14,7 +16,7 @@ Components:
      [X] Vertical Middle aligned
      [X] Vertical Right aligned
  [X] Corner rounding
- [-] Rectangle outlines
+ [X] Rectangle outlines
  [-] Gradients
  [-] Multiple windows
  [-] Drop shadows/inner shadows

@@ -46,11 +46,24 @@ float getCornerRadius(float2 p, float4 r)
     ((s.y > 0.0) ? r.x : r.w);  // TL, BL
 }
 
+float getClip(float2 pLocal, float4 parentBounds, float4 parentRadii)
+{
+  float2 pWorld = pLocal + parentBounds.xy + (parentBounds.zw * 0.5f);
+  float2 parentHalf = parentBounds.zw * 0.5f;
+  float2 parentCenter = parentBounds.xy + parentHalf;
+  
+  return sdRoundedBox(pWorld - parentCenter, parentHalf, parentRadii);
+}
+
 float4 main(Input input) : SV_Target0
 {
   float2 p = input.localPos;
   float4 r = input.borderRadius;
   float4 b = input.borderWidths;
+
+  // Clipping early rejection
+  float dClip = getClip(p, input.parentBounds, input.parentRadius);
+  clip(-dClip);
 
   // Outline
   float dOuter = sdRoundedBox(p, input.spriteBounds.zw * 0.5f, r);
@@ -67,6 +80,7 @@ float4 main(Input input) : SV_Target0
   float effectiveRadius = min(outerRadius, innerRadius);
   
   float baseUnit = fwidth(dOuter);
+  
   // Reduce AA width for sharp corners
   float aaWidth = (effectiveRadius <= 0.0) ? baseUnit * 0.25f : baseUnit;
   

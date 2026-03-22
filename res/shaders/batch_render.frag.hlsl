@@ -4,10 +4,11 @@ struct Input
   float4 borderColor : TEXCOORD1;
   float4 borderRadius : TEXCOORD2;
   float4 borderWidths : TEXCOORD3;
-  float2 localPos : TEXCOORD4;
-  float2 size : TEXCOORD5;
-  float4 parentBounds : TEXCOORD6;
-  float4 parentRadius : TEXCOORD7;
+  float4 spriteBounds : TEXCOORD4;
+  float4 parentBounds : TEXCOORD5;
+  float4 parentRadius : TEXCOORD6;
+  float2 localPos : TEXCOORD7;
+  float4 position : SV_Position;
 };
 
 float sdBox(float2 p, float2 b)
@@ -52,11 +53,11 @@ float4 main(Input input) : SV_Target0
   float4 b = input.borderWidths;
 
   // Outline
-  float dOuter = sdRoundedBox(p, input.size * 0.5f, r);
+  float dOuter = sdRoundedBox(p, input.spriteBounds.zw * 0.5f, r);
 
   // Fill
   float2 innerOffset = float2((b.w - b.y) * 0.5f, (b.z - b.x) * 0.5f);
-  float2 innerHalfSize = (input.size - float2(b.w + b.y, b.x + b.z)) * 0.5f;
+  float2 innerHalfSize = (input.spriteBounds.zw - float2(b.w + b.y, b.x + b.z)) * 0.5f;
 
   float4 innerR = max(0.0f, r - float4(max(b.w, b.x), max(b.y, b.x), max(b.y, b.z), max(b.w, b.z)));
   float dInner = sdRoundedBox(p - innerOffset, innerHalfSize, innerR);

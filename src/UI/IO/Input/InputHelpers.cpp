@@ -22,6 +22,7 @@ void InputHelpers::processEvents(const Window *window)
   const auto &appStyle = window->appStyle;
 
   const auto &mousePos = window->inputState.mousePosition;
+  const auto &windowResized = window->inputState.windowResized;
 
   CursorShape cursorShape = CursorShape_Default;
 
@@ -29,15 +30,18 @@ void InputHelpers::processEvents(const Window *window)
   const auto &buttonQuery =
     world.query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent, ecs::HoverHandlerComponent>();
 
-  buttonQuery.each([&cursorShape, &appStyle, &mousePos](
+  buttonQuery.each([&cursorShape, &appStyle, &mousePos, &windowResized](
                      const ecs::Entity &entity,
                      const ecs::ButtonComponent &button,
                      ecs::QuadRendererComponent &quadRenderer,
                      const ecs::BaseComponent &base,
                      const ecs::HoverHandlerComponent hoverHandler) {
-    if (is_mouse_in_rect_component(mousePos, base.rect)) {
+    if (!windowResized && is_mouse_in_rect_component(mousePos, base.rect)) {
       const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
+      const auto borderColorOpt = appStyle.buttonStyleHovered->borderColor;
+
       ecs::Color bgColor;
+      ecs::Color borderColor;
 
       if (bgColorOpt != std::nullopt) {
         bgColor = {
@@ -48,6 +52,17 @@ void InputHelpers::processEvents(const Window *window)
         };
       } else {
         bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
+      }
+
+      if (borderColorOpt != std::nullopt) {
+        borderColor = {
+          borderColorOpt.value().r,
+          borderColorOpt.value().g,
+          borderColorOpt.value().b,
+          borderColorOpt.value().a,
+        };
+      } else {
+        borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
       }
 
       // FIXME: Manually overriding the QuadRendererComponent color value for now,
@@ -57,10 +72,17 @@ void InputHelpers::processEvents(const Window *window)
         quadRenderer.color = bgColor;
       }
 
+      if (quadRenderer.borderColor != borderColor) {
+        quadRenderer.borderColor = borderColor;
+      }
+
       cursorShape = hoverHandler.cursorShape;
     } else {
       const auto bgColorOpt = appStyle.buttonStyle->backgroundColor;
+      const auto borderColorOpt = appStyle.buttonStyle->borderColor;
+
       ecs::Color bgColor;
+      ecs::Color borderColor;
 
       if (bgColorOpt != std::nullopt) {
         bgColor = {
@@ -73,9 +95,24 @@ void InputHelpers::processEvents(const Window *window)
         bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
       }
 
+      if (borderColorOpt != std::nullopt) {
+        borderColor = {
+          borderColorOpt.value().r,
+          borderColorOpt.value().g,
+          borderColorOpt.value().b,
+          borderColorOpt.value().a,
+        };
+      } else {
+        borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
+      }
+
       // FIXME (See above)
       if (quadRenderer.color != bgColor) {
         quadRenderer.color = bgColor;
+      }
+
+      if (quadRenderer.borderColor != borderColor) {
+        quadRenderer.borderColor = borderColor;
       }
     }
   });

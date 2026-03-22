@@ -13,6 +13,8 @@
 #define DEMO_WINDOW_WIDTH 1280
 #define DEMO_WINDOW_HEIGHT 720
 
+#define DPI_SCALE 1.25
+
 static ui::Color4f lerpColor(const ui::Color4f &a, const ui::Color4f &b, const float t)
 {
   return {a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t,
@@ -75,17 +77,17 @@ int main()
                                         &window.canvas.entity);
   e2.set<ui::LayoutComponent>({
     .type = ui::LayoutType_Vertical,
-    .margins = { 5, 5, 5, 5 },
+    .margins = { 10, 10, 10, 10 },
     .spacing = 3
   });
 
   /* ---- TEXT DISPLAY ---- */
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
-    &window.ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\n!@#$%^&*()_+=",
-    {1.0f, 1.0f, 1.0f, 1.0f}, 52, 16, currentY, 128, 128, "BigText", &e2);
+    &window.ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\n",
+    {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
 
   auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();
-  textComponent->horizontalAlignment = ui::TextHAlignment_Center;
+  textComponent->horizontalAlignment = ui::TextHAlignment_Left;
   textComponent->verticalAlignment = ui::TextVAlignment_Top;
   /* ---------------------- */
 
@@ -122,7 +124,8 @@ int main()
 
     button.set<ui::ecs::QuadRendererComponent>({
       .color = {0.36f, 0.36f, 0.36f, 1.0f},
-      .borderRadius = {4, 4, 4, 4}
+      .borderRadius = {4, 4, 4, 4},
+      .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
     });
     button.add<ui::ecs::HoverHandlerComponent>();
     button.add<ui::ecs::ButtonComponent>();
@@ -166,7 +169,7 @@ int main()
   e1.set<ui::ecs::QuadRendererComponent>({
     .color = red,
     .borderRadius = {30, 30, 30, 30},
-    .borderColor = {1.0f, 0.0f, 0.0f, 1.0f},
+    .borderColor = white,
     .borderWidths = {15.0f, 15.0f, 15.0f, 15.0f},
   });
   e2.set<ui::ecs::QuadRendererComponent>({
@@ -177,7 +180,7 @@ int main()
     .color = blue,
     .borderRadius = {9, 9, 9, 9},
     .borderColor = {0.25f, 0.25f, 0.25f, 1.0f},
-    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f}
+    .borderWidths = {0.0f, 0.0f, 0.0f, 0.0f}
   });
   e5.add<ui::ecs::QuadRendererComponent>();
   e6.add<ui::ecs::QuadRendererComponent>();

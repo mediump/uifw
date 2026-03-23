@@ -29,8 +29,7 @@ float sdRoundedBox(float2 p, float2 b, float4 r)
 
   // If this corner's radius is zero, use sharp box SDF for that corner
   if (radius <= 0.0) {
-      float2 d = p_abs - b;
-      return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+    return sdBox(p, b);
   }
 
   float2 q = p_abs - b + radius;
@@ -49,12 +48,10 @@ float getCornerRadius(float2 p, float4 r)
 float getClip(float2 pLocal, float4 spriteBounds, float4 parentBounds, float4 parentRadii)
 {
   // Convert local position to world space
-  // spriteBounds.xy = sprite's top-left, spriteBounds.zw = size
-  // pLocal is the rotated offset from sprite center
   float2 spriteCenter = spriteBounds.xy + (spriteBounds.zw * 0.5f);
   float2 pixelWorldPos = spriteCenter + pLocal;
 
-  // Convert world position to parent space for SDF test
+  // Convert world position to parent space
   float2 parentHalf = parentBounds.zw * 0.5f;
   float2 parentCenter = parentBounds.xy + parentHalf;
   float2 pParentSpace = pixelWorldPos - parentCenter;
@@ -79,7 +76,8 @@ float4 main(Input input) : SV_Target0
   float2 innerOffset = float2((b.w - b.y) * 0.5f, (b.z - b.x) * 0.5f);
   float2 innerHalfSize = (input.spriteBounds.zw - float2(b.w + b.y, b.x + b.z)) * 0.5f;
 
-  float4 innerR = max(0.0f, r - float4(max(b.w, b.x), max(b.y, b.x), max(b.y, b.z), max(b.w, b.z)));
+  float4 innerR = max(0.0f, r - float4(max(b.w, b.x), max(b.y, b.x),
+	max(b.y, b.z), max(b.w, b.z)));
   float dInner = sdRoundedBox(p - innerOffset, innerHalfSize, innerR);
 
   float outerRadius = getCornerRadius(p, r);

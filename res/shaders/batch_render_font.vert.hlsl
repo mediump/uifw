@@ -51,14 +51,15 @@ Output main(uint id : SV_VertexID)
   };
 
   float2 coord = vertexPos[vert];
-  coord *= sprite.size;
+  float2 localPos = coord - 0.5f;
 
-  float3 coordWithDepth = float3(coord + sprite.position.xy, sprite.position.z);
+  float2 scaledCoord = localPos * sprite.size;
+  float3 coordWithDepth = float3(scaledCoord + sprite.position.xy + (sprite.size * 0.5f), sprite.position.z);
 
   Output output;
 
   output.position = mul(viewProjectionMatrix, float4(coordWithDepth, 1.0f));
-  output.localPos = coord;
+  output.localPos = scaledCoord;
   output.bounds = float4(sprite.position.xy, sprite.size);
   output.texCoord = texCoord[vert];
   output.color = sprite.color;

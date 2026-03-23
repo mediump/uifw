@@ -23,6 +23,7 @@ void InputHelpers::processEvents(const Window *window)
 
   const auto &mousePos = window->inputState.mousePosition;
   const auto &windowResized = window->inputState.windowResized;
+  const auto &windowSize = window->inputState.windowSize;
 
   CursorShape cursorShape = CursorShape_Default;
 
@@ -30,13 +31,26 @@ void InputHelpers::processEvents(const Window *window)
   const auto &buttonQuery =
     world.query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent, ecs::HoverHandlerComponent>();
 
-  buttonQuery.each([&cursorShape, &appStyle, &mousePos, &windowResized](
+  buttonQuery.each([&cursorShape, &appStyle, &mousePos, &windowResized, &windowSize](
                      const ecs::Entity &entity,
                      const ecs::ButtonComponent &button,
                      ecs::QuadRendererComponent &quadRenderer,
                      const ecs::BaseComponent &base,
                      const ecs::HoverHandlerComponent hoverHandler) {
-    if (!windowResized && is_mouse_in_rect_component(mousePos, base.rect)) {
+    // Get clipping bounds
+    Rect clippingBounds = {
+      0, 0, windowSize.x, windowSize.y
+    };
+    const auto parent = base.transformRel.parent;
+
+    if (parent != UI_NULL_ENTITY &&
+        parent.has<ecs::QuadRendererComponent>()) {
+      const auto parentBase = parent.get<ecs::BaseComponent>();
+      clippingBounds = parentBase.rect;
+    }
+
+    if (!windowResized && is_mouse_in_rect_component(mousePos, base.rect) &&
+        is_mouse_in_rect_component(mousePos, clippingBounds)) {
       const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
       const auto borderColorOpt = appStyle.buttonStyleHovered->borderColor;
 

@@ -59,6 +59,12 @@ void ui::initializeWindow(const char *title,
 
   SDL_Log(" > Window size: [%i, %i]\n", width, height);
 
+  // Initialize input state with initial window size
+  window->inputState.windowSize = {
+    .x = static_cast<uint16_t>(width),
+    .y = static_cast<uint16_t>(height)
+  };
+
   // Create ui::Canvas
   const Rect bounds = getWindowBounds(window);
   window->canvas = createCanvas(&window->ecsRoot, bounds.x, bounds.y,

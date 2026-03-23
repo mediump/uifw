@@ -3,7 +3,8 @@
 Components:
  [-] Multisampling
  [X] Parent masking
- [-] Content scaling (DPI-correction)
+ [X] Content scaling (DPI-correction)
+    [-] (Putting on hold, no way to test this currently)
  [X] Fonts
    [X] Returns
    [X] Improve smoothing function

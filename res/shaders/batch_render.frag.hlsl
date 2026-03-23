@@ -1,3 +1,5 @@
+#include "sdf_inc.hlsl"
+
 struct Input
 {
   float4 color : TEXCOORD0;
@@ -10,31 +12,6 @@ struct Input
   float2 localPos : TEXCOORD7;
   float4 position : SV_Position;
 };
-
-float sdBox(float2 p, float2 b)
-{
-  float2 d = abs(p) - b;
-  return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
-}
-
-float sdRoundedBox(float2 p, float2 b, float4 r)
-{
-  float2 s = float2(p.x >= 0.0f ? 1.0f : -1.0f, p.y >= 0.0f ? 1.0f : -1.0f);
-  float2 p_abs = abs(p);
-
-  // Get the radius for the current corner quadrant
-  float radius = (s.x > 0.0) ?
-    ((s.y > 0.0) ? r.y : r.z) : // TR, BR
-    ((s.y > 0.0) ? r.x : r.w);  // TL, BL
-
-  // If this corner's radius is zero, use sharp box SDF for that corner
-  if (radius <= 0.0) {
-    return sdBox(p, b);
-  }
-
-  float2 q = p_abs - b + radius;
-  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0f)) - radius;
-}
 
 // Get the radius for the current pixel's corner quadrant
 float getCornerRadius(float2 p, float4 r)

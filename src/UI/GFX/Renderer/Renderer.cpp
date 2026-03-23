@@ -214,7 +214,7 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
     Rect mask = {
       0, 0, windowDimensions.x, windowDimensions.y
     };
-    Vector4i borderRadii = {0, 0, 0, 0};
+    Vector4f borderRadii = {0.0f, 0.0f, 0.0f, 0.0f};
 
     const auto currentParent = baseComponent.transformRel.parent;
 
@@ -267,12 +267,7 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
         .z = static_cast<float>(mask.width),
         .w = static_cast<float>(mask.height),
       },
-      .parentRadii = {
-        .x = static_cast<float>(borderRadii.x),
-        .y = static_cast<float>(borderRadii.y),
-        .z = static_cast<float>(borderRadii.z),
-        .w = static_cast<float>(borderRadii.w),
-      },
+      .parentRadii = borderRadii,
     });
     counter++;
   });

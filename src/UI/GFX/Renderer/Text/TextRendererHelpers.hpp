@@ -17,10 +17,10 @@ public:
 
 private:
   static void record_text_component(ecs::Entity e,
-                                  const ecs::BaseComponent &baseComponent,
-                                  const TextComponent &textComponent,
-                                  std::vector<FontGlyphInstance> *outInstances,
-                                  size_t *counter);
+                                    const ecs::BaseComponent &baseComponent,
+                                    const TextComponent &textComponent,
+                                    std::vector<FontGlyphInstance> *outInstances,
+                                    size_t *counter);
 
   static void record_line(const std::vector<std::string> &words,
                           size_t startIdx,
@@ -28,6 +28,8 @@ private:
                           ecs::Entity e,
                           const ecs::BaseComponent &baseComponent,
                           const TextComponent &textComponent,
+                          const Rect &clippingMask,
+                          const Vector4f &borderRadii,
                           std::vector<FontGlyphInstance> *outInstances,
                           size_t *counter,
                           const float *currentBaselineY,
@@ -36,6 +38,8 @@ private:
   static void record_word(const std::string &wordText,
                           const ecs::BaseComponent &baseComponent,
                           const TextComponent &textComponent,
+                          const Rect &clippingMask,
+                          const Vector4f &borderRadii,
                           std::vector<FontGlyphInstance> *outInstances,
                           size_t *counter,
                           float currentBaselineY,

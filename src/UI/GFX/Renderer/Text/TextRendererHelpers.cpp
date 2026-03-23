@@ -1,6 +1,7 @@
 #include "TextRendererHelpers.hpp"
 
 #include "TextTypes.hpp"
+#include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/Utils/StringUtils.hpp"
 
 // Space character advance multiplier (fraction of fontSize)
@@ -16,15 +17,17 @@ size_t TextRendererHelpers::recordGlyphDrawList(
   const auto world = canvas->entity.world();
   const auto textQuery = world.query<ecs::BaseComponent, TextComponent>();
 
+  const auto canvasBounds = canvas->entity.get<ecs::BaseComponent>().rect;
+
   // Reserve space to avoid reallocations
   outInstances.clear();
   outInstances.reserve(MAX_GLYPH_COUNT);
 
   size_t counter = 0;
 
-  textQuery.each([&outInstances, &counter](const ecs::Entity e,
-                                           const ecs::BaseComponent &baseComponent,
-                                           const TextComponent &textComponent) {
+  textQuery.each([&outInstances, &counter, canvasBounds](
+                   const ecs::Entity e, const ecs::BaseComponent &baseComponent,
+                   const TextComponent &textComponent) {
     record_text_component(e, baseComponent, textComponent, &outInstances, &counter);
   });
 
@@ -38,6 +41,16 @@ void TextRendererHelpers::record_text_component(
   std::vector<FontGlyphInstance> *outInstances,
   size_t *counter)
 {
+  // Get parent clipping mask
+  const auto clippingMask = baseComponent.rect;
+  Vector4f borderRadii = {0.0f, 0.0f, 0.0f, 0.0f};
+
+  if (e.has<ecs::QuadRendererComponent>()) {
+    const auto quadRenderer = e.get<ecs::QuadRendererComponent>();
+    borderRadii = quadRenderer.borderRadius;
+  }
+
+  // Font properties
   const FontData *fontData = textComponent.font;
 
   const auto fontSize = static_cast<float>(textComponent.pixelSize);
@@ -122,8 +135,8 @@ void TextRendererHelpers::record_text_component(
     }
 
     record_line(cachedWords[renderLine.index], renderLine.start, renderLine.end, e,
-                baseComponent, textComponent, outInstances, counter, &currentBaselineY,
-                alignmentOffset);
+                baseComponent, textComponent, clippingMask, borderRadii, outInstances,
+                counter, &currentBaselineY, alignmentOffset);
 
     currentBaselineY += lineHeight;
   }
@@ -135,6 +148,8 @@ void TextRendererHelpers::record_line(const std::vector<std::string> &words,
                                       const ecs::Entity e,
                                       const ecs::BaseComponent &baseComponent,
                                       const TextComponent &textComponent,
+                                      const Rect &clippingMask,
+                                      const Vector4f &borderRadii,
                                       std::vector<FontGlyphInstance> *outInstances,
                                       size_t *counter,
                                       const float *currentBaselineY,
@@ -149,8 +164,8 @@ void TextRendererHelpers::record_line(const std::vector<std::string> &words,
     const std::string &word = words[i];
 
     // Record word
-    record_word(word, baseComponent, textComponent, outInstances, counter,
-                *currentBaselineY, &currentAdvance);
+    record_word(word, baseComponent, textComponent, clippingMask, borderRadii,
+                outInstances, counter, *currentBaselineY, &currentAdvance);
 
     // Add space after word
     currentAdvance += spaceWidth;
@@ -160,6 +175,8 @@ void TextRendererHelpers::record_line(const std::vector<std::string> &words,
 void TextRendererHelpers::record_word(const std::string &wordText,
                                       const ecs::BaseComponent &baseComponent,
                                       const TextComponent &textComponent,
+                                      const Rect &clippingMask,
+                                      const Vector4f &borderRadii,
                                       std::vector<FontGlyphInstance> *outInstances,
                                       size_t *counter,
                                       const float currentBaselineY,
@@ -216,6 +233,18 @@ void TextRendererHelpers::record_word(const std::string &wordText,
         },
       .textureCoords = textureCoords,
       .color = textComponent.color,
+      .parentBounds = {
+        .x = static_cast<float>(clippingMask.x),
+        .y = static_cast<float>(clippingMask.y),
+        .z = static_cast<float>(clippingMask.width),
+        .w = static_cast<float>(clippingMask.height),
+      },
+      .parentRadii = {
+        .x = borderRadii.x,
+        .y = borderRadii.y,
+        .z = borderRadii.z,
+        .w = borderRadii.w,
+      },
     });
 
     *currentAdvance += glyphData.advance * fontSize;

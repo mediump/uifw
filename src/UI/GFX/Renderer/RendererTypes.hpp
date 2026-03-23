@@ -89,6 +89,8 @@ struct FontGlyphInstance
   UI_PAD_FLOAT(2);
   Vector4f textureCoords;
   Color4f color;
+  Vector4f parentBounds;
+  Vector4f parentRadii;
 };
 /* ------------------------------ */
 

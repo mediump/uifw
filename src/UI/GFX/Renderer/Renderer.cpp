@@ -219,7 +219,7 @@ size_t Renderer::record_sprite_draw_list(const Window *window,
     const auto currentParent = baseComponent.transformRel.parent;
 
     if (currentParent != UI_NULL_ENTITY &&
-        currentParent.has<ecs::BaseComponent, ecs::QuadRendererComponent>()) {
+        currentParent.has<ecs::QuadRendererComponent>()) {
       const auto parentQuadRenderer = currentParent.get<ecs::QuadRendererComponent>();
 
       if (parentQuadRenderer.clipContents) {

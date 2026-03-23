@@ -46,13 +46,20 @@ float getCornerRadius(float2 p, float4 r)
     ((s.y > 0.0) ? r.x : r.w);  // TL, BL
 }
 
-float getClip(float2 pLocal, float4 parentBounds, float4 parentRadii)
+float getClip(float2 pLocal, float4 spriteBounds, float4 parentBounds, float4 parentRadii)
 {
-  float2 pWorld = pLocal + parentBounds.xy + (parentBounds.zw * 0.5f);
+  // Convert local position to world space
+  // spriteBounds.xy = sprite's top-left, spriteBounds.zw = size
+  // pLocal is the rotated offset from sprite center
+  float2 spriteCenter = spriteBounds.xy + (spriteBounds.zw * 0.5f);
+  float2 pixelWorldPos = spriteCenter + pLocal;
+
+  // Convert world position to parent space for SDF test
   float2 parentHalf = parentBounds.zw * 0.5f;
   float2 parentCenter = parentBounds.xy + parentHalf;
-  
-  return sdRoundedBox(pWorld - parentCenter, parentHalf, parentRadii);
+  float2 pParentSpace = pixelWorldPos - parentCenter;
+
+  return sdRoundedBox(pParentSpace, parentHalf, parentRadii);
 }
 
 float4 main(Input input) : SV_Target0
@@ -62,7 +69,7 @@ float4 main(Input input) : SV_Target0
   float4 b = input.borderWidths;
 
   // Clipping early rejection
-  float dClip = getClip(p, input.parentBounds, input.parentRadius);
+  float dClip = getClip(p, input.spriteBounds, input.parentBounds, input.parentRadius);
   clip(-dClip);
 
   // Outline

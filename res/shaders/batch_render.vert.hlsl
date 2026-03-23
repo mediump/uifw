@@ -68,7 +68,7 @@ Output main(uint id : SV_VertexID)
   output.spriteBounds = float4(sprite.position.xy, sprite.size);
   output.parentBounds = sprite.parentBounds;
   output.parentRadius = sprite.parentRadius;
-  output.localPos = localPos * sprite.size;
+  output.localPos = rotatedCoord;
 
   return output;
 }

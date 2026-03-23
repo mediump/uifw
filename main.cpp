@@ -53,7 +53,7 @@ int main()
   });
 
   const auto framerateEntity = ui::TextHelpers::createTextEntity(
-    &window.ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 50, 250,
+    &window.ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
     "FramerateText");
 
   size_t currentY = 36;

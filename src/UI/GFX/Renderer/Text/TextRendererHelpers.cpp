@@ -42,11 +42,17 @@ void TextRendererHelpers::record_text_component(
   size_t *counter)
 {
   // Get parent clipping mask
-  const auto clippingMask = baseComponent.rect;
+  Rect clippingMask = baseComponent.rect;
   Vector4f borderRadii = {0.0f, 0.0f, 0.0f, 0.0f};
 
-  if (e.has<ecs::QuadRendererComponent>()) {
-    const auto quadRenderer = e.get<ecs::QuadRendererComponent>();
+  const auto currentParent = baseComponent.transformRel.parent;
+
+  if (currentParent != UI_NULL_ENTITY &&
+      currentParent.has<ecs::QuadRendererComponent>()) {
+    const auto parentBase = currentParent.get<ecs::BaseComponent>();
+    const auto quadRenderer = currentParent.get<ecs::QuadRendererComponent>();
+
+    clippingMask = parentBase.rect;
     borderRadii = quadRenderer.borderRadius;
   }
 

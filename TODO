@@ -2,7 +2,7 @@
 
 Components:
  [-] Multisampling
- [-] Parent masking
+ [X] Parent masking
  [-] Content scaling (DPI-correction)
  [X] Fonts
    [X] Returns

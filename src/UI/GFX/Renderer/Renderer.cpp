@@ -184,7 +184,7 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
   SDL_ReleaseGPUTransferBuffer(gpuDevice, textureTransferBuffer);
 }
 
-size_t Renderer::record_sprite_draw_list(const Window *window,
+size_t Renderer::record_sprite_draw_list(const WindowData *window,
                                          std::vector<SpriteInstance> &outInstances)
 {
   const Canvas &canvas = window->canvas;
@@ -366,11 +366,11 @@ DrawPipeline Renderer::create_draw_pipeline(const RendererData *renderer,
   return pipeline;
 }
 
-RendererData Renderer::createRenderer(const Window *window, const Canvas *canvas)
+RendererData Renderer::createRenderer(const WindowData *window, const Canvas *canvas)
 {
   RendererData renderer;
 
-  renderer.internals.sdlWindowPtr = window->ptr;
+  renderer.internals.sdlWindowPtr = window->sdlWindow;
 
   SDL_Log("Creating GPU device...\n");
 
@@ -397,7 +397,7 @@ RendererData Renderer::createRenderer(const Window *window, const Canvas *canvas
   return renderer;
 }
 
-void Renderer::draw(Window *window)
+void Renderer::draw(WindowData *window)
 {
   auto *gpuDevice = window->renderer.internals.gpuDevice;
   auto *windowPtr = window->renderer.internals.sdlWindowPtr;
@@ -405,7 +405,7 @@ void Renderer::draw(Window *window)
   auto &storage = window->renderer.storage;
 
   // Get window bounds for camera matrix
-  const Rect windowBounds = getWindowBounds(window);
+  const Rect windowBounds = Window::getWindowBounds(window);
 
   // Get cached camera matrix (only recalculated on resize)
   const glm::mat4 &cameraMatrix =

@@ -14,7 +14,7 @@
 namespace ui {
 
 UI_FORWARD_DECLARE_STRUCT(Canvas);
-UI_FORWARD_DECLARE_STRUCT(Window);
+UI_FORWARD_DECLARE_STRUCT(WindowData);
 
 struct SDLInternals
 {
@@ -65,9 +65,9 @@ struct RendererData
 class Renderer
 {
 public:
-  static RendererData createRenderer(const Window *window, const Canvas *canvas);
+  static RendererData createRenderer(const WindowData *window, const Canvas *canvas);
 
-  static void draw(Window *window);
+  static void draw(WindowData *window);
 
 private:
   static void pick_window_present_mode(const RendererData *renderer);
@@ -75,7 +75,7 @@ private:
   static DrawPipeline create_draw_pipeline(const RendererData *renderer,
                                            const Canvas *canvas);
 
-  static size_t record_sprite_draw_list(const Window *window,
+  static size_t record_sprite_draw_list(const WindowData *window,
                                         std::vector<SpriteInstance> &outInstances);
 
   static void create_text_render_pipeline(const RendererData *renderer,

@@ -11,28 +11,34 @@
 
 namespace ui {
 
-struct Window
+struct ApplicationData;
+
+struct WindowData
 {
   bool needsRelayout = true;
-  SDL_Window *ptr = nullptr;
+  SDL_Window *sdlWindow = nullptr;
+  ApplicationData *app = nullptr;
   RendererData renderer;
   Canvas canvas;
   ecs::ECSRoot ecsRoot;
   InputState inputState;
-  AppStyle appStyle;
 };
 
-void initPlatform();
+class Window
+{
+public:
+  [[nodiscard]] static Rect getWindowBounds(const WindowData *window);
 
-[[nodiscard]] Rect getWindowBounds(const Window *window);
+  static WindowData *initializeWindow(const char *title,
+                                      int width,
+                                      int height,
+                                      ApplicationData *app);
 
-[[nodiscard]] Canvas createCanvasForWindow(const Window &window,
-                                           const ecs::ECSRoot *root);
+  static void relayout(const WindowData *window, uint16_t width = 0, uint16_t height = 0);
 
-void initializeWindow(const char *title, int width, int height, Window *window);
+  static bool updateWindow(WindowData *window);
 
-void relayout(const Window *window, uint16_t width = 0, uint16_t height = 0);
-
-bool updateWindow(Window *window);
+  static void destroy(const WindowData *window);
+};
 
 }  // namespace ui

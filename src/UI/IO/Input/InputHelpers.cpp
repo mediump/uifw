@@ -1,25 +1,25 @@
 #include "InputHelpers.hpp"
 
+#include "UI/Core/Application.hpp"
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
+#include "UI/IO/Input/Input.hpp"
 #include "UI/Window/Window.hpp"
 
 using namespace ui;
 
-// FIXME: Don't use global state
-static SDL_Cursor *g_defaultCursor = nullptr;
-static SDL_Cursor *g_pointerCursor = nullptr;
-
-void InputHelpers::initSystemCursors()
+SystemCursors InputHelpers::initSystemCursors()
 {
-  g_defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT);
-  g_pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER);
+  return {
+    .defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT),
+    .pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER)
+  };
 }
 
-void InputHelpers::processEvents(const Window *window)
+void InputHelpers::processEvents(const WindowData *window)
 {
   const auto &world = window->canvas.entity.world();
-  const auto &appStyle = window->appStyle;
+  const auto &appStyle = window->app->appStyle;
 
   const auto &mousePos = window->inputState.mousePosition;
   const auto &windowResized = window->inputState.windowResized;
@@ -131,13 +131,13 @@ void InputHelpers::processEvents(const Window *window)
     }
   });
 
-  process_cursor_update(cursorShape);
+  process_cursor_update(window->app, cursorShape);
 }
 
-void InputHelpers::cleanupSystemCursors()
+void InputHelpers::cleanupSystemCursors(const SystemCursors systemCursors)
 {
-  SDL_DestroyCursor(g_pointerCursor);
-  SDL_DestroyCursor(g_defaultCursor);
+  SDL_DestroyCursor(systemCursors.defaultCursor);
+  SDL_DestroyCursor(systemCursors.pointerCursor);
 }
 
 bool InputHelpers::is_mouse_in_rect_component(const Vector2i &mousePos, const Rect &rect)
@@ -150,16 +150,17 @@ bool InputHelpers::is_mouse_in_rect_component(const Vector2i &mousePos, const Re
          p_y <= rect.y + rect.height;
 }
 
-void InputHelpers::process_cursor_update(const CursorShape &cursorShape)
+void InputHelpers::process_cursor_update(ApplicationData *app,
+                                         const CursorShape &cursorShape)
 {
   SDL_Cursor *targetCursor = nullptr;
 
   switch (cursorShape) {
   case CursorShape_Default:
-    targetCursor = g_defaultCursor;
+    targetCursor = app->systemCursors.defaultCursor;
     break;
   case CursorShape_Pointer:
-    targetCursor = g_pointerCursor;
+    targetCursor = app->systemCursors.pointerCursor;
     break;
   default:
     break;

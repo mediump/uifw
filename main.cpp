@@ -1,3 +1,4 @@
+#include "UI/Core/Application.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/GFX/Renderer/Text/TextHelpers.hpp"
@@ -23,23 +24,23 @@ static ui::Color4f lerpColor(const ui::Color4f &a, const ui::Color4f &b, const f
 
 int main()
 {
-  ui::initPlatform();
+  ui::ApplicationData app = ui::Application::init();
 
-  ui::Window window;
-  ui::initializeWindow("UIFW Window", DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT, &window);
+  ui::WindowData *window = ui::Window::initializeWindow("UIFW Window", DEMO_WINDOW_WIDTH,
+                                                        DEMO_WINDOW_HEIGHT, &app);
 
   ui::FontData fontData = ui::FontLoader::loadFont(
     "res/fonts/_generated/Roboto.png", "res/fonts/_generated/Roboto.json");
 
   /* ---------------------------- Setup scene ---------------------------- */
-  auto layoutComponent = window.canvas.entity.get_ref<ui::LayoutComponent>();
+  auto layoutComponent = window->canvas.entity.get_ref<ui::LayoutComponent>();
 
   layoutComponent->type = ui::LayoutType_Horizontal;
   layoutComponent->margins = {10, 10, 10, 10};
   layoutComponent->spacing = 10;
 
-  const auto e1 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity1",
-                                        &window.canvas.entity);
+  const auto e1 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity1",
+                                        &window->canvas.entity);
 
   auto e1Base = e1.get_ref<ui::ecs::BaseComponent>();
 
@@ -53,7 +54,7 @@ int main()
   });
 
   const auto framerateEntity = ui::TextHelpers::createTextEntity(
-    &window.ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
+    &window->ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
     "FramerateText");
 
   size_t currentY = 36;
@@ -73,8 +74,8 @@ int main()
   //   currentY += 26 * static_cast<uint32_t>(fontData.metrics.lineHeight); // Font size = 20
   // }
 
-  const auto e2 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity2",
-                                        &window.canvas.entity);
+  const auto e2 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity2",
+                                        &window->canvas.entity);
   e2.set<ui::LayoutComponent>({
     .type = ui::LayoutType_Vertical,
     .margins = { 10, 10, 10, 10 },
@@ -83,7 +84,7 @@ int main()
 
   /* ---- TEXT DISPLAY ---- */
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
-    &window.ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\n",
+    &window->ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\n",
     {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
 
   auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();
@@ -91,8 +92,8 @@ int main()
   textComponent->verticalAlignment = ui::TextVAlignment_Top;
   /* ---------------------- */
 
-  const auto e3 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity3",
-                                        &window.canvas.entity);
+  const auto e3 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity3",
+                                        &window->canvas.entity);
   e3.add<ui::LayoutComponent>();
 
   auto secondaryLayout = e3.get_ref<ui::LayoutComponent>();
@@ -100,7 +101,7 @@ int main()
   secondaryLayout->type = ui::LayoutType_Vertical;
   secondaryLayout->spacing = 10;
 
-  const auto e4 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity4", &e3);
+  const auto e4 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity4", &e3);
   e4.set<ui::LayoutComponent>({
     .type = ui::LayoutType_Vertical,
     .margins = {5, 5, 5, 5},
@@ -119,7 +120,7 @@ int main()
     buttonEntityNames[i] = "ButtonEntity" + std::to_string(canonicalIndex);
     buttonLabels[i] = "Button " + std::to_string(canonicalIndex);
 
-    const auto button = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50,
+    const auto button = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50,
                                               buttonEntityNames[i].c_str(), &e4);
 
     button.set<ui::ecs::QuadRendererComponent>({
@@ -148,11 +149,11 @@ int main()
   }
 
   // Add spacer
-  ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Spacer", &e4);
+  ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Spacer", &e4);
   /* ----------------------------------------------- */
 
-  const auto e5 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity5", &e3);
-  const auto e6 = ui::ecs::createEntity(&window.ecsRoot, 0, 0, 50, 50, "Entity6", &e3);
+  const auto e5 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity5", &e3);
+  const auto e6 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity6", &e3);
 
   auto e6Base = e6.get_ref<ui::ecs::BaseComponent>();
 
@@ -188,12 +189,12 @@ int main()
   e6.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   /* --------------------------------------------------------------------- */
 
-  ui::relayout(&window, DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT);
+  ui::Window::relayout(window, DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT);
 
   auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
   auto lastFrameTime = std::chrono::high_resolution_clock::now();
 
-  while (ui::updateWindow(&window)) {
+  while (ui::Application::update(&app)) {
     auto currentFrameTime = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> deltaTime = currentFrameTime - lastFrameTime;
     lastFrameTime = currentFrameTime;

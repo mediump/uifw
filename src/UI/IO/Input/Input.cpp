@@ -6,7 +6,7 @@
 
 using namespace ui;
 
-void Input::pollEvents(InputState *inputState, const Window *window)
+void Input::pollEvents(InputState *inputState, const WindowData *window)
 {
   reset_input_state(inputState);
 
@@ -66,9 +66,9 @@ void Input::reset_input_state(InputState *inputState)
   inputState->mouseUp = false;
 }
 
-Vector2i Input::get_window_size(const Window *window)
+Vector2i Input::get_window_size(const WindowData *window)
 {
-  const auto windowBounds = getWindowBounds(window);
+  const auto windowBounds = Window::getWindowBounds(window);
 
   return {
     .x = static_cast<uint16_t>(windowBounds.width),
@@ -76,7 +76,7 @@ Vector2i Input::get_window_size(const Window *window)
   };
 }
 
-Vector2i Input::get_mouse_position(const Window *window)
+Vector2i Input::get_mouse_position(const WindowData *window)
 {
   float xPos, yPos;
   SDL_GetMouseState(&xPos, &yPos);

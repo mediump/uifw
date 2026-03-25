@@ -6,7 +6,7 @@
 
 namespace ui {
 
-struct Window;
+struct WindowData;
 
 enum ShaderStage
 {

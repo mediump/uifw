@@ -4,7 +4,7 @@
 
 namespace ui {
 
-UI_FORWARD_DECLARE_STRUCT(Window);
+UI_FORWARD_DECLARE_STRUCT(WindowData);
 
 struct InputState
 {
@@ -20,14 +20,14 @@ struct InputState
 class Input
 {
 public:
-  static void pollEvents(InputState *inputState, const Window *window);
+  static void pollEvents(InputState *inputState, const WindowData *window);
 
 private:
   static void reset_input_state(InputState *inputState);
 
-  static Vector2i get_window_size(const Window *window);
+  static Vector2i get_window_size(const WindowData *window);
 
-  static Vector2i get_mouse_position(const Window *window);
+  static Vector2i get_mouse_position(const WindowData *window);
 };
 
 } // namespace ui

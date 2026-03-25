@@ -28,6 +28,7 @@ int main()
 
   ui::WindowData *window = ui::Window::initializeWindow("UIFW Window", DEMO_WINDOW_WIDTH,
                                                         DEMO_WINDOW_HEIGHT, &app);
+  ui::WindowData *window2 = ui::Window::initializeWindow("Other Window", 512, 512, &app);
 
   ui::FontData fontData = ui::FontLoader::loadFont(
     "res/fonts/_generated/Roboto.png", "res/fonts/_generated/Roboto.json");
@@ -74,8 +75,8 @@ int main()
   //   currentY += 26 * static_cast<uint32_t>(fontData.metrics.lineHeight); // Font size = 20
   // }
 
-  const auto e2 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity2",
-                                        &window->canvas.entity);
+  const auto e2 = ui::ecs::createEntity(&window2->ecsRoot, 0, 0, 50, 50, "Entity2",
+                                        &window2->canvas.entity);
   e2.set<ui::LayoutComponent>({
     .type = ui::LayoutType_Vertical,
     .margins = { 10, 10, 10, 10 },

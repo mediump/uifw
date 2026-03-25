@@ -38,7 +38,7 @@ bool ui::Application::update(ApplicationData *app)
   }
 
   if (!removeIndices.empty()) {
-    for (size_t i = removeIndices.size() - 1; i != SIZE_MAX; i--) {
+    for (int i = static_cast<int>(removeIndices.size()) - 1; i >= 0; i--) {
       app->windows.erase(app->windows.begin() + static_cast<long>(removeIndices[i]));
     }
   }

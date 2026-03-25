@@ -29,7 +29,7 @@ ui::ecs::Entity ui::ecs::createEntity(const ECSRoot *root,
                                       const char *name,
                                       const Entity *parent)
 {
-  const Entity entity = root->world.entity();
+  const Entity entity = root->world->entity();
 
   entity.set_name(name);
   entity.set<BaseComponent>({.rect = {x, y, width, height},

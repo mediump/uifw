@@ -52,6 +52,9 @@ WindowData *Window::initializeWindow(const char *title,
   window->inputState.windowSize = {.x = static_cast<uint16_t>(width),
                                    .y = static_cast<uint16_t>(height)};
 
+  // Create ECSWorld
+  window->ecsRoot.world = new flecs::world();
+
   // Create ui::Canvas
   const Rect bounds = getWindowBounds(window);
   window->canvas = createCanvas(&window->ecsRoot, bounds.x, bounds.y, bounds.width,

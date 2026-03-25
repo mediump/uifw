@@ -11,7 +11,7 @@ struct ECSRoot
   // The root of the ECS world. This system uses the flecs library to manage
   // entities
   //
-  flecs::world world;
+  flecs::world *world;
 };
 
 }  // namespace ui::ecs

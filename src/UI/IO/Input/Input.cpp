@@ -45,19 +45,21 @@ static void process_event(InputState *inputState, const SDL_Event &event)
   case SDL_EVENT_QUIT:
     inputState->shouldQuit = true;
     break;
+  case SDL_EVENT_WINDOW_MOUSE_ENTER:
+    inputState->windowFocused = true;
+    break;
+  case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+    inputState->windowFocused = false;
+    break;
   case SDL_EVENT_WINDOW_RESIZED:
     inputState->windowResized = true;
-    inputState->windowSize = {
-      .x = static_cast<uint16_t>(event.window.data1),
-      .y = static_cast<uint16_t>(event.window.data2)
-    };
+    inputState->windowSize = {.x = static_cast<uint16_t>(event.window.data1),
+                              .y = static_cast<uint16_t>(event.window.data2)};
     break;
   case SDL_EVENT_MOUSE_MOTION:
     inputState->mouseMoved = true;
-    inputState->mousePosition = {
-      .x = static_cast<uint16_t>(event.motion.x),
-      .y = static_cast<uint16_t>(event.motion.y)
-    };
+    inputState->mousePosition = {.x = static_cast<uint16_t>(event.motion.x),
+                                 .y = static_cast<uint16_t>(event.motion.y)};
     break;
   case SDL_EVENT_MOUSE_BUTTON_DOWN:
     inputState->mouseDown = true;
@@ -94,7 +96,7 @@ void Input::pollEvents(InputState *inputState, const WindowData *window)
   // We use a static buffer to avoid allocation on every call
   static std::vector<SDL_Event> event_buffer;
   static std::vector<SDL_Event> other_window_events;
-  
+
   event_buffer.clear();
   other_window_events.clear();
 
@@ -108,7 +110,8 @@ void Input::pollEvents(InputState *inputState, const WindowData *window)
   for (const auto &e : event_buffer) {
     if (is_event_for_window(e, windowID)) {
       process_event(inputState, e);
-    } else {
+    }
+    else {
       other_window_events.push_back(e);
     }
   }

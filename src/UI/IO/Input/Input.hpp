@@ -9,6 +9,7 @@ UI_FORWARD_DECLARE_STRUCT(WindowData);
 struct InputState
 {
   bool shouldQuit = false;
+  bool windowFocused = false;
   bool windowResized = false;
   Vector2i windowSize = {0, 0};
   bool mouseMoved = false;

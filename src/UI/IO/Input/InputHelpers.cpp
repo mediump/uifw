@@ -18,12 +18,19 @@ SystemCursors InputHelpers::initSystemCursors()
 
 void InputHelpers::processEvents(const WindowData *window)
 {
+  const auto &inputState = window->inputState;
+
+  if (!inputState.windowFocused) {
+    // Ignore events when mouse is not over window
+    return;
+  }
+
   const auto &world = window->canvas.entity.world();
   const auto &appStyle = window->app->appStyle;
 
-  const auto &mousePos = window->inputState.mousePosition;
-  const auto &windowResized = window->inputState.windowResized;
-  const auto &windowSize = window->inputState.windowSize;
+  const auto &mousePos = inputState.mousePosition;
+  const auto &windowResized = inputState.windowResized;
+  const auto &windowSize = inputState.windowSize;
 
   CursorShape cursorShape = CursorShape_Default;
 

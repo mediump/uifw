@@ -85,7 +85,7 @@ int main()
 
   /* ---- TEXT DISPLAY ---- */
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\n",
+    &window2->ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\n",
     {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
 
   auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();

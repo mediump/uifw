@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_gpu.h>
 
 #include "UI/GFX/Renderer/Renderer.hpp"
 
@@ -16,7 +16,7 @@ enum ShaderStage
 
 typedef SDL_GPUShader Shader;
 
-Shader *createShader(const RendererData *renderer,
+Shader *createShader(SDL_GPUDevice *gpuDevice,
                      const char *bytecodePath,
                      ShaderStage stage,
                      uint32_t samplerCount,
@@ -24,6 +24,6 @@ Shader *createShader(const RendererData *renderer,
                      uint32_t storageBufferCount,
                      uint32_t storageTextureCount);
 
-void destroyShader(Shader *shader, const RendererData *renderer);
+void destroyShader(Shader *shader, SDL_GPUDevice *gpuDevice);
 
 }  // namespace ui

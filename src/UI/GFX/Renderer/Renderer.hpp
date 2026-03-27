@@ -65,7 +65,8 @@ struct RendererData
 class Renderer
 {
 public:
-  static RendererData createRenderer(const WindowData *window, const Canvas *canvas);
+  static RendererData createRenderer(const WindowData *window, const Canvas *canvas,
+                                     SDL_GPUDevice *gpuDevice);
 
   static void draw(WindowData *window);
 

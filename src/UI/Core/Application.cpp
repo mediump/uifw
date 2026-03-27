@@ -1,5 +1,7 @@
 #include "Application.hpp"
 
+#include <SDL3/SDL_gpu.h>
+
 ui::ApplicationData ui::Application::init()
 {
   ApplicationData data = {};
@@ -15,6 +17,15 @@ ui::ApplicationData ui::Application::init()
   if (SDL_Init(SDL_INIT_VIDEO) == false) {
     throw std::runtime_error("Unable to initialize SDL.");
   }
+
+  SDL_Log("Creating GPU device...\n");
+  data.gpuDevice = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, true, nullptr);
+
+  if (data.gpuDevice == nullptr) {
+    throw std::runtime_error("Unable to create GPU device.");
+  }
+
+  SDL_Log("Created GPU device (Backend: %s)\n", SDL_GetGPUDeviceDriver(data.gpuDevice));
 
   data.systemCursors = InputHelpers::initSystemCursors();
   return data;
@@ -49,4 +60,8 @@ bool ui::Application::update(ApplicationData *app)
 void ui::Application::destroy(const ApplicationData *app)
 {
   InputHelpers::cleanupSystemCursors(app->systemCursors);
+  
+  if (app->gpuDevice != nullptr) {
+    SDL_DestroyGPUDevice(app->gpuDevice);
+  }
 }

@@ -78,9 +78,9 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
   }
 
   SDL_GPUShader *textVertexShader =
-    createShader(renderer, TEXT_VS_PATH, ShaderStage_Vertex, 0, 1, 1, 0);
+    createShader(gpuDevice, TEXT_VS_PATH, ShaderStage_Vertex, 0, 1, 1, 0);
   SDL_GPUShader *textFragmentShader =
-    createShader(renderer, TEXT_FS_PATH, ShaderStage_Fragment, 1, 0, 0, 0);
+    createShader(gpuDevice, TEXT_FS_PATH, ShaderStage_Fragment, 1, 0, 0, 0);
 
   const SDL_GPUColorTargetDescription colorDesc = {
     .format = SDL_GetGPUSwapchainTextureFormat(gpuDevice, window),
@@ -103,8 +103,8 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
 
   pipeline->textPipeline = SDL_CreateGPUGraphicsPipeline(gpuDevice, &pipelineCreateInfo);
 
-  destroyShader(textVertexShader, renderer);
-  destroyShader(textFragmentShader, renderer);
+  destroyShader(textVertexShader, gpuDevice);
+  destroyShader(textFragmentShader, gpuDevice);
 
   // Create font atlas texture
   const auto imageDataSize = static_cast<uint32_t>(imageData->w * imageData->h * 4);
@@ -316,9 +316,9 @@ DrawPipeline Renderer::create_draw_pipeline(const RendererData *renderer,
   constexpr auto SPRITE_FS_PATH = "res/shaders/_compiled/SPIRV/batch_render.frag.spv";
 
   SDL_GPUShader *spriteVertexShader =
-    createShader(renderer, SPRITE_VS_PATH, ShaderStage_Vertex, 0, 1, 1, 0);
+    createShader(gpuDevice, SPRITE_VS_PATH, ShaderStage_Vertex, 0, 1, 1, 0);
   SDL_GPUShader *spriteFragmentShader =
-    createShader(renderer, SPRITE_FS_PATH, ShaderStage_Fragment, 0, 0, 0, 0);
+    createShader(gpuDevice, SPRITE_FS_PATH, ShaderStage_Fragment, 0, 0, 0, 0);
 
   const SDL_GPUColorTargetDescription colorDesc = {
     .format = SDL_GetGPUSwapchainTextureFormat(gpuDevice, window),
@@ -342,8 +342,8 @@ DrawPipeline Renderer::create_draw_pipeline(const RendererData *renderer,
   pipeline.spriteDataPipeline =
     SDL_CreateGPUGraphicsPipeline(gpuDevice, &pipelineCreateInfo);
 
-  destroyShader(spriteVertexShader, renderer);
-  destroyShader(spriteFragmentShader, renderer);
+  destroyShader(spriteVertexShader, gpuDevice);
+  destroyShader(spriteFragmentShader, gpuDevice);
 
   // Create sprite data transfer buffer
   constexpr SDL_GPUTransferBufferCreateInfo transferBufferInfo = {
@@ -366,23 +366,19 @@ DrawPipeline Renderer::create_draw_pipeline(const RendererData *renderer,
   return pipeline;
 }
 
-RendererData Renderer::createRenderer(const WindowData *window, const Canvas *canvas)
+RendererData Renderer::createRenderer(const WindowData *window, const Canvas *canvas,
+                                      SDL_GPUDevice *gpuDevice)
 {
   RendererData renderer;
 
   renderer.internals.sdlWindowPtr = window->sdlWindow;
+  renderer.internals.gpuDevice = gpuDevice;
 
-  SDL_Log("Creating GPU device...\n");
-
-  renderer.internals.gpuDevice =
-    SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV, UI_VALIDATION_ENABLED, nullptr);
-
-  UI_LOG_MSG("Created GPU device (Backend: %s)",
-             SDL_GetGPUDeviceDriver(renderer.internals.gpuDevice));
+  SDL_Log("Claiming window for GPU device...\n");
 
   if (!SDL_ClaimWindowForGPUDevice(renderer.internals.gpuDevice,
                                    renderer.internals.sdlWindowPtr)) {
-    UI_LOG_MSG("Failed to claim GPU device");
+    UI_LOG_MSG("Failed to claim window for GPU device");
     return renderer;
   }
 

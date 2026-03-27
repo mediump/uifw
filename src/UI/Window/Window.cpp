@@ -61,7 +61,8 @@ WindowData *Window::initializeWindow(const char *title,
                                 bounds.height, "Canvas");
 
   // Create ui::Renderer
-  window->renderer = Renderer::createRenderer(window, &window->canvas);
+  window->renderer = Renderer::createRenderer(window, &window->canvas,
+                                              app->gpuDevice);
 
   // Apply initial window layout
   relayout(window);

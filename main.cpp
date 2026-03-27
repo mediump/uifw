@@ -190,7 +190,9 @@ int main()
   e6.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
   /* --------------------------------------------------------------------- */
 
+  // FIXME: Currently user must call Window::relayout for input events to work
   ui::Window::relayout(window, DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT);
+  ui::Window::relayout(window2, 512, 512);
 
   auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
   auto lastFrameTime = std::chrono::high_resolution_clock::now();

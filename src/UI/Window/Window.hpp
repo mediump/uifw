@@ -30,11 +30,11 @@ public:
   [[nodiscard]] static Rect getWindowBounds(const WindowData *window);
 
   static WindowData *initializeWindow(const char *title,
-                                      int width,
-                                      int height,
+                                      uint16_t width,
+                                      uint16_t height,
                                       ApplicationData *app);
 
-  static void relayout(const WindowData *window, uint16_t width = 0, uint16_t height = 0);
+  static void relayout(WindowData *window, uint16_t width = 0, uint16_t height = 0);
 
   static bool updateWindow(WindowData *window);
 

@@ -26,8 +26,8 @@ Rect Window::getWindowBounds(const WindowData *window)
 }
 
 WindowData *Window::initializeWindow(const char *title,
-                                     const int width,
-                                     const int height,
+                                     const uint16_t width,
+                                     const uint16_t height,
                                      ApplicationData *app)
 {
   auto window = new WindowData();
@@ -65,7 +65,7 @@ WindowData *Window::initializeWindow(const char *title,
                                               app->gpuDevice);
 
   // Apply initial window layout
-  relayout(window);
+  //relayout(window, width, height);
 
   // Record window in app window list
   window->app = app;
@@ -74,9 +74,7 @@ WindowData *Window::initializeWindow(const char *title,
   return window;
 }
 
-void Window::relayout(const WindowData *window,
-                      const uint16_t width,
-                      const uint16_t height)
+void Window::relayout(WindowData *window, const uint16_t width, const uint16_t height)
 {
   const auto &canvasRoot = window->canvas.entity;
   Vector2i windowSize = {width, height};
@@ -98,6 +96,7 @@ void Window::relayout(const WindowData *window,
   };
 
   Layout::traverseAndApplyLayout(canvasRoot);
+  window->needsRelayout = false;
 }
 
 bool Window::updateWindow(WindowData *window)

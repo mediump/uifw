@@ -6,7 +6,7 @@
 #include "UI/Window/Window.hpp"
 
 #include <SDL3/SDL_gpu.h>
-#include <vector>
+#include <map>
 
 namespace ui {
 
@@ -15,7 +15,7 @@ struct ApplicationData {
   SystemCursors systemCursors;
   AppStyle appStyle;
   SDL_GPUDevice *gpuDevice = nullptr;
-  std::vector<WindowData *> windows;
+  std::map<uint32_t, WindowData *> windows;
 };
 
 class Application

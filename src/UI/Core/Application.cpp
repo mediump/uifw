@@ -37,20 +37,20 @@ bool ui::Application::update(ApplicationData *app)
     return false;
   }
 
-  std::vector<size_t> removeIndices;
+  Input::pollEvents(app);
 
-  for (size_t i = 0; i < app->windows.size(); i++) {
-    const auto window = app->windows[i];
+  std::vector<uint32_t> removeIndices;
 
+  for (const auto &[id, window] : app->windows) {
     if (!Window::updateWindow(window)) {
-      Window::destroy(window);
-      removeIndices.emplace_back(i);
+      removeIndices.emplace_back(id);
     }
   }
 
   if (!removeIndices.empty()) {
-    for (int i = static_cast<int>(removeIndices.size()) - 1; i >= 0; i--) {
-      app->windows.erase(app->windows.begin() + static_cast<long>(removeIndices[i]));
+    for (const uint32_t id : removeIndices) {
+      Window::destroy(app->windows[id]);
+      app->windows.erase(id);
     }
   }
 

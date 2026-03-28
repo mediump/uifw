@@ -4,6 +4,7 @@
 
 namespace ui {
 
+UI_FORWARD_DECLARE_STRUCT(ApplicationData);
 UI_FORWARD_DECLARE_STRUCT(WindowData);
 
 struct InputState
@@ -21,7 +22,7 @@ struct InputState
 class Input
 {
 public:
-  static void pollEvents(InputState *inputState, const WindowData *window);
+  static void pollEvents(ApplicationData *app);
 
 private:
   static void reset_input_state(InputState *inputState);

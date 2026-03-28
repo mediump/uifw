@@ -1,5 +1,6 @@
 #include "Window.hpp"
 
+#include "SDL3/SDL_video.h"
 #include "UI/Canvas/Canvas.hpp"
 #include "UI/Core/Application.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
@@ -40,7 +41,10 @@ WindowData *Window::initializeWindow(const char *title,
     throw std::runtime_error("Unable to create a window.");
   }
 
+  const uint32_t windowId = SDL_GetWindowID(window->sdlWindow);
+
   SDL_Log(" > Window size: [%i, %i]\n", width, height);
+  SDL_Log(" > Window id: %i", windowId);
 
   // Set window icon
   if (SDL_Surface *icon = SDL_LoadPNG("res/icons/app_icon.png")) {
@@ -64,12 +68,9 @@ WindowData *Window::initializeWindow(const char *title,
   window->renderer = Renderer::createRenderer(window, &window->canvas,
                                               app->gpuDevice);
 
-  // Apply initial window layout
-  //relayout(window, width, height);
-
-  // Record window in app window list
+  // Record window in app window map (SDL_WindowID -> WindowData *)
   window->app = app;
-  app->windows.emplace_back(window);
+  app->windows[windowId] = window;
 
   return window;
 }
@@ -101,7 +102,6 @@ void Window::relayout(WindowData *window, const uint16_t width, const uint16_t h
 
 bool Window::updateWindow(WindowData *window)
 {
-  Input::pollEvents(&window->inputState, window);
   const auto &inputState = window->inputState;
 
   if (inputState.shouldQuit) {

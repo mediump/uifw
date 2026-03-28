@@ -3,69 +3,46 @@
 #include <SDL3/SDL.h>
 #include <vector>
 
+#include "SDL3/SDL_events.h"
+#include "UI/Core/Application.hpp"
 #include "UI/Window/Window.hpp"
 
 using namespace ui;
 
-// Helper to check if an event belongs to a specific window
-static bool is_event_for_window(const SDL_Event &event, Uint32 windowID)
+static void process_event(ApplicationData *app, const SDL_Event &event)
 {
-  switch (event.type) {
-  case SDL_EVENT_WINDOW_RESIZED:
-  case SDL_EVENT_WINDOW_MOVED:
-  case SDL_EVENT_WINDOW_MINIMIZED:
-  case SDL_EVENT_WINDOW_MAXIMIZED:
-  case SDL_EVENT_WINDOW_FOCUS_GAINED:
-  case SDL_EVENT_WINDOW_FOCUS_LOST:
-  case SDL_EVENT_WINDOW_SHOWN:
-  case SDL_EVENT_WINDOW_HIDDEN:
-  case SDL_EVENT_WINDOW_EXPOSED:
-  case SDL_EVENT_WINDOW_RESTORED:
-  case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-    return event.window.windowID == windowID;
-  case SDL_EVENT_MOUSE_MOTION:
-  case SDL_EVENT_MOUSE_BUTTON_DOWN:
-  case SDL_EVENT_MOUSE_BUTTON_UP:
-  case SDL_EVENT_MOUSE_WHEEL:
-    return event.motion.windowID == windowID;
-  case SDL_EVENT_KEY_DOWN:
-  case SDL_EVENT_KEY_UP:
-    return event.key.windowID == windowID;
-  case SDL_EVENT_QUIT:
-    // Quit is global, applies to all windows
-    return true;
-  default:
-    return true;
+  auto it = app->windows.find(event.window.windowID);
+  if (it == app->windows.end()) {
+    return;
   }
-}
 
-static void process_event(InputState *inputState, const SDL_Event &event)
-{
+  InputState &inputState = it->second->inputState;
+
   switch (event.type) {
   case SDL_EVENT_QUIT:
-    inputState->shouldQuit = true;
+    inputState.shouldQuit = true;
     break;
   case SDL_EVENT_WINDOW_MOUSE_ENTER:
-    inputState->windowFocused = true;
+    inputState.windowFocused = true;
     break;
   case SDL_EVENT_WINDOW_MOUSE_LEAVE:
-    inputState->windowFocused = false;
+    inputState.windowFocused = false;
     break;
   case SDL_EVENT_WINDOW_RESIZED:
-    inputState->windowResized = true;
-    inputState->windowSize = {.x = static_cast<uint16_t>(event.window.data1),
-                              .y = static_cast<uint16_t>(event.window.data2)};
+    inputState.windowResized = true;
+    inputState.windowSize = {.x = static_cast<uint16_t>(event.window.data1),
+                             .y = static_cast<uint16_t>(event.window.data2)};
     break;
   case SDL_EVENT_MOUSE_MOTION:
-    inputState->mouseMoved = true;
-    inputState->mousePosition = {.x = static_cast<uint16_t>(event.motion.x),
-                                 .y = static_cast<uint16_t>(event.motion.y)};
+    inputState.mouseMoved = true;
+    inputState.mousePosition = {.x = static_cast<uint16_t>(event.motion.x),
+                                .y = static_cast<uint16_t>(event.motion.y)};
     break;
   case SDL_EVENT_MOUSE_BUTTON_DOWN:
-    inputState->mouseDown = true;
+    inputState.mouseDown = true;
     break;
   case SDL_EVENT_MOUSE_BUTTON_UP:
-    inputState->mouseUp = true;
+    inputState.mouseUp = true;
     break;
   case SDL_EVENT_MOUSE_WHEEL:
     break;
@@ -86,39 +63,18 @@ static void process_event(InputState *inputState, const SDL_Event &event)
   }
 }
 
-void Input::pollEvents(InputState *inputState, const WindowData *window)
+void Input::pollEvents(ApplicationData *app)
 {
-  reset_input_state(inputState);
+  // Reset all window input states
+  for (const auto &[id, window] : app->windows) {
+    reset_input_state(&window->inputState);
+  }
 
-  const Uint32 windowID = SDL_GetWindowID(window->sdlWindow);
-
-  // Collect all events and distribute them to appropriate windows
-  // We use a static buffer to avoid allocation on every call
-  static std::vector<SDL_Event> event_buffer;
-  static std::vector<SDL_Event> other_window_events;
-
-  event_buffer.clear();
-  other_window_events.clear();
-
-  // First, drain all events from the queue
+  // Poll all events, send events to each window
   SDL_Event event;
+
   while (SDL_PollEvent(&event)) {
-    event_buffer.push_back(event);
-  }
-
-  // Process events for this window, save others for re-queue
-  for (const auto &e : event_buffer) {
-    if (is_event_for_window(e, windowID)) {
-      process_event(inputState, e);
-    }
-    else {
-      other_window_events.push_back(e);
-    }
-  }
-
-  // Re-queue events for other windows
-  for (auto &e : other_window_events) {
-    SDL_PushEvent(&e);
+    process_event(app, event);
   }
 }
 

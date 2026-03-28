@@ -19,9 +19,9 @@ Components:
  [X] Corner rounding
  [X] Rectangle outlines
  [-] Gradients
- [-] Multiple windows
+ [X] Multiple windows
  [-] Drop shadows/inner shadows
- [-] Functional callbacks/event handler
+ [X] Functional callbacks/event handler
  [-] Bold/italic fonts
  [-] Scrollable contents
  [-] Tabs

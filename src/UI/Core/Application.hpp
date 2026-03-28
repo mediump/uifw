@@ -26,6 +26,9 @@ public:
   static bool update(ApplicationData *app);
 
   static void destroy(const ApplicationData *app);
+
+private:
+  static void destroy_all_windows(ApplicationData *app);
 };
 
 }

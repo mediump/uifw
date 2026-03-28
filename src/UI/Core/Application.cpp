@@ -2,7 +2,9 @@
 
 #include <SDL3/SDL_gpu.h>
 
-ui::ApplicationData ui::Application::init()
+using namespace ui;
+
+ApplicationData Application::init()
 {
   ApplicationData data = {};
   data.appStyle = Style::getDefaultAppStyle();
@@ -31,8 +33,13 @@ ui::ApplicationData ui::Application::init()
   return data;
 }
 
-bool ui::Application::update(ApplicationData *app)
+bool Application::update(ApplicationData *app)
 {
+  if (app->shouldQuit) {
+    destroy_all_windows(app);
+    return false;
+  }
+
   if (app->windows.empty()) {
     return false;
   }
@@ -57,11 +64,19 @@ bool ui::Application::update(ApplicationData *app)
   return !app->windows.empty();
 }
 
-void ui::Application::destroy(const ApplicationData *app)
+void Application::destroy(const ApplicationData *app)
 {
   InputHelpers::cleanupSystemCursors(app->systemCursors);
   
   if (app->gpuDevice != nullptr) {
     SDL_DestroyGPUDevice(app->gpuDevice);
   }
+}
+
+void Application::destroy_all_windows(ApplicationData *app) {
+  for (const auto &[id, window] : app->windows) {
+    Window::destroy(window);
+  }
+
+  app->windows.clear();
 }

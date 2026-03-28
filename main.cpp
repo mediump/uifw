@@ -9,7 +9,6 @@
 #include <chrono>
 
 #include "UI/ECS/Components/InputComponents.hpp"
-#include "UI/Layout/LayoutHelpers.hpp"
 
 #define DEMO_WINDOW_WIDTH 1280
 #define DEMO_WINDOW_HEIGHT 720

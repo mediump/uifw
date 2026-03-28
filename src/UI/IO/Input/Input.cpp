@@ -20,6 +20,9 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
 
   switch (event.type) {
   case SDL_EVENT_QUIT:
+    app->shouldQuit = true;
+    break;
+  case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
     inputState.shouldQuit = true;
     break;
   case SDL_EVENT_WINDOW_MOUSE_ENTER:

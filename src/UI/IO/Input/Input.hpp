@@ -17,6 +17,7 @@ struct InputState
   Vector2i mousePosition = {0, 0};
   bool mouseDown = false;
   bool mouseUp = false;
+  Vector2f scrollDelta = {0.0f, 0.0f};
 };
 
 class Input

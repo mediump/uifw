@@ -31,6 +31,9 @@ struct TextComponent
   Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
   uint16_t pixelSize = 13;
 
+  bool isScrollable = false;
+  float scrollPosition = 0.0f;
+
   TextHAlignment horizontalAlignment = TextHAlignment_Left;
   TextVAlignment verticalAlignment = TextVAlignment_Top;
   bool lineWrapping = true;

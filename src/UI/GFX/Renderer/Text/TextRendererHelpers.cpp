@@ -102,7 +102,8 @@ void TextRendererHelpers::record_text_component(
 
   // Calculate vertical alignment offset based on total rendered line count
   const float totalTextHeight = static_cast<float>(renderLines.size()) * lineHeight;
-  float verticalOffset;
+
+  float verticalOffset = 0.0f;
 
   switch (textComponent.verticalAlignment) {
   case TextVAlignment_Middle:
@@ -117,6 +118,9 @@ void TextRendererHelpers::record_text_component(
     verticalOffset = 0.0f;
     break;
   }
+
+  // Add scroll position to verticalOffset
+  verticalOffset += textComponent.scrollPosition;
 
   float currentBaselineY = static_cast<float>(baseComponent.rect.y) +
     (fontData->metrics.ascender * fontSize) + verticalOffset;

@@ -1,153 +1,41 @@
 #include "InputHelpers.hpp"
 
 #include "UI/Core/Application.hpp"
+#include "UI/ECS/Components/BaseComponent.hpp"
+#include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/IO/Input/Input.hpp"
 #include "UI/Window/Window.hpp"
 
+constexpr float SCROLL_SPEED = 15.0f;
+
 using namespace ui;
 
 SystemCursors InputHelpers::initSystemCursors()
 {
-  return {
-    .defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT),
-    .pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER)
-  };
+  return {.defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT),
+          .pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER)};
 }
 
 void InputHelpers::processEvents(const WindowData *window)
 {
   const auto &inputState = window->inputState;
 
-  if (!inputState.windowFocused) {
-    // Ignore events when mouse is not over window
+  if (!inputState.windowFocused || inputState.windowResized) {
+    // Ignore events when mouse is not over window or is resizing
     return;
   }
 
   const auto &world = window->canvas.entity.world();
   const auto &appStyle = window->app->appStyle;
 
-  const auto &mousePos = inputState.mousePosition;
-  const auto &mouseDown = inputState.mouseDown;
-  const auto &windowResized = inputState.windowResized;
-  const auto &windowSize = inputState.windowSize;
-
   CursorShape cursorShape = CursorShape_Default;
 
-  // PROCESS BUTTONS //////////////////////////////////
-  const auto &buttonQuery =
-    world.query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent, ecs::HoverHandlerComponent>();
-
-  buttonQuery.each([&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized,
-                    &windowSize](const ecs::Entity &entity,
-                                 const ecs::ButtonComponent &button,
-                                 ecs::QuadRendererComponent &quadRenderer,
-                                 const ecs::BaseComponent &base,
-                                 const ecs::HoverHandlerComponent hoverHandler) {
-    // Get clipping bounds
-    Rect clippingBounds = {
-      0, 0, windowSize.x, windowSize.y
-    };
-    const auto parent = base.transformRel.parent;
-
-    if (parent != UI_NULL_ENTITY &&
-        parent.has<ecs::QuadRendererComponent>()) {
-      const auto parentBase = parent.get<ecs::BaseComponent>();
-      clippingBounds = parentBase.rect;
-    }
-
-    if (!windowResized && is_mouse_in_rect_component(mousePos, base.rect) &&
-        is_mouse_in_rect_component(mousePos, clippingBounds)) {
-      const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
-      const auto borderColorOpt = appStyle.buttonStyleHovered->borderColor;
-
-      ecs::Color bgColor;
-      ecs::Color borderColor;
-
-      if (bgColorOpt != std::nullopt) {
-        bgColor = {
-          bgColorOpt.value().r,
-          bgColorOpt.value().g,
-          bgColorOpt.value().b,
-          bgColorOpt.value().a,
-        };
-      }
-      else {
-        bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
-      }
-
-      if (borderColorOpt != std::nullopt) {
-        borderColor = {
-          borderColorOpt.value().r,
-          borderColorOpt.value().g,
-          borderColorOpt.value().b,
-          borderColorOpt.value().a,
-        };
-      }
-      else {
-        borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
-      }
-
-      // FIXME: Manually overriding the QuadRendererComponent color value for now,
-      //  although this should be reworked later since the initial data provided by the
-      //  user is lost in this process.
-      if (quadRenderer.color != bgColor) {
-        quadRenderer.color = bgColor;
-      }
-
-      if (quadRenderer.borderColor != borderColor) {
-        quadRenderer.borderColor = borderColor;
-      }
-
-      cursorShape = hoverHandler.cursorShape;
-
-      // Handle click event
-      if (mouseDown && button.onClick) {
-        button.onClick(entity);
-      }
-    }
-    else {
-      const auto bgColorOpt = appStyle.buttonStyle->backgroundColor;
-      const auto borderColorOpt = appStyle.buttonStyle->borderColor;
-
-      ecs::Color bgColor;
-      ecs::Color borderColor;
-
-      if (bgColorOpt != std::nullopt) {
-        bgColor = {
-          bgColorOpt.value().r,
-          bgColorOpt.value().g,
-          bgColorOpt.value().b,
-          bgColorOpt.value().a,
-        };
-      }
-      else {
-        bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
-      }
-
-      if (borderColorOpt != std::nullopt) {
-        borderColor = {
-          borderColorOpt.value().r,
-          borderColorOpt.value().g,
-          borderColorOpt.value().b,
-          borderColorOpt.value().a,
-        };
-      }
-      else {
-        borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
-      }
-
-      // FIXME (See above)
-      if (quadRenderer.color != bgColor) {
-        quadRenderer.color = bgColor;
-      }
-
-      if (quadRenderer.borderColor != borderColor) {
-        quadRenderer.borderColor = borderColor;
-      }
-    }
-  });
+  /* ---- Process events ---- */
+  process_buttons(inputState, world, appStyle, &cursorShape);
+  process_text_components(inputState, world);
+  /* ------------------------ */
 
   process_cursor_update(window->app, cursorShape);
 }
@@ -162,10 +50,8 @@ bool InputHelpers::is_mouse_in_rect_component(const Vector2i &mousePos, const Re
 {
   const auto &[p_x, p_y] = mousePos;
 
-  return p_x >= rect.x &&
-         p_x <= rect.x + rect.width &&
-         p_y >= rect.y &&
-         p_y <= rect.y + rect.height;
+  return p_x >= rect.x && p_x <= rect.x + rect.width && p_y >= rect.y &&
+    p_y <= rect.y + rect.height;
 }
 
 void InputHelpers::process_cursor_update(ApplicationData *app,
@@ -189,4 +75,150 @@ void InputHelpers::process_cursor_update(ApplicationData *app,
   if (currentCursor != targetCursor) {
     SDL_SetCursor(targetCursor);
   }
+}
+
+void InputHelpers::process_buttons(const InputState &inputState,
+                                   const flecs::world &world,
+                                   const AppStyle &appStyle,
+                                   CursorShape *cursorShape)
+{
+  const auto &mousePos = inputState.mousePosition;
+  const auto &mouseDown = inputState.mouseDown;
+  const auto &windowResized = inputState.windowResized;
+  const auto &windowSize = inputState.windowSize;
+
+  const auto &buttonQuery = world.query<ecs::ButtonComponent, ecs::QuadRendererComponent,
+                                        ecs::BaseComponent, ecs::HoverHandlerComponent>();
+
+  buttonQuery.each(
+    [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize](
+      const ecs::Entity &entity, const ecs::ButtonComponent &button,
+      ecs::QuadRendererComponent &quadRenderer, const ecs::BaseComponent &base,
+      const ecs::HoverHandlerComponent hoverHandler) {
+      // Get clipping bounds
+      Rect clippingBounds = {0, 0, windowSize.x, windowSize.y};
+      const auto parent = base.transformRel.parent;
+
+      if (parent != UI_NULL_ENTITY && parent.has<ecs::QuadRendererComponent>()) {
+        const auto parentBase = parent.get<ecs::BaseComponent>();
+        clippingBounds = parentBase.rect;
+      }
+
+      if (is_mouse_in_rect_component(mousePos, base.rect) &&
+          is_mouse_in_rect_component(mousePos, clippingBounds)) {
+        const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
+        const auto borderColorOpt = appStyle.buttonStyleHovered->borderColor;
+
+        ecs::Color bgColor;
+        ecs::Color borderColor;
+
+        if (bgColorOpt != std::nullopt) {
+          bgColor = {
+            bgColorOpt.value().r,
+            bgColorOpt.value().g,
+            bgColorOpt.value().b,
+            bgColorOpt.value().a,
+          };
+        }
+        else {
+          bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
+        }
+
+        if (borderColorOpt != std::nullopt) {
+          borderColor = {
+            borderColorOpt.value().r,
+            borderColorOpt.value().g,
+            borderColorOpt.value().b,
+            borderColorOpt.value().a,
+          };
+        }
+        else {
+          borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
+        }
+
+        // FIXME: Manually overriding the QuadRendererComponent color value for now,
+        //  although this should be reworked later since the initial data provided by the
+        //  user is lost in this process.
+        if (quadRenderer.color != bgColor) {
+          quadRenderer.color = bgColor;
+        }
+
+        if (quadRenderer.borderColor != borderColor) {
+          quadRenderer.borderColor = borderColor;
+        }
+
+        *cursorShape = hoverHandler.cursorShape;
+
+        // Handle click event
+        if (mouseDown && button.onClick) {
+          button.onClick(entity);
+        }
+      }
+      else {
+        const auto bgColorOpt = appStyle.buttonStyle->backgroundColor;
+        const auto borderColorOpt = appStyle.buttonStyle->borderColor;
+
+        ecs::Color bgColor;
+        ecs::Color borderColor;
+
+        if (bgColorOpt != std::nullopt) {
+          bgColor = {
+            bgColorOpt.value().r,
+            bgColorOpt.value().g,
+            bgColorOpt.value().b,
+            bgColorOpt.value().a,
+          };
+        }
+        else {
+          bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
+        }
+
+        if (borderColorOpt != std::nullopt) {
+          borderColor = {
+            borderColorOpt.value().r,
+            borderColorOpt.value().g,
+            borderColorOpt.value().b,
+            borderColorOpt.value().a,
+          };
+        }
+        else {
+          borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
+        }
+
+        // FIXME (See above)
+        if (quadRenderer.color != bgColor) {
+          quadRenderer.color = bgColor;
+        }
+
+        if (quadRenderer.borderColor != borderColor) {
+          quadRenderer.borderColor = borderColor;
+        }
+      }
+    });
+}
+
+void InputHelpers::process_text_components(const InputState &inputState,
+                                           const flecs::world &world)
+{
+  const auto &mousePos = inputState.mousePosition;
+  const auto &scrollDelta = inputState.scrollDelta;
+
+  if (std::abs(scrollDelta.x) < 0.001f && 
+      std::abs(scrollDelta.y) < 0.001f) {
+    return;
+  }
+
+  const auto &textQuery = world.query<TextComponent, ecs::BaseComponent>();
+
+  textQuery.each([&mousePos, &scrollDelta](const ecs::Entity &entity,
+                                           TextComponent &textComponent,
+                                           const ecs::BaseComponent &base) {
+    if (!textComponent.isScrollable) {
+      return;
+    }
+
+    if (is_mouse_in_rect_component(mousePos, base.rect)) {
+      textComponent.scrollPosition += scrollDelta.y * SCROLL_SPEED;
+    }
+  });
 }

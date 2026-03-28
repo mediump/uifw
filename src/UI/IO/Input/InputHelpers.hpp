@@ -3,6 +3,8 @@
 #include "Input.hpp"
 
 #include "UI/ECS/Components/InputComponents.hpp"
+#include "UI/ECS/Components/StyleComponents.hpp"
+#include "UI/ECS/ECSRoot/ECSRoot.hpp"
 #include "UI/Layout/LayoutTypes.hpp"
 
 #include <SDL3/SDL.h>
@@ -25,6 +27,14 @@ public:
   static void cleanupSystemCursors(SystemCursors systemCursors);
 
 private:
+  static void process_buttons(const InputState &inputState,
+                              const flecs::world &world,
+                              const AppStyle &appStyle,
+                              CursorShape *cursorShape);
+
+  static void process_text_components(const InputState &inputState,
+                                      const flecs::world &world);
+
   static bool is_mouse_in_rect_component(const Vector2i &mousePos, const Rect &rect);
   static void process_cursor_update(ApplicationData *app, const CursorShape &cursorShape);
 };

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SDL3/SDL_events.h"
+#include "SDL3/SDL_mouse.h"
 #include "UI/Core/Application.hpp"
 #include "UI/Window/Window.hpp"
 
@@ -48,6 +49,8 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
     inputState.mouseUp = true;
     break;
   case SDL_EVENT_MOUSE_WHEEL:
+    inputState.scrollDelta = {static_cast<float>(event.wheel.integer_x),
+                              static_cast<float>(event.wheel.integer_y)};
     break;
   case SDL_EVENT_KEY_DOWN:
     break;
@@ -88,6 +91,7 @@ void Input::reset_input_state(InputState *inputState)
   inputState->mouseMoved = false;
   inputState->mouseDown = false;
   inputState->mouseUp = false;
+  inputState->scrollDelta = {0.0, 0.0};
 }
 
 Vector2i Input::get_window_size(const WindowData *window)

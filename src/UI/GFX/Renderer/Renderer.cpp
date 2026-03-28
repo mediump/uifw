@@ -42,16 +42,16 @@ void Renderer::pick_window_present_mode(const RendererData *renderer)
 {
   SDL_GPUPresentMode presentMode = SDL_GPU_PRESENTMODE_VSYNC;
 
-  if (SDL_WindowSupportsGPUPresentMode(renderer->internals.gpuDevice,
-                                       renderer->internals.sdlWindowPtr,
-                                       SDL_GPU_PRESENTMODE_IMMEDIATE)) {
-    presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
-  }
-  else if (SDL_WindowSupportsGPUPresentMode(renderer->internals.gpuDevice,
-                                            renderer->internals.sdlWindowPtr,
-                                            SDL_GPU_PRESENTMODE_MAILBOX)) {
-    presentMode = SDL_GPU_PRESENTMODE_MAILBOX;
-  }
+  // if (SDL_WindowSupportsGPUPresentMode(renderer->internals.gpuDevice,
+  //                                      renderer->internals.sdlWindowPtr,
+  //                                      SDL_GPU_PRESENTMODE_IMMEDIATE)) {
+  //   presentMode = SDL_GPU_PRESENTMODE_IMMEDIATE;
+  // }
+  // else if (SDL_WindowSupportsGPUPresentMode(renderer->internals.gpuDevice,
+  //                                           renderer->internals.sdlWindowPtr,
+  //                                           SDL_GPU_PRESENTMODE_MAILBOX)) {
+  //   presentMode = SDL_GPU_PRESENTMODE_MAILBOX;
+  // }
 
   SDL_SetGPUSwapchainParameters(renderer->internals.gpuDevice,
                                 renderer->internals.sdlWindowPtr,

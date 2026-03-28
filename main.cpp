@@ -9,6 +9,7 @@
 #include <chrono>
 
 #include "UI/ECS/Components/InputComponents.hpp"
+#include "Utils.hpp"
 
 #define DEMO_WINDOW_WIDTH 1280
 #define DEMO_WINDOW_HEIGHT 720
@@ -129,7 +130,10 @@ int main()
       .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
     });
     button.add<ui::ecs::HoverHandlerComponent>();
-    button.add<ui::ecs::ButtonComponent>();
+    button.set<ui::ecs::ButtonComponent>(
+      {.onClick = [](const ui::ecs::Entity &entity) { 
+        UI_LOG_MSG("Button Clicked: '%s'", entity.name().c_str());
+      }});
 
     button.set<ui::TextComponent>({
       .text = buttonLabels[i].c_str(),

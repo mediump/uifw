@@ -29,6 +29,7 @@ void InputHelpers::processEvents(const WindowData *window)
   const auto &appStyle = window->app->appStyle;
 
   const auto &mousePos = inputState.mousePosition;
+  const auto &mouseDown = inputState.mouseDown;
   const auto &windowResized = inputState.windowResized;
   const auto &windowSize = inputState.windowSize;
 
@@ -38,12 +39,12 @@ void InputHelpers::processEvents(const WindowData *window)
   const auto &buttonQuery =
     world.query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent, ecs::HoverHandlerComponent>();
 
-  buttonQuery.each([&cursorShape, &appStyle, &mousePos, &windowResized, &windowSize](
-                     const ecs::Entity &entity,
-                     const ecs::ButtonComponent &button,
-                     ecs::QuadRendererComponent &quadRenderer,
-                     const ecs::BaseComponent &base,
-                     const ecs::HoverHandlerComponent hoverHandler) {
+  buttonQuery.each([&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized,
+                    &windowSize](const ecs::Entity &entity,
+                                 const ecs::ButtonComponent &button,
+                                 ecs::QuadRendererComponent &quadRenderer,
+                                 const ecs::BaseComponent &base,
+                                 const ecs::HoverHandlerComponent hoverHandler) {
     // Get clipping bounds
     Rect clippingBounds = {
       0, 0, windowSize.x, windowSize.y
@@ -71,7 +72,8 @@ void InputHelpers::processEvents(const WindowData *window)
           bgColorOpt.value().b,
           bgColorOpt.value().a,
         };
-      } else {
+      }
+      else {
         bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
       }
 
@@ -82,7 +84,8 @@ void InputHelpers::processEvents(const WindowData *window)
           borderColorOpt.value().b,
           borderColorOpt.value().a,
         };
-      } else {
+      }
+      else {
         borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
       }
 
@@ -98,7 +101,13 @@ void InputHelpers::processEvents(const WindowData *window)
       }
 
       cursorShape = hoverHandler.cursorShape;
-    } else {
+
+      // Handle click event
+      if (mouseDown && button.onClick) {
+        button.onClick(entity);
+      }
+    }
+    else {
       const auto bgColorOpt = appStyle.buttonStyle->backgroundColor;
       const auto borderColorOpt = appStyle.buttonStyle->borderColor;
 
@@ -112,7 +121,8 @@ void InputHelpers::processEvents(const WindowData *window)
           bgColorOpt.value().b,
           bgColorOpt.value().a,
         };
-      } else {
+      }
+      else {
         bgColor = {1.0f, 1.0f, 1.0f, 1.0f};
       }
 
@@ -123,7 +133,8 @@ void InputHelpers::processEvents(const WindowData *window)
           borderColorOpt.value().b,
           borderColorOpt.value().a,
         };
-      } else {
+      }
+      else {
         borderColor = {0.0f, 0.0f, 0.0f, 0.0f};
       }
 

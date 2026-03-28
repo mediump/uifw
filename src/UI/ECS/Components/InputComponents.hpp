@@ -1,6 +1,8 @@
 #pragma once
 
-#include "UI/GFX/Renderer/RendererTypes.hpp"
+#include "UI/ECS/Entity/Entity.hpp"
+
+#include <functional>
 
 namespace ui {
 
@@ -23,7 +25,9 @@ struct HoverHandlerComponent
 };
 
 struct ButtonComponent
-{};
+{
+  std::function<void(const Entity &)> onClick = nullptr;
+};
 
 } // namespace ecs
 

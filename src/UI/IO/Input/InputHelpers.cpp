@@ -234,13 +234,14 @@ void InputHelpers::process_text_components(const InputState &inputState,
     const float textHeight =
       TextUtils::computeTotalTextHeight(textComponent, base.rect.width);
 
+    ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
+
     // If text fits in the viewport, no scrolling is needed
     if (textHeight <= base.rect.height) {
       textComponent.scrollPosition = 0.0f;
       return;
     }
 
-    ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
     ScrollArea::updateScrollbarPosition(textComponent, base, textHeight);
 
     // Exit early if no scroll input

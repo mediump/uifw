@@ -16,6 +16,13 @@ public:
 
   static void layoutScrollbar(TextComponent &textComponent,
                               const ecs::BaseComponent &base);
+
+private:
+  static void layout_background(const ecs::Entity &background,
+                                const ecs::BaseComponent &base);
+
+  static void layout_handle(const ecs::Entity &handle, 
+    const ecs::BaseComponent &base);
 };
 
 } // namespace ui

@@ -5,39 +5,69 @@
 
 using namespace ui;
 
-#define SCROLLBAR_WIDTH 16;
+#define SCROLLBAR_WIDTH 16
 
 void ScrollArea::addScrollbarElement(const ecs::ECSRoot *root,
                                      const ecs::Entity &entity,
                                      TextComponent &textComponent,
                                      const ecs::BaseComponent &base)
 {
-  const auto name = std::string(entity.name()) + "_Scrollbar";
+  const auto bgName = std::string(entity.name()) + "_Scrollbar";
+  const auto handleName = bgName + "_Handle";
 
-  auto scrollbarEntity = ecs::createEntity(root, 0, 0, 0, 0, name.c_str(), &entity);
-  scrollbarEntity.set<ecs::QuadRendererComponent>(
+  auto background = ecs::createEntity(root, 0, 0, 0, 0, bgName.c_str(), &entity);
+  background.set<ecs::QuadRendererComponent>(
     {.color = {0.9f, 0.9f, 0.9f, 1.0f}, .borderRadius = {8, 8, 8, 8}});
 
-  textComponent.scrollbar = scrollbarEntity;
+  auto handle = ecs::createEntity(root, 0, 0, 0, 0, handleName.c_str(), &background);
+  handle.set<ecs::QuadRendererComponent>(
+    {.color = {0.5f, 0.5f, 0.5f, 1.0f}, .borderRadius = {6, 6, 6, 6}});
+
+  textComponent.scrollbar = background;
   layoutScrollbar(textComponent, base);
 }
 
 void ScrollArea::layoutScrollbar(TextComponent &textComponent,
                                  const ecs::BaseComponent &base)
 {
-  const auto &scrollbar = textComponent.scrollbar;
+  const auto &background = textComponent.scrollbar;
+  const auto &handle = background.get<ecs::BaseComponent>().transformRel.first;
 
-  if (scrollbar == UI_NULL_ENTITY) {
+  if (background == UI_NULL_ENTITY || handle == UI_NULL_ENTITY) {
     return;
   }
 
+  layout_background(background, base);
+  layout_handle(handle, base);
+}
+
+void ScrollArea::layout_background(const ecs::Entity &background,
+                                   const ecs::BaseComponent &base)
+{
   const uint16_t x = base.rect.x + base.rect.width - SCROLLBAR_WIDTH;
   const uint16_t y = base.rect.y;
   const uint16_t w = SCROLLBAR_WIDTH;
   const uint16_t h = base.rect.height;
 
-  auto scrollbarBase = textComponent.scrollbar.get_ref<ecs::BaseComponent>();
+  auto scrollbarBase = background.get_ref<ecs::BaseComponent>();
   scrollbarBase->rect = {
+    .x = x,
+    .y = y,
+    .width = w,
+    .height = h,
+  };
+}
+
+void ui::ScrollArea::layout_handle(const ecs::Entity &handle,
+                                   const ecs::BaseComponent &base)
+{
+  const uint16_t x = base.rect.x + base.rect.width - SCROLLBAR_WIDTH + 2;
+  const uint16_t y = base.rect.y + 2;
+  const uint16_t w = SCROLLBAR_WIDTH - 4;
+  const uint16_t h = base.rect.height - 4;
+
+  auto handleBase = handle.get_ref<ecs::BaseComponent>();
+  handleBase->rect = {
     .x = x,
     .y = y,
     .width = w,

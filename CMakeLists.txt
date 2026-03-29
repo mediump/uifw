@@ -42,6 +42,8 @@ add_library(uifw STATIC
   src/UI/GFX/Renderer/Text/TextRendererHelpers.hpp
   src/UI/Core/Application.cpp
   src/UI/Core/Application.hpp
+  src/UI/Widgets/Text/ScrollArea.cpp
+  src/UI/Widgets/Text/ScrollArea.hpp
 )
 
 target_link_libraries(uifw PUBLIC

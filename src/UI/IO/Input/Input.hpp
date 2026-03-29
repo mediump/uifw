@@ -29,7 +29,6 @@ private:
   static void reset_input_state(InputState *inputState);
 
   static Vector2i get_window_size(const WindowData *window);
-
   static Vector2i get_mouse_position(const WindowData *window);
 };
 

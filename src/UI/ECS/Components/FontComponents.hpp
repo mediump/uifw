@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/RendererTypes.hpp"
 #include "Utils.hpp"
 
@@ -25,13 +26,14 @@ enum TextVAlignment
 
 struct TextComponent
 {
-  const char* text = "TextComponent";
-  FontData* font = nullptr;
+  const char *text = "TextComponent";
+  FontData *font = nullptr;
 
   Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
   uint16_t pixelSize = 13;
 
   bool isScrollable = false;
+  ecs::Entity scrollbar = UI_NULL_ENTITY;
   float scrollPosition = 0.0f;
 
   TextHAlignment horizontalAlignment = TextHAlignment_Left;
@@ -41,4 +43,4 @@ struct TextComponent
   bool needsUpdate = true;
 };
 
-}
+} // namespace ui

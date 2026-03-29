@@ -5,8 +5,10 @@
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
+#include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
+#include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
 
 constexpr float SCROLL_SPEED = 15.0f;
@@ -28,14 +30,14 @@ void InputHelpers::processEvents(const WindowData *window)
     return;
   }
 
-  const auto &world = window->canvas.entity.world();
+  const auto &root = window->ecsRoot;
   const auto &appStyle = window->app->appStyle;
 
   CursorShape cursorShape = CursorShape_Default;
 
   /* ---- Process events ---- */
-  process_buttons(inputState, world, appStyle, &cursorShape);
-  process_text_components(inputState, world);
+  process_buttons(inputState, root, appStyle, &cursorShape);
+  process_text_components(inputState, root);
   /* ------------------------ */
 
   process_cursor_update(window->app, cursorShape);
@@ -79,7 +81,7 @@ void InputHelpers::process_cursor_update(ApplicationData *app,
 }
 
 void InputHelpers::process_buttons(const InputState &inputState,
-                                   const flecs::world &world,
+                                   const ecs::ECSRoot &root,
                                    const AppStyle &appStyle,
                                    CursorShape *cursorShape)
 {
@@ -87,13 +89,16 @@ void InputHelpers::process_buttons(const InputState &inputState,
     return;
   }
 
+  auto &world = root.world;
+
   const auto &mousePos = inputState.mousePosition;
   const auto &mouseDown = inputState.mouseDown;
   const auto &windowResized = inputState.windowResized;
   const auto &windowSize = inputState.windowSize;
 
-  const auto &buttonQuery = world.query<ecs::ButtonComponent, ecs::QuadRendererComponent,
-                                        ecs::BaseComponent, ecs::HoverHandlerComponent>();
+  const auto &buttonQuery =
+    world->query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent,
+                 ecs::HoverHandlerComponent>();
 
   buttonQuery.each(
     [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize](
@@ -203,18 +208,27 @@ void InputHelpers::process_buttons(const InputState &inputState,
 }
 
 void InputHelpers::process_text_components(const InputState &inputState,
-                                           const flecs::world &world)
+                                           const ecs::ECSRoot &root)
 {
+  const auto &world = root.world;
+
   const auto &mousePos = inputState.mousePosition;
   const auto &scrollDelta = inputState.scrollDelta;
 
-  const auto &textQuery = world.query<TextComponent, ecs::BaseComponent>();
+  const auto &textQuery = world->query<TextComponent, ecs::BaseComponent>();
 
-  textQuery.each([&mousePos, &scrollDelta](const ecs::Entity &entity,
-                                           TextComponent &textComponent,
-                                           const ecs::BaseComponent &base) {
+  textQuery.each([&mousePos, &scrollDelta, &root](const ecs::Entity &entity,
+                                                  TextComponent &textComponent,
+                                                  const ecs::BaseComponent &base) {
     if (!textComponent.isScrollable) {
       return;
+    }
+
+    if (textComponent.scrollbar == UI_NULL_ENTITY) {
+      ScrollArea::addScrollbarElement(&root, entity, textComponent, base);
+    }
+    else {
+      ScrollArea::layoutScrollbar(textComponent, base);
     }
 
     const float textHeight =

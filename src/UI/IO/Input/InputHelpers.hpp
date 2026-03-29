@@ -28,12 +28,12 @@ public:
 
 private:
   static void process_buttons(const InputState &inputState,
-                              const flecs::world &world,
+                              const ecs::ECSRoot &root,
                               const AppStyle &appStyle,
                               CursorShape *cursorShape);
 
   static void process_text_components(const InputState &inputState,
-                                      const flecs::world &world);
+                                      const ecs::ECSRoot &root);
 
   static bool is_mouse_in_rect_component(const Vector2i &mousePos, const Rect &rect);
   static void process_cursor_update(ApplicationData *app, const CursorShape &cursorShape);

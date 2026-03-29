@@ -203,8 +203,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
   const auto &mousePos = inputState.mousePosition;
   const auto &scrollDelta = inputState.scrollDelta;
 
-  if (std::abs(scrollDelta.x) < 0.001f && 
-      std::abs(scrollDelta.y) < 0.001f) {
+  if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
     return;
   }
 
@@ -218,7 +217,15 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     if (is_mouse_in_rect_component(mousePos, base.rect)) {
-      textComponent.scrollPosition += scrollDelta.y * SCROLL_SPEED;
+      // Compute scroll position clamping values
+      const float maxScrollPos = 0.0f;
+
+      float nextScrollPosition =
+        textComponent.scrollPosition + scrollDelta.y * SCROLL_SPEED;
+
+      nextScrollPosition = std::min(maxScrollPos, nextScrollPosition);
+
+      textComponent.scrollPosition = nextScrollPosition;
     }
   });
 }

@@ -367,3 +367,63 @@ float TextRendererHelpers::get_word_length(const std::string &wordText,
 
   return currentAdvance;
 }
+
+float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
+                                        float availableWidth)
+{
+  const FontData *fontData = textComponent.font;
+  const auto fontSize = static_cast<float>(textComponent.pixelSize);
+  const auto lineHeight =
+    fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
+
+  const std::string textString(textComponent.text);
+  const std::vector<std::string> inputLines = StringUtils::split(textString, "\n");
+
+  size_t totalRenderedLines = 0;
+
+  for (const auto &line : inputLines) {
+    if (line.empty()) {
+      // Empty line still counts as a rendered line
+      totalRenderedLines++;
+      continue;
+    }
+
+    const std::vector<std::string> words = StringUtils::split(line, " ");
+
+    if (words.empty()) {
+      totalRenderedLines++;
+      continue;
+    }
+
+    if (!textComponent.lineWrapping) {
+      // No wrapping: each input line is exactly one rendered line
+      totalRenderedLines++;
+      continue;
+    }
+
+    // Calculate how many lines this input line wraps into
+    float currentAdvance = 0.0f;
+    const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
+
+    for (size_t i = 0; i < words.size(); i++) {
+      const std::string &word = words[i];
+      const float wordLength = TextRendererHelpers::get_word_length(word, textComponent, fontData);
+
+      const float totalWordWidth =
+        (currentAdvance > 0.0f) ? (wordLength + spaceWidth) : wordLength;
+
+      if (i > 0 && currentAdvance + totalWordWidth > availableWidth) {
+        // Line wrap occurs
+        totalRenderedLines++;
+        currentAdvance = 0.0f;
+      }
+
+      currentAdvance += totalWordWidth;
+    }
+
+    // Count the final line
+    totalRenderedLines++;
+  }
+
+  return static_cast<float>(totalRenderedLines) * lineHeight;
+}

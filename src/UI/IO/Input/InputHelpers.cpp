@@ -5,6 +5,7 @@
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
+#include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
 #include "UI/Window/Window.hpp"
 
@@ -217,13 +218,18 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     if (is_mouse_in_rect_component(mousePos, base.rect)) {
-      // Compute scroll position clamping values
+      // Compute scroll position
+      const float textHeight =
+        TextUtils::computeTotalTextHeight(textComponent, base.rect.width);
+
       const float maxScrollPos = 0.0f;
+      const float minScrollPos = base.rect.height - textHeight;
 
       float nextScrollPosition =
         textComponent.scrollPosition + scrollDelta.y * SCROLL_SPEED;
 
       nextScrollPosition = std::min(maxScrollPos, nextScrollPosition);
+      nextScrollPosition = std::max(minScrollPos, nextScrollPosition);
 
       textComponent.scrollPosition = nextScrollPosition;
     }

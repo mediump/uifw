@@ -57,9 +57,25 @@ private:
     const FontData *fontData,
     float availableWidth);
 
+public:
   static float get_word_length(const std::string &wordText,
                                const TextComponent &textComponent,
                                const FontData *fontData);
+};
+
+class TextUtils
+{
+public:
+  /**
+   * Computes the total height of all rendered lines for a TextComponent.
+   * Takes into account font size, line height, explicit newlines, and word wrapping.
+   *
+   * @param textComponent The text component to measure
+   * @param availableWidth The available width for text wrapping
+   * @return Total height in pixels
+   */
+  static float computeTotalTextHeight(const TextComponent &textComponent,
+                                      float availableWidth);
 };
 
 }

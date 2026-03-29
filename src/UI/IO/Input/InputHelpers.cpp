@@ -23,7 +23,7 @@ void InputHelpers::processEvents(const WindowData *window)
 {
   const auto &inputState = window->inputState;
 
-  if (!inputState.windowFocused || inputState.windowResized) {
+  if (!inputState.windowFocused) {
     // Ignore events when mouse is not over window or is resizing
     return;
   }
@@ -83,6 +83,10 @@ void InputHelpers::process_buttons(const InputState &inputState,
                                    const AppStyle &appStyle,
                                    CursorShape *cursorShape)
 {
+  if (inputState.windowResized) {
+    return;
+  }
+
   const auto &mousePos = inputState.mousePosition;
   const auto &mouseDown = inputState.mouseDown;
   const auto &windowResized = inputState.windowResized;
@@ -204,10 +208,6 @@ void InputHelpers::process_text_components(const InputState &inputState,
   const auto &mousePos = inputState.mousePosition;
   const auto &scrollDelta = inputState.scrollDelta;
 
-  if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
-    return;
-  }
-
   const auto &textQuery = world.query<TextComponent, ecs::BaseComponent>();
 
   textQuery.each([&mousePos, &scrollDelta](const ecs::Entity &entity,
@@ -217,11 +217,21 @@ void InputHelpers::process_text_components(const InputState &inputState,
       return;
     }
 
-    if (is_mouse_in_rect_component(mousePos, base.rect)) {
-      // Compute scroll position
-      const float textHeight =
-        TextUtils::computeTotalTextHeight(textComponent, base.rect.width);
+    const float textHeight =
+      TextUtils::computeTotalTextHeight(textComponent, base.rect.width);
 
+    // If text fits in the viewport, no scrolling is needed
+    if (textHeight <= base.rect.height) {
+      textComponent.scrollPosition = 0.0f;
+      return;
+    }
+
+    // Exit early if no scroll input
+    if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
+      return;
+    }
+
+    if (is_mouse_in_rect_component(mousePos, base.rect)) {
       const float maxScrollPos = 0.0f;
       const float minScrollPos = base.rect.height - textHeight;
 

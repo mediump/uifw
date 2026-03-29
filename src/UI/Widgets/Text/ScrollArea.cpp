@@ -59,9 +59,9 @@ void ScrollArea::layout_background(const ecs::Entity &background,
   };
 }
 
-void ui::ScrollArea::updateScrollbar(TextComponent &textComponent,
-                                     const ecs::BaseComponent &base,
-                                     float textHeight)
+void ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
+                                         const ecs::BaseComponent &base,
+                                         float textHeight)
 {
   if (textComponent.scrollbar == UI_NULL_ENTITY) {
     return;
@@ -87,6 +87,38 @@ void ui::ScrollArea::updateScrollbar(TextComponent &textComponent,
 
   auto handleBase = handle.get_ref<ecs::BaseComponent>();
   handleBase->rect.height = height;
+}
+
+void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
+                                             const ecs::BaseComponent &base,
+                                             float textHeight)
+{
+  if (textComponent.scrollbar == UI_NULL_ENTITY) {
+    return;
+  }
+
+  const auto background = textComponent.scrollbar;
+  const auto handle = background.get<ecs::BaseComponent>().transformRel.first;
+
+  if (handle == UI_NULL_ENTITY) {
+    return;
+  }
+
+  const float scrollableHeight = textHeight - base.rect.height;
+  if (scrollableHeight <= 0.0f) {
+    return;
+  }
+
+  const float scrollRatio = textComponent.scrollPosition / -scrollableHeight;
+  const float scrollbarTrackHeight = static_cast<float>(base.rect.height - 4);
+
+  auto handleBase = handle.get_ref<ecs::BaseComponent>();
+  const float handleHeight = static_cast<float>(handleBase->rect.height);
+
+  const float maxScrollY = scrollbarTrackHeight - handleHeight;
+  const uint16_t y = base.rect.y + 2 + static_cast<uint16_t>(scrollRatio * maxScrollY);
+
+  handleBase->rect.y = y;
 }
 
 void ui::ScrollArea::layout_handle(const ecs::Entity &handle,

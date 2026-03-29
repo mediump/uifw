@@ -17,9 +17,13 @@ public:
   static void layoutScrollbar(TextComponent &textComponent,
                               const ecs::BaseComponent &base);
 
-  static void updateScrollbar(TextComponent &textComponent,
-                              const ecs::BaseComponent &base,
-                              float textHeight);
+  static void updateScrollbarSize(TextComponent &textComponent,
+                                  const ecs::BaseComponent &base,
+                                  float textHeight);
+
+  static void updateScrollbarPosition(TextComponent &textComponent,
+                                      const ecs::BaseComponent &base,
+                                      float textHeight);
 
 private:
   static void layout_background(const ecs::Entity &background,

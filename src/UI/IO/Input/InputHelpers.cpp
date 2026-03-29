@@ -23,8 +23,8 @@ void InputHelpers::processEvents(const WindowData *window)
 {
   const auto &inputState = window->inputState;
 
-  if (!inputState.windowFocused) {
-    // Ignore events when mouse is not over window or is resizing
+  if (!inputState.windowFocused && !inputState.windowResized) {
+    // Ignore events when mouse is not over window and not resizing
     return;
   }
 

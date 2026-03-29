@@ -2,6 +2,7 @@
 
 #include "TextTypes.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
+#include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
 #include "UI/Utils/StringUtils.hpp"
@@ -11,6 +12,11 @@
 constexpr float SPACE_ADVANCE_MULTIPLIER = 0.25f;
 
 constexpr uint32_t MAX_GLYPH_COUNT = 8192;
+
+#define BORDER_TOP(b)    b.z;
+#define BORDER_BOTTOM(b) b.x;
+#define BORDER_LEFT(b)   b.w;
+#define BORDER_RIGHT(b)  b.y;
 
 using namespace ui;
 
@@ -61,6 +67,11 @@ void TextRendererHelpers::record_text_component(
 
     clippingMask = parentBase.rect;
     borderRadii = quadRenderer.borderRadius;
+
+    calculate_final_clipping_mask(&clippingMask, parentBase, currentParent);
+  }
+  else {
+    calculate_final_clipping_mask(&clippingMask, baseComponent, e);
   }
 
   // Font properties
@@ -256,18 +267,20 @@ void TextRendererHelpers::record_word(const std::string &wordText,
         },
       .textureCoords = textureCoords,
       .color = textComponent.color,
-      .parentBounds = {
-        .x = static_cast<float>(clippingMask.x),
-        .y = static_cast<float>(clippingMask.y),
-        .z = static_cast<float>(clippingMask.width),
-        .w = static_cast<float>(clippingMask.height),
-      },
-      .parentRadii = {
-        .x = borderRadii.x,
-        .y = borderRadii.y,
-        .z = borderRadii.z,
-        .w = borderRadii.w,
-      },
+      .parentBounds =
+        {
+          .x = static_cast<float>(clippingMask.x),
+          .y = static_cast<float>(clippingMask.y),
+          .z = static_cast<float>(clippingMask.width),
+          .w = static_cast<float>(clippingMask.height),
+        },
+      .parentRadii =
+        {
+          .x = borderRadii.x,
+          .y = borderRadii.y,
+          .z = borderRadii.z,
+          .w = borderRadii.w,
+        },
     });
 
     *currentAdvance += glyphData.advance * fontSize;
@@ -292,7 +305,7 @@ std::vector<std::pair<size_t, size_t>> TextRendererHelpers::calculate_line_wraps
 
   for (size_t i = 0; i < words.size(); i++) {
     const std::string &word = words[i];
-    const float wordLength = get_word_length(word, textComponent, fontData);
+    const float wordLength = getWordLength(word, textComponent, fontData);
 
     // Calculate total width needed for this word (including preceding space if not at
     // line start)
@@ -333,7 +346,7 @@ std::vector<float> TextRendererHelpers::calculate_wrapped_line_widths(
 
   for (size_t i = 0; i < words.size(); i++) {
     const std::string &word = words[i];
-    const float wordLength = get_word_length(word, textComponent, fontData);
+    const float wordLength = getWordLength(word, textComponent, fontData);
 
     // Calculate total width needed for this word
     const float totalWordWidth =
@@ -356,9 +369,9 @@ std::vector<float> TextRendererHelpers::calculate_wrapped_line_widths(
   return lineWidths;
 }
 
-float TextRendererHelpers::get_word_length(const std::string &wordText,
-                                           const TextComponent &textComponent,
-                                           const FontData *fontData)
+float TextRendererHelpers::getWordLength(const std::string &wordText,
+                                         const TextComponent &textComponent,
+                                         const FontData *fontData)
 {
   float currentAdvance = 0.0f;
   const float fontSize = textComponent.pixelSize;
@@ -428,7 +441,8 @@ float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
 
     for (size_t i = 0; i < words.size(); i++) {
       const std::string &word = words[i];
-      const float wordLength = TextRendererHelpers::get_word_length(word, textComponent, fontData);
+      const float wordLength =
+        TextRendererHelpers::getWordLength(word, textComponent, fontData);
 
       const float totalWordWidth =
         (currentAdvance > 0.0f) ? (wordLength + spaceWidth) : wordLength;
@@ -447,4 +461,23 @@ float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
   }
 
   return static_cast<float>(totalRenderedLines) * lineHeight;
+}
+
+void ui::TextRendererHelpers::calculate_final_clipping_mask(
+  Rect *rect, const ecs::BaseComponent &baseComponent, const ecs::Entity &e)
+{
+  // Apply border padding
+  if (e.has<ecs::QuadRendererComponent>()) {
+    const auto quadRenderer = e.get<ecs::QuadRendererComponent>();
+
+    const uint16_t top = BORDER_TOP(quadRenderer.borderWidths);
+    const uint16_t bottom = BORDER_BOTTOM(quadRenderer.borderWidths);
+    const uint16_t left = BORDER_LEFT(quadRenderer.borderWidths);
+    const uint16_t right = BORDER_RIGHT(quadRenderer.borderWidths);
+
+    rect->x += left;
+    rect->width -= left + right;
+    rect->y += top;
+    rect->height -= top + bottom;
+  }
 }

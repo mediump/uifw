@@ -3,17 +3,28 @@
 #include "UI/Canvas/Canvas.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
+#include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
+#include "flecs/addons/cpp/component.hpp"
 
 #include <vector>
 
 namespace ui {
 
+class TextUtils;
+
 class TextRendererHelpers
 {
+  friend class TextUtils;
+
 public:
   static size_t recordGlyphDrawList(const Canvas *canvas,
-                                       std::vector<FontGlyphInstance> &outInstances);
+                                    std::vector<FontGlyphInstance> &outInstances);
+
+protected:
+  static float getWordLength(const std::string &wordText,
+                             const TextComponent &textComponent,
+                             const FontData *fontData);
 
 private:
   static void record_text_component(ecs::Entity e,
@@ -57,10 +68,9 @@ private:
     const FontData *fontData,
     float availableWidth);
 
-public:
-  static float get_word_length(const std::string &wordText,
-                               const TextComponent &textComponent,
-                               const FontData *fontData);
+  static void calculate_final_clipping_mask(Rect *rect,
+                                            const ecs::BaseComponent &baseComponent,
+                                            const ecs::Entity &e);
 };
 
 class TextUtils
@@ -78,4 +88,4 @@ public:
                                       const ecs::BaseComponent &baseComponent);
 };
 
-}
+} // namespace ui

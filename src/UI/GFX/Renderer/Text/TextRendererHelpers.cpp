@@ -12,6 +12,8 @@ constexpr float SPACE_ADVANCE_MULTIPLIER = 0.25f;
 
 constexpr uint32_t MAX_GLYPH_COUNT = 8192;
 
+constexpr uint32_t TEXT_PADDING = 3;
+
 using namespace ui;
 
 size_t TextRendererHelpers::recordGlyphDrawList(

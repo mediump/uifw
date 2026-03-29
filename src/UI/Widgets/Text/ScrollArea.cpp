@@ -3,7 +3,6 @@
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
-#include "Utils.hpp"
 
 using namespace ui;
 

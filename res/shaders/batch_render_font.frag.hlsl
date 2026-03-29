@@ -59,7 +59,7 @@ float screenPxRange(float2 texCoord)
 
 float4 main(Input input) : SV_Target0
 {
-  // Clipping early rejection
+  // Clipping
   float dClip = getClip(input.localPos, 
                         input.bounds, 
                         input.parentBounds, 

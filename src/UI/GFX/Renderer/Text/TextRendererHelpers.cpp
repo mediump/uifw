@@ -18,6 +18,9 @@ constexpr uint32_t MAX_GLYPH_COUNT = 8192;
 #define BORDER_LEFT(b)   b.w;
 #define BORDER_RIGHT(b)  b.y;
 
+// N-pixel slop factor, used to avoid noticeable pops when culling text
+#define CULLING_SLOP 5
+
 using namespace ui;
 
 size_t TextRendererHelpers::recordGlyphDrawList(
@@ -254,6 +257,13 @@ void TextRendererHelpers::record_word(const std::string &wordText,
       (atlasHeight - glyphData.atlasBounds.bottom) / atlasHeight,
     };
 
+    const float x = static_cast<float>(baseComponent.rect.x) + *currentAdvance + pl;
+    const float y = currentBaselineY - pt;
+
+    if (!is_glyph_in_clipping_mask(x, y, quadWidth, quadHeight, clippingMask)) {
+      continue;
+    }
+
     outInstances->emplace_back(FontGlyphInstance{
       .position =
         {
@@ -462,6 +472,30 @@ float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
   }
 
   return static_cast<float>(totalRenderedLines) * lineHeight;
+}
+
+bool ui::TextRendererHelpers::is_glyph_in_clipping_mask(
+  float x, float y, float w, float h, const Rect &clippingMask)
+{
+  const float a_x1 = x;
+  const float a_x2 = x + w;
+  const float a_y1 = y;
+  const float a_y2 = y + h;
+
+  const float b_x1 = clippingMask.x - CULLING_SLOP;
+  const float b_x2 = clippingMask.x + clippingMask.width + CULLING_SLOP;
+  const float b_y1 = clippingMask.y - CULLING_SLOP;
+  const float b_y2 = clippingMask.y + clippingMask.height + CULLING_SLOP;
+
+  if (a_x1 > b_x2 || b_x1 > a_x2) {
+    return false;
+  }
+
+  if (a_y1 > b_y2 || b_y1 > a_y2) {
+    return false;
+  }
+
+  return true;
 }
 
 void ui::TextRendererHelpers::calculate_final_clipping_mask(

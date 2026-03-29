@@ -3,9 +3,7 @@
 #include "UI/Canvas/Canvas.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
-#include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
-#include "flecs/addons/cpp/component.hpp"
 
 #include <vector>
 
@@ -67,6 +65,9 @@ private:
     const TextComponent &textComponent,
     const FontData *fontData,
     float availableWidth);
+
+  static bool is_glyph_in_clipping_mask(
+    float x, float y, float w, float h, const Rect &clippingMask);
 
   static void calculate_final_clipping_mask(Rect *rect,
                                             const ecs::BaseComponent &baseComponent,

@@ -1,4 +1,5 @@
 #include "ScrollArea.hpp"
+#include <cstdint>
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
@@ -56,6 +57,36 @@ void ScrollArea::layout_background(const ecs::Entity &background,
     .width = w,
     .height = h,
   };
+}
+
+void ui::ScrollArea::updateScrollbar(TextComponent &textComponent,
+                                     const ecs::BaseComponent &base,
+                                     float textHeight)
+{
+  if (textComponent.scrollbar == UI_NULL_ENTITY) {
+    return;
+  }
+
+  const auto background = textComponent.scrollbar;
+  const auto handle = background.get<ecs::BaseComponent>().transformRel.first;
+
+  if (handle == UI_NULL_ENTITY) {
+    return;
+  }
+
+  const uint16_t scrollbarHeight = base.rect.height - 4;
+
+  constexpr uint16_t minHeight = 12;
+  const uint16_t maxHeight = scrollbarHeight;
+
+  const float ratio = static_cast<float>(base.rect.height) / textHeight;
+  uint16_t height = static_cast<uint16_t>(ratio * scrollbarHeight);
+
+  height = std::max(minHeight, height);
+  height = std::min(maxHeight, height);
+
+  auto handleBase = handle.get_ref<ecs::BaseComponent>();
+  handleBase->rect.height = height;
 }
 
 void ui::ScrollArea::layout_handle(const ecs::Entity &handle,

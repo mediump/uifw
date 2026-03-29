@@ -240,6 +240,8 @@ void InputHelpers::process_text_components(const InputState &inputState,
       return;
     }
 
+    ScrollArea::updateScrollbar(textComponent, base, textHeight);
+
     // Exit early if no scroll input
     if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
       return;

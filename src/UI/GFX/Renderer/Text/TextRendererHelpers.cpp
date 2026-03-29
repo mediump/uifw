@@ -68,10 +68,11 @@ void TextRendererHelpers::record_text_component(
     clippingMask = parentBase.rect;
     borderRadii = quadRenderer.borderRadius;
 
-    calculate_final_clipping_mask(&clippingMask, parentBase, currentParent);
+    calculate_final_clipping_mask(&clippingMask, parentBase, textComponent,
+                                  currentParent);
   }
   else {
-    calculate_final_clipping_mask(&clippingMask, baseComponent, e);
+    calculate_final_clipping_mask(&clippingMask, baseComponent, textComponent, e);
   }
 
   // Font properties
@@ -464,8 +465,15 @@ float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
 }
 
 void ui::TextRendererHelpers::calculate_final_clipping_mask(
-  Rect *rect, const ecs::BaseComponent &baseComponent, const ecs::Entity &e)
+  Rect *rect,
+  const ecs::BaseComponent &baseComponent,
+  const TextComponent &textComponent,
+  const ecs::Entity &e)
 {
+  const bool hasScrollbar = textComponent.isScrollable &&
+    textComponent.scrollbar != UI_NULL_ENTITY &&
+    textComponent.scrollbar.get<ecs::BaseComponent>().visible;
+
   // Apply border padding
   if (e.has<ecs::QuadRendererComponent>()) {
     const auto quadRenderer = e.get<ecs::QuadRendererComponent>();
@@ -476,8 +484,20 @@ void ui::TextRendererHelpers::calculate_final_clipping_mask(
     const uint16_t right = BORDER_RIGHT(quadRenderer.borderWidths);
 
     rect->x += left;
-    rect->width -= left + right;
+
+    if (hasScrollbar) {
+      rect->width -= left;
+    }
+    else {
+      rect->width -= left + right;
+    }
+
     rect->y += top;
     rect->height -= top + bottom;
+  }
+
+  // Apply scrollbar padding (if needed)
+  if (hasScrollbar) {
+    rect->width -= ScrollArea::getScrollbarWidth();
   }
 }

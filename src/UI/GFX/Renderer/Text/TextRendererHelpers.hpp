@@ -70,6 +70,7 @@ private:
 
   static void calculate_final_clipping_mask(Rect *rect,
                                             const ecs::BaseComponent &baseComponent,
+                                            const TextComponent &textComponent,
                                             const ecs::Entity &e);
 };
 

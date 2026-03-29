@@ -1,8 +1,11 @@
 #include "TextRendererHelpers.hpp"
 
 #include "TextTypes.hpp"
+#include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
+#include "UI/ECS/Entity/Entity.hpp"
 #include "UI/Utils/StringUtils.hpp"
+#include "UI/Widgets/Text/ScrollArea.hpp"
 
 // Space character advance multiplier (fraction of fontSize)
 constexpr float SPACE_ADVANCE_MULTIPLIER = 0.25f;
@@ -67,7 +70,13 @@ void TextRendererHelpers::record_text_component(
   const auto lineHeight =
     fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
 
-  const float availableWidth = baseComponent.rect.width;
+  float availableWidth = baseComponent.rect.width;
+
+  if (textComponent.isScrollable && textComponent.scrollbar != UI_NULL_ENTITY) {
+    if (textComponent.scrollbar.get<ecs::BaseComponent>().visible) {
+      availableWidth -= ScrollArea::getScrollbarWidth();
+    }
+  }
 
   // Calculate all rendered lines and their widths
   const auto textString = std::string(textComponent.text);
@@ -373,8 +382,16 @@ float TextRendererHelpers::get_word_length(const std::string &wordText,
 }
 
 float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
-                                        float availableWidth)
+                                        const ecs::BaseComponent &baseComponent)
 {
+  float availableWidth = baseComponent.rect.width;
+
+  if (textComponent.isScrollable && textComponent.scrollbar != UI_NULL_ENTITY) {
+    if (textComponent.scrollbar.get<ecs::BaseComponent>().visible) {
+      availableWidth -= ScrollArea::getScrollbarWidth();
+    }
+  }
+
   const FontData *fontData = textComponent.font;
   const auto fontSize = static_cast<float>(textComponent.pixelSize);
   const auto lineHeight =

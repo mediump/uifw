@@ -71,11 +71,11 @@ public:
    * Takes into account font size, line height, explicit newlines, and word wrapping.
    *
    * @param textComponent The text component to measure
-   * @param availableWidth The available width for text wrapping
+   * @param baseComponent The base component the text is attached to
    * @return Total height in pixels
    */
   static float computeTotalTextHeight(const TextComponent &textComponent,
-                                      float availableWidth);
+                                      const ecs::BaseComponent &baseComponent);
 };
 
 }

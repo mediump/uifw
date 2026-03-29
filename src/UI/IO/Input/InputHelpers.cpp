@@ -232,7 +232,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     const float textHeight =
-      TextUtils::computeTotalTextHeight(textComponent, base.rect.width);
+      TextUtils::computeTotalTextHeight(textComponent, base);
 
     ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
 

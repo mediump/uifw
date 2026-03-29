@@ -26,9 +26,9 @@ int main()
 {
   ui::ApplicationData app = ui::Application::init();
 
-  ui::WindowData *window = ui::Window::initializeWindow("UIFW Window", DEMO_WINDOW_WIDTH,
+  ui::WindowData *window = ui::Window::initializeWindow("Buttons", DEMO_WINDOW_WIDTH,
                                                         DEMO_WINDOW_HEIGHT, &app);
-  ui::WindowData *window2 = ui::Window::initializeWindow("Other Window", 512, 512, &app);
+  ui::WindowData *window2 = ui::Window::initializeWindow("Text/Scroll Area", 512, 512, &app);
 
   ui::FontData fontData = ui::FontLoader::loadFont(
     "res/fonts/_generated/Roboto.png", "res/fonts/_generated/Roboto.json");
@@ -87,6 +87,11 @@ int main()
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
     &window2->ecsRoot, &fontData, "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor jugs.\n",
     {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
+
+  textDisplayEntity.set<ui::ecs::QuadRendererComponent>({
+    .color = {0.3f, 0.3f, 0.3f, 1.0f},
+    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+  });
 
   auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();
   textComponent->horizontalAlignment = ui::TextHAlignment_Left;
@@ -177,10 +182,6 @@ int main()
     .borderRadius = {30, 30, 30, 30},
     .borderColor = white,
     .borderWidths = {15.0f, 15.0f, 15.0f, 15.0f},
-  });
-  e2.set<ui::ecs::QuadRendererComponent>({
-    .color = green,
-    .borderWidths = {0.0f, 5.0f, 0.0f, 5.0f},
   });
   e4.set<ui::ecs::QuadRendererComponent>({
     .color = blue,

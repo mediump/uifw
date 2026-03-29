@@ -18,10 +18,18 @@ void ScrollArea::addScrollbarElement(const ecs::ECSRoot *root,
   const auto handleName = bgName + "_Handle";
 
   auto background = ecs::createEntity(root, 0, 0, 0, 0, bgName.c_str(), &entity);
+
+  auto backgroundBase = background.get_ref<ecs::BaseComponent>();
+  backgroundBase->zOrder = 5;
+
   background.set<ecs::QuadRendererComponent>(
-    {.color = {0.9f, 0.9f, 0.9f, 1.0f}, .borderRadius = {8, 8, 8, 8}});
+    {.color = {0.9f, 0.9f, 0.9f, 1.0f}, .borderRadius = {0, 0, 0, 0}});
 
   auto handle = ecs::createEntity(root, 0, 0, 0, 0, handleName.c_str(), &background);
+
+  auto handleBase = handle.get_ref<ecs::BaseComponent>();
+  handleBase->zOrder = 10;
+
   handle.set<ecs::QuadRendererComponent>(
     {.color = {0.5f, 0.5f, 0.5f, 1.0f}, .borderRadius = {6, 6, 6, 6}});
 
@@ -126,6 +134,11 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
   const uint16_t y = base.rect.y + 2 + static_cast<uint16_t>(scrollRatio * maxScrollY);
 
   handleBase->rect.y = y;
+}
+
+[[nodiscard]] uint16_t ui::ScrollArea::getScrollbarWidth()
+{
+  return SCROLLBAR_WIDTH;
 }
 
 void ui::ScrollArea::layout_handle(const ecs::Entity &handle,

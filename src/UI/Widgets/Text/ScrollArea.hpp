@@ -25,6 +25,8 @@ public:
                                       const ecs::BaseComponent &base,
                                       float textHeight);
 
+  [[nodiscard]] static uint16_t getScrollbarWidth();
+
 private:
   static void layout_background(const ecs::Entity &background,
                                 const ecs::BaseComponent &base);

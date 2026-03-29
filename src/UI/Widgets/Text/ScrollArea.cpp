@@ -157,6 +157,4 @@ void ui::ScrollArea::set_scrollbar_visibility(UI_REF(ecs::BaseComponent) backgro
   if (handleBase->visible != visible) {
     handleBase->visible = visible;
   }
-
-  UI_LOG_MSG("Set scrollbar visibility: %s", visible ? "true" : "false");
 }

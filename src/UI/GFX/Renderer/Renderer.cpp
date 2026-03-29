@@ -207,6 +207,10 @@ size_t Renderer::record_sprite_draw_list(const WindowData *window,
   quadQuery.each([&inputState, &outInstances, &counter, &windowDimensions](
                    ecs::Entity e, const ecs::BaseComponent &baseComponent,
                    const ecs::QuadRendererComponent &quadRenderer) {
+    if (!baseComponent.visible) {
+      return;
+    }
+
     if (counter >= MAX_SPRITE_COUNT) {
       return;
     }
@@ -269,6 +273,7 @@ size_t Renderer::record_sprite_draw_list(const WindowData *window,
       },
       .parentRadii = borderRadii,
     });
+    
     counter++;
   });
 

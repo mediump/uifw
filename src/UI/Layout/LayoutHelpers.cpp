@@ -49,13 +49,19 @@ void Layout::layout_children(const ecs::Entity &parent,
   const LayoutMargins margins = parentLayoutComponent.margins;
   const uint16_t spacing = parentLayoutComponent.spacing;
 
-  std::vector<UI_REF(ecs::BaseComponent)> children(nChildren);
+  std::vector<UI_REF(ecs::BaseComponent)> children;
+  children.reserve(nChildren);
+
   auto currentComponent =
     parentBaseComponent.transformRel.first.get_ref<ecs::BaseComponent>();
 
   for (size_t i = 0; i < nChildren; ++i) {
+    if (!currentComponent->visible) {
+      continue;
+    }
+
     const auto currentEntity = currentComponent.entity();
-    children[i] = currentComponent;
+    children.emplace_back(currentComponent);
 
     if (currentEntity.has<LayoutComponent>()) {
       entityQueue.push(currentEntity);
@@ -69,9 +75,10 @@ void Layout::layout_children(const ecs::Entity &parent,
   }
 
   // Pair of min/max values for the layout axis
-  std::vector<std::pair<uint16_t, uint16_t>> inSizeConstraints(nChildren);
+  const size_t nVisibleChildren = children.size();
+  std::vector<std::pair<uint16_t, uint16_t>> inSizeConstraints(nVisibleChildren);
 
-  for (size_t i = 0; i < nChildren; ++i) {
+  for (size_t i = 0; i < nVisibleChildren; ++i) {
     switch (layoutType) {
     case LayoutType_Horizontal:
       inSizeConstraints[i] = std::make_pair(children[i]->minWidth, children[i]->maxWidth);
@@ -92,13 +99,13 @@ void Layout::layout_children(const ecs::Entity &parent,
   switch (layoutType) {
   case LayoutType_Horizontal:
     availableSpace = parentBaseComponent.rect.width - margins.left - margins.right -
-      spacing * (nChildren - 1);
+      spacing * (nVisibleChildren - 1);
 
     currentPosition = parentBaseComponent.rect.x + margins.left;
     break;
   case LayoutType_Vertical:
     availableSpace = parentBaseComponent.rect.height - margins.top - margins.bottom -
-      spacing * (nChildren - 1);
+      spacing * (nVisibleChildren - 1);
 
     currentPosition = parentBaseComponent.rect.y + margins.top;
     break;
@@ -107,11 +114,11 @@ void Layout::layout_children(const ecs::Entity &parent,
   }
 
   const uint16_t initialSpace = availableSpace;
-  std::vector<uint16_t> computedSizes(nChildren);
-  size_t nRemainingComponents = nChildren;
+  std::vector<uint16_t> computedSizes(nVisibleChildren);
+  size_t nRemainingComponents = nVisibleChildren;
 
   // Calculate fixed-sized components first
-  for (size_t i = 0; i < nChildren; ++i) {
+  for (size_t i = 0; i < nVisibleChildren; ++i) {
     const uint16_t minSize = inSizeConstraints[i].first;
     const uint16_t maxSize = inSizeConstraints[i].second;
 
@@ -131,7 +138,7 @@ void Layout::layout_children(const ecs::Entity &parent,
   }
 
   // Then calculate flexible-size entities
-  for (size_t i = 0; i < nChildren; ++i) {
+  for (size_t i = 0; i < nVisibleChildren; ++i) {
     const uint16_t minSize = inSizeConstraints[i].first;
     const uint16_t maxSize = inSizeConstraints[i].second;
 
@@ -171,7 +178,7 @@ void Layout::layout_children(const ecs::Entity &parent,
   }
 
   // Set sizes
-  for (size_t i = 0; i < nChildren; ++i) {
+  for (size_t i = 0; i < nVisibleChildren; ++i) {
     switch (layoutType) {
     case LayoutType_Horizontal:
       children[i]->rect = {currentPosition, secondaryAxisPosition, computedSizes[i],
@@ -189,7 +196,7 @@ void Layout::layout_children(const ecs::Entity &parent,
   }
 
   // Set z order
-  for (size_t i = 0; i < nChildren; ++i) {
+  for (size_t i = 0; i < nVisibleChildren; ++i) {
     children[i]->zOrder = nIteration;
   }
 }

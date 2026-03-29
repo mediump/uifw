@@ -30,6 +30,10 @@ private:
                                 const ecs::BaseComponent &base);
 
   static void layout_handle(const ecs::Entity &handle, const ecs::BaseComponent &base);
+
+  static void set_scrollbar_visibility(UI_REF(ecs::BaseComponent) backgroundBase,
+                                       UI_REF(ecs::BaseComponent) handleBase,
+                                       bool visible);
 };
 
 } // namespace ui

@@ -25,7 +25,8 @@ struct BaseComponent {
 
   uint16_t zOrder = 0;
   uint16_t inLayout = false;
-  uint16_t needsUpdate = true;
+  bool visible = true;
+  bool needsUpdate = true;
 };
 
 }

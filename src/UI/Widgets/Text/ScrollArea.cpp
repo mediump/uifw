@@ -3,6 +3,7 @@
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
+#include "Utils.hpp"
 
 using namespace ui;
 
@@ -45,12 +46,13 @@ void ScrollArea::layoutScrollbar(TextComponent &textComponent,
 void ScrollArea::layout_background(const ecs::Entity &background,
                                    const ecs::BaseComponent &base)
 {
+  auto scrollbarBase = background.get_ref<ecs::BaseComponent>();
+
   const uint16_t x = base.rect.x + base.rect.width - SCROLLBAR_WIDTH;
   const uint16_t y = base.rect.y;
   const uint16_t w = SCROLLBAR_WIDTH;
   const uint16_t h = base.rect.height;
 
-  auto scrollbarBase = background.get_ref<ecs::BaseComponent>();
   scrollbarBase->rect = {
     .x = x,
     .y = y,
@@ -68,7 +70,9 @@ void ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
   }
 
   const auto background = textComponent.scrollbar;
-  const auto handle = background.get<ecs::BaseComponent>().transformRel.first;
+  auto backgroundBase = background.get_ref<ecs::BaseComponent>();
+
+  const auto handle = backgroundBase->transformRel.first;
 
   if (handle == UI_NULL_ENTITY) {
     return;
@@ -87,6 +91,8 @@ void ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
 
   auto handleBase = handle.get_ref<ecs::BaseComponent>();
   handleBase->rect.height = height;
+
+  set_scrollbar_visibility(backgroundBase, handleBase, (base.rect.height <= textHeight));
 }
 
 void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
@@ -104,6 +110,8 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
     return;
   }
 
+  auto handleBase = handle.get_ref<ecs::BaseComponent>();
+
   const float scrollableHeight = textHeight - base.rect.height;
   if (scrollableHeight <= 0.0f) {
     return;
@@ -112,7 +120,6 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
   const float scrollRatio = textComponent.scrollPosition / -scrollableHeight;
   const float scrollbarTrackHeight = static_cast<float>(base.rect.height - 4);
 
-  auto handleBase = handle.get_ref<ecs::BaseComponent>();
   const float handleHeight = static_cast<float>(handleBase->rect.height);
 
   const float maxScrollY = scrollbarTrackHeight - handleHeight;
@@ -124,16 +131,32 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
 void ui::ScrollArea::layout_handle(const ecs::Entity &handle,
                                    const ecs::BaseComponent &base)
 {
+  auto handleBase = handle.get_ref<ecs::BaseComponent>();
+
   const uint16_t x = base.rect.x + base.rect.width - SCROLLBAR_WIDTH + 2;
   const uint16_t y = base.rect.y + 2;
   const uint16_t w = SCROLLBAR_WIDTH - 4;
   const uint16_t h = base.rect.height - 4;
 
-  auto handleBase = handle.get_ref<ecs::BaseComponent>();
   handleBase->rect = {
     .x = x,
     .y = y,
     .width = w,
     .height = h,
   };
+}
+
+void ui::ScrollArea::set_scrollbar_visibility(UI_REF(ecs::BaseComponent) backgroundBase,
+                                              UI_REF(ecs::BaseComponent) handleBase,
+                                              bool visible)
+{
+  if (backgroundBase->visible != visible) {
+    backgroundBase->visible = visible;
+  }
+
+  if (handleBase->visible != visible) {
+    handleBase->visible = visible;
+  }
+
+  UI_LOG_MSG("Set scrollbar visibility: %s", visible ? "true" : "false");
 }

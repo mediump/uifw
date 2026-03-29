@@ -28,6 +28,10 @@ size_t TextRendererHelpers::recordGlyphDrawList(
   textQuery.each([&outInstances, &counter, canvasBounds](
                    const ecs::Entity e, const ecs::BaseComponent &baseComponent,
                    const TextComponent &textComponent) {
+    if (!baseComponent.visible) {
+      return;
+    }
+
     record_text_component(e, baseComponent, textComponent, &outInstances, &counter);
   });
 

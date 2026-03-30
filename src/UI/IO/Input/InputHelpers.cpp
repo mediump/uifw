@@ -213,13 +213,15 @@ void InputHelpers::process_text_components(const InputState &inputState,
   const auto &world = root.world;
 
   const auto &mousePos = inputState.mousePosition;
+  const auto &mouseDown = inputState.mouseDown;
+  const auto &mouseUp = inputState.mouseUp;
   const auto &scrollDelta = inputState.scrollDelta;
 
   const auto &textQuery = world->query<TextComponent, ecs::BaseComponent>();
 
-  textQuery.each([&mousePos, &scrollDelta, &root](const ecs::Entity &entity,
-                                                  TextComponent &textComponent,
-                                                  const ecs::BaseComponent &base) {
+  textQuery.each([&mousePos, &mouseDown, &mouseUp, &scrollDelta, &root](
+                   const ecs::Entity &entity, TextComponent &textComponent,
+                   const ecs::BaseComponent &base) {
     if (!textComponent.isScrollable) {
       return;
     }
@@ -242,7 +244,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     ScrollArea::updateScrollbarPosition(textComponent, base, textHeight);
-    ScrollArea::updateScrollbarInput(textComponent, base, mousePos);
+    ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp);
 
     // Exit early if no scroll input
     if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {

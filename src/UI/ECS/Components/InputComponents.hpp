@@ -17,11 +17,19 @@ enum CursorShape
   CursorShape_HorizontalResize,
 };
 
+enum HoverState
+{
+  HoverState_Idle,
+  HoverState_Hovered,
+  HoverState_Clicked,
+};
+
 namespace ecs {
 
 struct HoverHandlerComponent
 {
   CursorShape cursorShape = CursorShape_Pointer;
+  HoverState state = HoverState_Idle;
 };
 
 struct ButtonComponent

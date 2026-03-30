@@ -27,7 +27,9 @@ public:
 
   static void updateScrollbarInput(TextComponent &textComponent,
                                    const ecs::BaseComponent &base,
-                                   const Vector2i &mousePos);
+                                   const Vector2i &mousePos,
+                                   const bool &mouseDown,
+                                   const bool &mouseUp);
 
   [[nodiscard]] static uint16_t getScrollbarWidth();
 

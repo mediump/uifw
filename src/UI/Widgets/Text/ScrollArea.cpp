@@ -1,6 +1,7 @@
 #include "ScrollArea.hpp"
 #include <cstdint>
 #include "UI/ECS/Components/BaseComponent.hpp"
+#include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
 #include "UI/IO/Input/InputHelpers.hpp"
@@ -32,6 +33,7 @@ void ScrollArea::addScrollbarElement(const ecs::ECSRoot *root,
 
   handle.set<ecs::QuadRendererComponent>(
     {.color = {0.5f, 0.5f, 0.5f, 1.0f}, .borderRadius = {6, 6, 6, 6}});
+  handle.add<ecs::HoverHandlerComponent>();
 
   textComponent.scrollbar = background;
   layoutScrollbar(textComponent, base);
@@ -137,32 +139,71 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
 }
 
 void ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
-                                           const ecs::BaseComponent &base,
-                                           const Vector2i &mousePos)
+                                          const ecs::BaseComponent &base,
+                                          const Vector2i &mousePos,
+                                          const bool &mouseDown,
+                                          const bool &mouseUp)
 {
   if (textComponent.scrollbar != UI_NULL_ENTITY) {
     const auto background = textComponent.scrollbar.get<ecs::BaseComponent>();
+
+    bool hovered = false;
+    bool clicked = false;
 
     if (background.transformRel.nChildren > 0) {
       const auto handle = background.transformRel.first;
       const auto handleBase = handle.get<ecs::BaseComponent>();
 
-      if (handle.has<ecs::QuadRendererComponent>()) {
+      if (handle.has<ecs::QuadRendererComponent>() &&
+          handle.has<ecs::HoverHandlerComponent>()) {
         auto handleQuadRenderer = handle.get_ref<ecs::QuadRendererComponent>();
+        auto handleHoverHandler = handle.get_ref<ecs::HoverHandlerComponent>();
 
         constexpr ecs::Color idleColor = {0.5f, 0.5f, 0.5f, 1.0f};
         constexpr ecs::Color hoveredColor = {0.4f, 0.4f, 0.4f, 1.0f};
+        constexpr ecs::Color clickedColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
-        if (InputHelpers::isMouseInRect(mousePos, handleBase.rect))
-        {
-          if (handleQuadRenderer->color != hoveredColor) {
-            handleQuadRenderer->color = hoveredColor;
-          }
+        // Detect hover state
+        if (mouseUp && handleHoverHandler->state == HoverState_Clicked) {
+          handleHoverHandler->state = HoverState_Idle;
         }
         else {
+          if (InputHelpers::isMouseInRect(mousePos, handleBase.rect)) {
+            if (handleHoverHandler->state != HoverState_Clicked &&
+                handleHoverHandler->state != HoverState_Hovered) {
+              handleHoverHandler->state = HoverState_Hovered;
+            }
+            else {
+              if (mouseDown) {
+                handleHoverHandler->state = HoverState_Clicked;
+              }
+            }
+          }
+          else {
+            if (handleHoverHandler->state != HoverState_Clicked &&
+                handleHoverHandler->state != HoverState_Idle) {
+              handleHoverHandler->state = HoverState_Idle;
+            }
+          }
+        }
+
+        // Apply style
+        switch (handleHoverHandler->state) {
+        case HoverState_Idle:
           if (handleQuadRenderer->color != idleColor) {
             handleQuadRenderer->color = idleColor;
           }
+          break;
+        case HoverState_Hovered:
+          if (handleQuadRenderer->color != hoveredColor) {
+            handleQuadRenderer->color = hoveredColor;
+          }
+          break;
+        case HoverState_Clicked:
+          if (handleQuadRenderer->color != clickedColor) {
+            handleQuadRenderer->color = clickedColor;
+          }
+          break;
         }
       }
     }

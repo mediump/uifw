@@ -17,15 +17,15 @@ public:
   static void layoutScrollbar(TextComponent &textComponent,
                               const ecs::BaseComponent &base);
 
-  static void updateScrollbarSize(TextComponent &textComponent,
-                                  const ecs::BaseComponent &base,
-                                  float textHeight);
+  static float updateScrollbarSize(TextComponent &textComponent,
+                                   const ecs::BaseComponent &base,
+                                   float textHeight);
 
   static void updateScrollbarPosition(TextComponent &textComponent,
                                       const ecs::BaseComponent &base,
                                       float textHeight);
 
-  static void updateScrollbarInput(TextComponent &textComponent,
+  static bool updateScrollbarInput(TextComponent &textComponent,
                                    const ecs::BaseComponent &base,
                                    const Vector2i &mousePos,
                                    const bool &mouseDown,

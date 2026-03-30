@@ -44,6 +44,7 @@ add_library(uifw STATIC
   src/UI/Core/Application.hpp
   src/UI/Widgets/Text/ScrollArea.cpp
   src/UI/Widgets/Text/ScrollArea.hpp
+  src/UI/Utils/MathUtils.hpp
 )
 
 target_link_libraries(uifw PUBLIC

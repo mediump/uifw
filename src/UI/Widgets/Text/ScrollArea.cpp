@@ -71,12 +71,12 @@ void ScrollArea::layout_background(const ecs::Entity &background,
   };
 }
 
-void ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
-                                         const ecs::BaseComponent &base,
-                                         float textHeight)
+float ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
+                                          const ecs::BaseComponent &base,
+                                          float textHeight)
 {
   if (textComponent.scrollbar == UI_NULL_ENTITY) {
-    return;
+    return 0.0f;
   }
 
   const auto background = textComponent.scrollbar;
@@ -85,7 +85,7 @@ void ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
   const auto handle = backgroundBase->transformRel.first;
 
   if (handle == UI_NULL_ENTITY) {
-    return;
+    return 0.0f;
   }
 
   const uint16_t scrollbarHeight = base.rect.height - 4;
@@ -103,6 +103,7 @@ void ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
   handleBase->rect.height = height;
 
   set_scrollbar_visibility(backgroundBase, handleBase, (base.rect.height <= textHeight));
+  return height;
 }
 
 void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
@@ -138,7 +139,7 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
   handleBase->rect.y = y;
 }
 
-void ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
+bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
                                           const ecs::BaseComponent &base,
                                           const Vector2i &mousePos,
                                           const bool &mouseDown,
@@ -203,11 +204,14 @@ void ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
           if (handleQuadRenderer->color != clickedColor) {
             handleQuadRenderer->color = clickedColor;
           }
+          return true;
           break;
         }
       }
     }
   }
+
+  return false;
 }
 
 [[nodiscard]] uint16_t ui::ScrollArea::getScrollbarWidth()

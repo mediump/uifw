@@ -8,9 +8,12 @@
 #include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
+#include "UI/Utils/MathUtils.hpp"
 #include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
 #include "Utils.hpp"
+
+#include <algorithm>
 
 constexpr float SCROLL_SPEED = 25.0f;
 
@@ -235,7 +238,8 @@ void InputHelpers::process_text_components(const InputState &inputState,
 
     const float textHeight = TextUtils::computeTotalTextHeight(textComponent, base);
 
-    ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
+    const float scrollbarHeight =
+      ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
 
     // If text fits in the viewport, no scrolling is needed
     if (textHeight <= base.rect.height) {
@@ -244,24 +248,40 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     ScrollArea::updateScrollbarPosition(textComponent, base, textHeight);
-    ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp);
+    const bool isDragging =
+      ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp);
 
-    // Exit early if no scroll input
-    if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
-      return;
-    }
+    const float maxScrollPos = 0.0f;
+    const float minScrollPos = base.rect.height - textHeight;
 
-    if (isMouseInRect(mousePos, base.rect)) {
-      const float maxScrollPos = 0.0f;
-      const float minScrollPos = base.rect.height - textHeight;
+    if (isDragging) {
+      const float scrollbarHalf = scrollbarHeight * 0.5f;
+      const float mousePosRatio = 1.0f -
+        std::clamp(static_cast<float>(mousePos.y - base.rect.y - scrollbarHalf) /
+                     (base.rect.height - scrollbarHeight),
+                   0.0f, 1.0f);
 
       float nextScrollPosition =
-        textComponent.scrollPosition + scrollDelta.y * SCROLL_SPEED;
-
-      nextScrollPosition = std::min(maxScrollPos, nextScrollPosition);
-      nextScrollPosition = std::max(minScrollPos, nextScrollPosition);
+        MathUtils::remapRange(mousePosRatio, 0.0f, 1.0f, minScrollPos, maxScrollPos);
+      nextScrollPosition = std::clamp(nextScrollPosition, minScrollPos, maxScrollPos);
 
       textComponent.scrollPosition = nextScrollPosition;
+    }
+    else {
+      if (isMouseInRect(mousePos, base.rect)) {
+        if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
+          // Exit early if no scroll input
+          return;
+        }
+
+        float nextScrollPosition =
+          textComponent.scrollPosition + scrollDelta.y * SCROLL_SPEED;
+
+        nextScrollPosition = std::min(maxScrollPos, nextScrollPosition);
+        nextScrollPosition = std::max(minScrollPos, nextScrollPosition);
+
+        textComponent.scrollPosition = nextScrollPosition;
+      }
     }
   });
 }

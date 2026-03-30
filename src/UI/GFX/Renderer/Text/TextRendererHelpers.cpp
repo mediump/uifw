@@ -18,8 +18,9 @@ constexpr uint32_t MAX_GLYPH_COUNT = 8192;
 #define BORDER_LEFT(b)   b.w;
 #define BORDER_RIGHT(b)  b.y;
 
-// N-pixel slop factor, used to avoid noticeable pops when culling text
+// N-pixel slop factors, used to avoid noticeable pops when culling text
 #define CULLING_SLOP 5
+#define SCROLL_SLOP 30
 
 using namespace ui;
 
@@ -110,6 +111,8 @@ void TextRendererHelpers::record_text_component(
     float width;
   };
 
+  // TODO: compute line range based on scroll position/projected line height
+
   std::vector<RenderLine> renderLines;
 
   for (size_t inputIdx = 0; inputIdx < inputLines.size(); inputIdx++) {
@@ -148,13 +151,22 @@ void TextRendererHelpers::record_text_component(
   }
 
   // Add scroll position to verticalOffset
-  verticalOffset += textComponent.scrollPosition;
+  const float scrollPos = textComponent.scrollPosition;
+  verticalOffset += scrollPos;
 
   float currentBaselineY = static_cast<float>(baseComponent.rect.y) +
     textComponent.padding + (fontData->metrics.ascender * fontSize) + verticalOffset;
 
   // Record each rendered line with its own alignment offset
   for (const auto &renderLine : renderLines) {
+    if (currentBaselineY < -SCROLL_SLOP) {
+      continue;
+    }
+
+    if (currentBaselineY > clippingMask.height + SCROLL_SLOP) {
+      break;
+    }
+    
     const float lineWidth = renderLine.width;
 
     // Calculate horizontal alignment offset for this specific rendered line

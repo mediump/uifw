@@ -11,7 +11,7 @@
 #include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
 
-constexpr float SCROLL_SPEED = 15.0f;
+constexpr float SCROLL_SPEED = 25.0f;
 
 using namespace ui;
 

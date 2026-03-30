@@ -26,16 +26,21 @@ public:
   static void processEvents(const WindowData *window);
   static void cleanupSystemCursors(SystemCursors systemCursors);
 
+  static bool isMouseInRect(const Vector2i &mousePos, const Rect &rect);
+
 private:
   static void process_buttons(const InputState &inputState,
                               const ecs::ECSRoot &root,
                               const AppStyle &appStyle,
                               CursorShape *cursorShape);
 
+  static void process_scrollbars(const InputState &inputState,
+                                 const ecs::ECSRoot &root,
+                                 const AppStyle &appStyle);
+
   static void process_text_components(const InputState &inputState,
                                       const ecs::ECSRoot &root);
 
-  static bool is_mouse_in_rect_component(const Vector2i &mousePos, const Rect &rect);
   static void process_cursor_update(ApplicationData *app, const CursorShape &cursorShape);
 };
 

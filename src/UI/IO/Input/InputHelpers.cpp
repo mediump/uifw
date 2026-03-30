@@ -10,6 +10,7 @@
 #include "UI/IO/Input/Input.hpp"
 #include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
+#include "Utils.hpp"
 
 constexpr float SCROLL_SPEED = 25.0f;
 
@@ -49,7 +50,7 @@ void InputHelpers::cleanupSystemCursors(const SystemCursors systemCursors)
   SDL_DestroyCursor(systemCursors.pointerCursor);
 }
 
-bool InputHelpers::is_mouse_in_rect_component(const Vector2i &mousePos, const Rect &rect)
+bool InputHelpers::isMouseInRect(const Vector2i &mousePos, const Rect &rect)
 {
   const auto &[p_x, p_y] = mousePos;
 
@@ -114,8 +115,7 @@ void InputHelpers::process_buttons(const InputState &inputState,
         clippingBounds = parentBase.rect;
       }
 
-      if (is_mouse_in_rect_component(mousePos, base.rect) &&
-          is_mouse_in_rect_component(mousePos, clippingBounds)) {
+      if (isMouseInRect(mousePos, base.rect) && isMouseInRect(mousePos, clippingBounds)) {
         const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
         const auto borderColorOpt = appStyle.buttonStyleHovered->borderColor;
 
@@ -231,8 +231,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
       ScrollArea::layoutScrollbar(textComponent, base);
     }
 
-    const float textHeight =
-      TextUtils::computeTotalTextHeight(textComponent, base);
+    const float textHeight = TextUtils::computeTotalTextHeight(textComponent, base);
 
     ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
 
@@ -243,13 +242,14 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     ScrollArea::updateScrollbarPosition(textComponent, base, textHeight);
+    ScrollArea::updateScrollbarInput(textComponent, base, mousePos);
 
     // Exit early if no scroll input
     if (std::abs(scrollDelta.x) < 0.001f && std::abs(scrollDelta.y) < 0.001f) {
       return;
     }
 
-    if (is_mouse_in_rect_component(mousePos, base.rect)) {
+    if (isMouseInRect(mousePos, base.rect)) {
       const float maxScrollPos = 0.0f;
       const float minScrollPos = base.rect.height - textHeight;
 
@@ -263,3 +263,8 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
   });
 }
+
+void ui::InputHelpers::process_scrollbars(const InputState &inputState,
+                                          const ecs::ECSRoot &root,
+                                          const AppStyle &appStyle)
+{}

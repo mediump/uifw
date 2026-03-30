@@ -159,13 +159,13 @@ void TextRendererHelpers::record_text_component(
 
   // Record each rendered line with its own alignment offset
   for (const auto &renderLine : renderLines) {
-    if (currentBaselineY < -SCROLL_SLOP) {
-      continue;
-    }
+    // if (currentBaselineY < -SCROLL_SLOP) {
+    //   continue;
+    // }
 
-    if (currentBaselineY > clippingMask.height + SCROLL_SLOP) {
-      break;
-    }
+    // if (currentBaselineY > clippingMask.height + SCROLL_SLOP) {
+    //   break;
+    // }
     
     const float lineWidth = renderLine.width;
 

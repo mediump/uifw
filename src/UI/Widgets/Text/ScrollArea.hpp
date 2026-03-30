@@ -25,6 +25,10 @@ public:
                                       const ecs::BaseComponent &base,
                                       float textHeight);
 
+  static void updateScrollbarInput(TextComponent &textComponent,
+                                   const ecs::BaseComponent &base,
+                                   const Vector2i &mousePos);
+
   [[nodiscard]] static uint16_t getScrollbarWidth();
 
 private:

@@ -3,6 +3,7 @@
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
+#include "UI/IO/Input/InputHelpers.hpp"
 
 using namespace ui;
 
@@ -133,6 +134,39 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
   const uint16_t y = base.rect.y + 2 + static_cast<uint16_t>(scrollRatio * maxScrollY);
 
   handleBase->rect.y = y;
+}
+
+void ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
+                                           const ecs::BaseComponent &base,
+                                           const Vector2i &mousePos)
+{
+  if (textComponent.scrollbar != UI_NULL_ENTITY) {
+    const auto background = textComponent.scrollbar.get<ecs::BaseComponent>();
+
+    if (background.transformRel.nChildren > 0) {
+      const auto handle = background.transformRel.first;
+      const auto handleBase = handle.get<ecs::BaseComponent>();
+
+      if (handle.has<ecs::QuadRendererComponent>()) {
+        auto handleQuadRenderer = handle.get_ref<ecs::QuadRendererComponent>();
+
+        constexpr ecs::Color idleColor = {0.5f, 0.5f, 0.5f, 1.0f};
+        constexpr ecs::Color hoveredColor = {0.4f, 0.4f, 0.4f, 1.0f};
+
+        if (InputHelpers::isMouseInRect(mousePos, handleBase.rect))
+        {
+          if (handleQuadRenderer->color != hoveredColor) {
+            handleQuadRenderer->color = hoveredColor;
+          }
+        }
+        else {
+          if (handleQuadRenderer->color != idleColor) {
+            handleQuadRenderer->color = idleColor;
+          }
+        }
+      }
+    }
+  }
 }
 
 [[nodiscard]] uint16_t ui::ScrollArea::getScrollbarWidth()

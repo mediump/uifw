@@ -84,26 +84,44 @@ int main()
     {.type = ui::LayoutType_Vertical, .margins = {10, 10, 10, 10}, .spacing = 3});
 
   /* ---- TEXT DISPLAY ---- */
-  // const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
-  //   &window2->ecsRoot, &fontData,
-  //   "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-  //   "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen
-  //   liquor " "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with
-  //   five-dozen liquor " "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box
-  //   with five-dozen liquor " "jugs.\nPack my box with five-dozen liquor jugs.\nPack my
-  //   box with five-dozen liquor " "jugs.\nPack my box with five-dozen liquor jugs.\nPack
-  //   my box with five-dozen liquor " "jugs.\nPack my box with five-dozen liquor
-  //   jugs.\nPack my box with five-dozen liquor " "jugs.\nPack my box with five-dozen
-  //   liquor jugs.\nPack my box with five-dozen liquor " "jugs.\nPack my box with
-  //   five-dozen liquor jugs.\nPack my box with five-dozen liquor " "jugs.\nPack my box
-  //   with five-dozen liquor jugs.\nPack my box with five-dozen liquor " "jugs.\n",
-  //   {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
-
-  const auto &longText = ui::FileUtils::loadTextFile("res/test-data/t8.shakespeare.txt");
-  
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
-    &window2->ecsRoot, &fontData, longText.c_str(), {1.0f, 1.0f, 1.0f, 1.0f}, 16, 16, currentY,
-    128, 128, "BigText", &e2);
+    &window2->ecsRoot, &fontData,
+    "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
+    "jugs.", {1.0f, 1.0f, 1.0f, 1.0f},
+    32, 16, currentY, 128, 128, "BigText", &e2);
+
+  // const auto &longText =
+  // ui::FileUtils::loadTextFile("res/test-data/t8.shakespeare.txt");
+
+  // const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
+  //   &window2->ecsRoot, &fontData, longText.c_str(), {1.0f, 1.0f, 1.0f, 1.0f}, 16, 16,
+  //   currentY, 128, 128, "BigText", &e2);
 
   textDisplayEntity.set<ui::ecs::QuadRendererComponent>({
     .color = {0.3f, 0.3f, 0.3f, 1.0f},

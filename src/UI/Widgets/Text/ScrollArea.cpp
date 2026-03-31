@@ -11,12 +11,14 @@
 
 using namespace ui;
 
-#define SCROLLBAR_WIDTH 16
+#define SCROLLBAR_WIDTH   16
+#define SCROLLBAR_PADDING 4
+#define SCROLLBAR_HOVER_GROW 1
 
-#define BORDER_TOP(b)    b.z
-#define BORDER_BOTTOM(b) b.x
-#define BORDER_LEFT(b)   b.w
-#define BORDER_RIGHT(b)  b.y
+#define BORDER_TOP(b)     b.z
+#define BORDER_BOTTOM(b)  b.x
+#define BORDER_LEFT(b)    b.w
+#define BORDER_RIGHT(b)   b.y
 
 void ScrollArea::addScrollbarElement(const ecs::ECSRoot *root,
                                      const ecs::Entity &entity,
@@ -33,7 +35,7 @@ void ScrollArea::addScrollbarElement(const ecs::ECSRoot *root,
   backgroundBase->zOrder = 5;
 
   background.set<ecs::QuadRendererComponent>(
-    {.color = {0.9f, 0.9f, 0.9f, 1.0f}, .borderRadius = {0, 0, 0, 0}});
+    {.color = {0.9f, 0.9f, 0.9f, 0.0f}, .borderRadius = {0, 0, 0, 0}});
 
   auto handle = ecs::createEntity(root, 0, 0, 0, 0, handleName.c_str(), &background);
 
@@ -41,8 +43,12 @@ void ScrollArea::addScrollbarElement(const ecs::ECSRoot *root,
   handleBase->zOrder = 10;
 
   handle.set<ecs::QuadRendererComponent>(
-    {.color = {0.5f, 0.5f, 0.5f, 1.0f}, .borderRadius = {6, 6, 6, 6}});
-  handle.add<ecs::HoverHandlerComponent>();
+    {.color = {0.5f, 0.5f, 0.5f, 1.0f}, .borderRadius = {5, 5, 5, 5}});
+
+  handle.set<ecs::HoverHandlerComponent>({
+    .cursorShape = CursorShape_Pointer,
+    .state = HoverState_Idle
+  });
 
   textComponent.scrollbar = background;
   layoutScrollbar(textComponent, base, offsets);
@@ -71,10 +77,12 @@ Rect ScrollArea::layout_background(const ecs::Entity &background,
 {
   auto scrollbarBase = background.get_ref<ecs::BaseComponent>();
 
-  const uint16_t x = base.rect.x + base.rect.width - SCROLLBAR_WIDTH - BORDER_RIGHT(offsets);
+  const uint16_t x =
+    base.rect.x + base.rect.width - SCROLLBAR_WIDTH - BORDER_RIGHT(offsets);
   const uint16_t y = base.rect.y + BORDER_TOP(offsets);
   const uint16_t w = SCROLLBAR_WIDTH;
-  const uint16_t h = std::abs(base.rect.height - BORDER_TOP(offsets) - BORDER_BOTTOM(offsets));
+  const uint16_t h =
+    std::abs(base.rect.height - BORDER_TOP(offsets) - BORDER_BOTTOM(offsets));
 
   const Rect result = {
     .x = x,
@@ -106,7 +114,8 @@ float ui::ScrollArea::updateScrollbarSize(TextComponent &textComponent,
     return 0.0f;
   }
 
-  const uint16_t scrollbarHeight = base.rect.height - BORDER_TOP(offsets) - BORDER_BOTTOM(offsets);
+  const uint16_t scrollbarHeight =
+    base.rect.height - BORDER_TOP(offsets) - BORDER_BOTTOM(offsets);
 
   constexpr uint16_t minHeight = 12;
   const uint16_t maxHeight = scrollbarHeight;
@@ -149,11 +158,13 @@ void ui::ScrollArea::updateScrollbarPosition(TextComponent &textComponent,
 
   const float scrollRatio = textComponent.scrollPosition / -scrollableHeight;
 
-  const float scrollbarTrackHeight = static_cast<float>(background.get<ecs::BaseComponent>().rect.height - 4);
+  const float scrollbarTrackHeight =
+    static_cast<float>(background.get<ecs::BaseComponent>().rect.height - 4);
   const float handleHeight = static_cast<float>(handleBase->rect.height);
 
   const float maxScrollY = scrollbarTrackHeight - handleHeight;
-  const uint16_t y = background.get<ecs::BaseComponent>().rect.y + 2 + static_cast<uint16_t>(scrollRatio * maxScrollY);
+  const uint16_t y = background.get<ecs::BaseComponent>().rect.y + 2 +
+    static_cast<uint16_t>(scrollRatio * maxScrollY);
 
   handleBase->rect.y = y;
 }
@@ -162,7 +173,8 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
                                           const ecs::BaseComponent &base,
                                           const Vector2i &mousePos,
                                           const bool &mouseDown,
-                                          const bool &mouseUp)
+                                          const bool &mouseUp,
+                                          CursorShape* cursorShape)
 {
   if (textComponent.scrollbar != UI_NULL_ENTITY) {
     const auto background = textComponent.scrollbar.get<ecs::BaseComponent>();
@@ -180,12 +192,13 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
         auto handleHoverHandler = handle.get_ref<ecs::HoverHandlerComponent>();
 
         constexpr ecs::Color idleColor = {0.5f, 0.5f, 0.5f, 1.0f};
-        constexpr ecs::Color hoveredColor = {0.4f, 0.4f, 0.4f, 1.0f};
-        constexpr ecs::Color clickedColor = {0.19f, 0.19f, 0.19f, 1.0f};
+        constexpr ecs::Color hoveredColor = {0.5f, 0.5f, 0.5f, 1.0f};
+        constexpr ecs::Color clickedColor = {0.55f, 0.55f, 0.55f, 1.0f};
 
         // Detect hover state
         if (mouseUp && handleHoverHandler->state == HoverState_Clicked) {
           handleHoverHandler->state = HoverState_Idle;
+          *cursorShape = CursorShape_Pointer;
         }
         else {
           if (InputHelpers::isMouseInRect(mousePos, handleBase.rect)) {
@@ -196,6 +209,7 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
             else {
               if (mouseDown) {
                 handleHoverHandler->state = HoverState_Clicked;
+                *cursorShape = CursorShape_Pointer;
               }
             }
           }
@@ -203,6 +217,7 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
             if (handleHoverHandler->state != HoverState_Clicked &&
                 handleHoverHandler->state != HoverState_Idle) {
               handleHoverHandler->state = HoverState_Idle;
+              *cursorShape = CursorShape_Default;
             }
           }
         }
@@ -241,16 +256,33 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
 void ui::ScrollArea::layout_handle(UI_REF(ecs::BaseComponent) handleBase,
                                    const Rect &backgroundBounds)
 {
-  const uint16_t x = backgroundBounds.x + 2;
-  const uint16_t y = backgroundBounds.y + 2;
-  const uint16_t w = backgroundBounds.width - 4;
-  const uint16_t h = backgroundBounds.height - 4;
+  const auto &scrollbarEntity = handleBase.entity();
+  float padding = SCROLLBAR_PADDING;
+
+  if (scrollbarEntity.has<ecs::HoverHandlerComponent>()) {
+    const auto &hoverHandler = scrollbarEntity.get<ecs::HoverHandlerComponent>();
+    if (hoverHandler.state != HoverState_Idle) {
+      padding -= SCROLLBAR_HOVER_GROW;
+    }
+  }
+
+  const uint16_t x = backgroundBounds.x + padding;
+  const uint16_t y = backgroundBounds.y + padding;
+  const uint16_t w = backgroundBounds.width - padding * 2;
+  const uint16_t h = backgroundBounds.height - padding * 2;
 
   handleBase->rect = {
     .x = x,
     .y = y,
     .width = w,
     .height = h,
+  };
+
+  if (scrollbarEntity.has<ecs::QuadRendererComponent>()) {
+    auto quadRenderer = scrollbarEntity.get_ref<ecs::QuadRendererComponent>();
+
+    const float r = static_cast<float>(w) * 0.5f;
+    quadRenderer->borderRadius = {r, r, r, r};
   };
 }
 

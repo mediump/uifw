@@ -2,6 +2,7 @@
 
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
+#include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
 
 namespace ui {
@@ -33,7 +34,8 @@ public:
                                    const ecs::BaseComponent &base,
                                    const Vector2i &mousePos,
                                    const bool &mouseDown,
-                                   const bool &mouseUp);
+                                   const bool &mouseUp,
+                                   CursorShape *cursorShape);
 
   [[nodiscard]] static uint16_t getScrollbarWidth();
 

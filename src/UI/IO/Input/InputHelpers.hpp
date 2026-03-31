@@ -39,7 +39,8 @@ private:
                                  const AppStyle &appStyle);
 
   static void process_text_components(const InputState &inputState,
-                                      const ecs::ECSRoot &root);
+                                      const ecs::ECSRoot &root,
+                                      CursorShape *cursorShape);
 
   static void process_cursor_update(ApplicationData *app, const CursorShape &cursorShape);
 };

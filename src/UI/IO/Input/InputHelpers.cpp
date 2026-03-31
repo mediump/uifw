@@ -51,7 +51,7 @@ void InputHelpers::processEvents(const WindowData *window)
 
   /* ---- Process events ---- */
   process_buttons(inputState, root, appStyle, &cursorShape);
-  process_text_components(inputState, root);
+  process_text_components(inputState, root, &cursorShape);
   /* ------------------------ */
 
   process_cursor_update(window->app, cursorShape);
@@ -221,7 +221,8 @@ void InputHelpers::process_buttons(const InputState &inputState,
 }
 
 void InputHelpers::process_text_components(const InputState &inputState,
-                                           const ecs::ECSRoot &root)
+                                           const ecs::ECSRoot &root,
+                                           CursorShape *cursorShape)
 {
   const auto &world = root.world;
 
@@ -232,7 +233,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
 
   const auto &textQuery = world->query<TextComponent, ecs::BaseComponent>();
 
-  textQuery.each([&mousePos, &mouseDown, &mouseUp, &scrollDelta, &root](
+  textQuery.each([&mousePos, &mouseDown, &mouseUp, &scrollDelta, &root, &cursorShape](
                    const ecs::Entity &entity, TextComponent &textComponent,
                    const ecs::BaseComponent &base) {
     if (!textComponent.isScrollable) {
@@ -272,7 +273,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
 
     ScrollArea::updateScrollbarPosition(textComponent, base, textHeight, offsets);
     const bool isDragging =
-      ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp);
+      ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp, cursorShape);
 
     const float maxScrollPos = 0.0f;
     const float minScrollPos = base.rect.height - textHeight;

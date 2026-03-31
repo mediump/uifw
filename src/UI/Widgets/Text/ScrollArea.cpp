@@ -176,6 +176,8 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
                                           const bool &mouseUp,
                                           CursorShape* cursorShape)
 {
+  bool isClicked = false;
+
   if (textComponent.scrollbar != UI_NULL_ENTITY) {
     const auto background = textComponent.scrollbar.get<ecs::BaseComponent>();
 
@@ -191,14 +193,13 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
         auto handleQuadRenderer = handle.get_ref<ecs::QuadRendererComponent>();
         auto handleHoverHandler = handle.get_ref<ecs::HoverHandlerComponent>();
 
-        constexpr ecs::Color idleColor = {0.5f, 0.5f, 0.5f, 1.0f};
-        constexpr ecs::Color hoveredColor = {0.5f, 0.5f, 0.5f, 1.0f};
+        constexpr ecs::Color idleColor = {0.5f, 0.5f, 0.5f, 0.75f};
+        constexpr ecs::Color hoveredColor = {0.5f, 0.5f, 0.5f, 0.8f};
         constexpr ecs::Color clickedColor = {0.55f, 0.55f, 0.55f, 1.0f};
 
         // Detect hover state
         if (mouseUp && handleHoverHandler->state == HoverState_Clicked) {
           handleHoverHandler->state = HoverState_Idle;
-          *cursorShape = CursorShape_Pointer;
         }
         else {
           if (InputHelpers::isMouseInRect(mousePos, handleBase.rect)) {
@@ -209,7 +210,6 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
             else {
               if (mouseDown) {
                 handleHoverHandler->state = HoverState_Clicked;
-                *cursorShape = CursorShape_Pointer;
               }
             }
           }
@@ -217,7 +217,6 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
             if (handleHoverHandler->state != HoverState_Clicked &&
                 handleHoverHandler->state != HoverState_Idle) {
               handleHoverHandler->state = HoverState_Idle;
-              *cursorShape = CursorShape_Default;
             }
           }
         }
@@ -238,14 +237,22 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
           if (handleQuadRenderer->color != clickedColor) {
             handleQuadRenderer->color = clickedColor;
           }
-          return true;
+          isClicked = true;
           break;
+        }
+
+        // Update cursor
+        if (handleHoverHandler->state == HoverState_Idle) {
+          *cursorShape = CursorShape_Default;
+        }
+        else {
+          *cursorShape = CursorShape_Pointer;
         }
       }
     }
   }
 
-  return false;
+  return isClicked;
 }
 
 [[nodiscard]] uint16_t ui::ScrollArea::getScrollbarWidth()

@@ -12,6 +12,7 @@ struct InputState
   bool shouldQuit = false;
   bool windowFocused = false;
   bool windowResized = false;
+  bool windowMinimized = false;
   Vector2i windowSize = {0, 0};
   bool mouseMoved = false;
   Vector2i mousePosition = {0, 0};

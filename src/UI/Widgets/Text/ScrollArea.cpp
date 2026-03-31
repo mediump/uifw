@@ -181,7 +181,7 @@ bool ui::ScrollArea::updateScrollbarInput(TextComponent &textComponent,
 
         constexpr ecs::Color idleColor = {0.5f, 0.5f, 0.5f, 1.0f};
         constexpr ecs::Color hoveredColor = {0.4f, 0.4f, 0.4f, 1.0f};
-        constexpr ecs::Color clickedColor = {0.94f, 0.41f, 0.21f, 1.0f};
+        constexpr ecs::Color clickedColor = {0.19f, 0.19f, 0.19f, 1.0f};
 
         // Detect hover state
         if (mouseUp && handleHoverHandler->state == HoverState_Clicked) {

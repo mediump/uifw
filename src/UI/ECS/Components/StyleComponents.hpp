@@ -33,21 +33,21 @@ public:
     return {
       .buttonStyle = std::optional(ButtonStyle{
         .backgroundColor = std::optional(Color4f{0.35f, 0.35f, 0.35f, 1.0f}),
-        .borderColor = std::optional(Color4f{0.15f, 0.15f, 0.15f, 1.0f}),
-        .textColor = std::optional(Color4f{0.94f, 0.94f, 0.94f, 1.0f}),
-        .cornerRadius = std::optional(Vector4i{3, 3, 3, 3}),
+        .borderColor = std::optional(Color4f{0.46f, 0.46f, 0.46f, 1.0f}),
+        .textColor = std::optional(Color4f{1.0f, 1.0f, 1.0f, 1.0f}),
+        .cornerRadius = std::optional(Vector4i{6, 6, 6, 6}),
       }),
       .buttonStyleHovered = std::optional(ButtonStyle{
-        .backgroundColor = std::optional(Color4f{0.30f, 0.30f, 0.30f, 1.0f}),
-        .borderColor = std::optional(Color4f{0.15f, 0.15f, 0.15f, 1.0f}),
-        .textColor = std::optional(Color4f{0.94f, 0.94f, 0.94f, 1.0f}),
-        .cornerRadius = std::optional(Vector4i{3, 3, 3, 3}),
+        .backgroundColor = std::optional(Color4f{1.00f, 0.58f, 0.41f, 1.0f}),
+        .borderColor = std::optional(Color4f{0.59f, 0.27f, 0.15f, 1.0f}),
+        .textColor = std::optional(Color4f{0.59f, 0.27f, 0.15f, 1.0f}),
+        .cornerRadius = std::optional(Vector4i{6, 6, 6, 6}),
       }),
       .buttonStyleClicked = std::optional(ButtonStyle{
-        .backgroundColor = std::optional(Color4f{0.20f, 0.20f, 0.20f, 1.0f}),
-        .borderColor = std::optional(Color4f{0.34f, 0.34f, 0.34f, 1.0f}),
-        .textColor = std::optional(Color4f{0.94f, 0.94f, 0.94f, 1.0f}),
-        .cornerRadius = std::optional(Vector4i{3, 3, 3, 3}),
+        .backgroundColor = std::optional(Color4f{1.00f, 0.58f, 0.41f, 1.0f}),
+        .borderColor = std::optional(Color4f{0.59f, 0.27f, 0.15f, 1.0f}),
+        .textColor = std::optional(Color4f{0.59f, 0.27f, 0.15f, 1.0f}),
+        .cornerRadius = std::optional(Vector4i{6, 6, 6, 6}),
       }),
     };
   }

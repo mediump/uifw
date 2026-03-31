@@ -1,9 +1,11 @@
 #include "UI/Core/Application.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
+#include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/GFX/Renderer/Text/TextHelpers.hpp"
 #include "UI/GFX/Shader.hpp"
 #include "UI/IO/Text/FontLoader.hpp"
+#include "UI/Layout/LayoutTypes.hpp"
 #include "UI/Utils/FileUtils.hpp"
 #include "UI/Window/Window.hpp"
 
@@ -44,6 +46,18 @@ int main()
 
   const auto e1 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity1",
                                         &window->canvas.entity);
+
+  e1.set<ui::LayoutComponent>({
+    .type = ui::LayoutType_Horizontal,
+    .margins = {10, 10, 10, 10},
+    .spacing = 5,
+  });
+
+  const auto message1 = ui::TextHelpers::createTextEntity(&window->ecsRoot, 
+    &fontData, "welcome to me buttons", {1.0f, 1.0f, 1.0f, 1.0f}, 64, 25, 9, 500, 200, "Message1");   
+
+  const auto message2 = ui::TextHelpers::createTextEntity(&window->ecsRoot, 
+    &fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25, 170, 500, 125, "Message2"); 
 
   auto e1Base = e1.get_ref<ui::ecs::BaseComponent>();
 
@@ -113,8 +127,8 @@ int main()
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\n", {1.0f, 1.0f, 1.0f, 1.0f},
-    32, 16, currentY, 128, 128, "BigText", &e2);
+    "jugs.\n",
+    {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
 
   // const auto &longText =
   // ui::FileUtils::loadTextFile("res/test-data/t8.shakespeare.txt");
@@ -150,7 +164,7 @@ int main()
   e4.set<ui::LayoutComponent>({
     .type = ui::LayoutType_Vertical,
     .margins = {9, 9, 9, 9},
-    .spacing = 5,
+    .spacing = 3,
   });
 
   /* ---------------- Create buttons ---------------- */
@@ -170,8 +184,8 @@ int main()
 
     button.set<ui::ecs::QuadRendererComponent>({
       .color = {0.36f, 0.36f, 0.36f, 1.0f},
-      .borderRadius = {4, 4, 4, 4},
-      .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
+      .borderRadius = {6, 6, 6, 6},
+      .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
     });
     button.add<ui::ecs::HoverHandlerComponent>();
     button.set<ui::ecs::ButtonComponent>({.onClick = [](const ui::ecs::Entity &entity) {
@@ -186,9 +200,11 @@ int main()
                                    .verticalAlignment = ui::TextVAlignment_Middle});
 
     auto buttonBaseComponent = button.get_ref<ui::ecs::BaseComponent>();
+    const uint16_t buttonHeight = fontData.metrics.lineHeight * 14 + 24;
+
     buttonBaseComponent->inLayout = true;
-    buttonBaseComponent->minHeight = 30;
-    buttonBaseComponent->maxHeight = 30;
+    buttonBaseComponent->minHeight = buttonHeight;
+    buttonBaseComponent->maxHeight = buttonHeight;
     buttonBaseComponent->minWidth = 75;
     buttonBaseComponent->maxWidth = 75;
   }
@@ -213,27 +229,27 @@ int main()
   constexpr ui::ecs::Color white = {0.5f, 0.5f, 0.5f, 1.0f};
 
   e1.set<ui::ecs::QuadRendererComponent>({
-    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
-    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
     .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });
   e4.set<ui::ecs::QuadRendererComponent>({
-    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
-    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
     .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });
   e5.set<ui::ecs::QuadRendererComponent>({
-    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
-    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
     .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });
   e6.set<ui::ecs::QuadRendererComponent>({
-    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
-    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
     .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });
   /* --------------------------------------------------------------------- */

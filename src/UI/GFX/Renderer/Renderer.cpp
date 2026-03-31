@@ -400,6 +400,10 @@ RendererData Renderer::createRenderer(const WindowData *window, const Canvas *ca
 
 void Renderer::draw(WindowData *window)
 {
+  if (window->inputState.windowMinimized) {
+    return;
+  }
+
   auto *gpuDevice = window->renderer.internals.gpuDevice;
   auto *windowPtr = window->renderer.internals.sdlWindowPtr;
   auto &drawPipeline = window->renderer.drawPipeline;
@@ -492,7 +496,7 @@ void Renderer::draw(WindowData *window)
   // Render everything
   const SDL_GPUColorTargetInfo colorTargetInfo = {
     .texture = swapchainTexture,
-    .clear_color = {0.18f, 0.18f, 0.18f, 1.0f},
+    .clear_color = {0.10f, 0.10f, 0.10f, 1.0f},
     .load_op = SDL_GPU_LOADOP_CLEAR,
     .store_op = SDL_GPU_STOREOP_STORE,
     .cycle = false,

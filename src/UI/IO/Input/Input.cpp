@@ -57,6 +57,10 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
   case SDL_EVENT_KEY_UP:
     break;
   case SDL_EVENT_WINDOW_MINIMIZED:
+    inputState.windowMinimized = true;
+    break;
+  case SDL_EVENT_WINDOW_RESTORED:
+    inputState.windowMinimized = false;
     break;
   case SDL_EVENT_WINDOW_MAXIMIZED:
     break;

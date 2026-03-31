@@ -12,18 +12,22 @@ public:
   static void addScrollbarElement(const ecs::ECSRoot *root,
                                   const ecs::Entity &entity,
                                   TextComponent &textComponent,
-                                  const ecs::BaseComponent &base);
+                                  const ecs::BaseComponent &base,
+                                  const Vector4i &offsets);
 
   static void layoutScrollbar(TextComponent &textComponent,
-                              const ecs::BaseComponent &base);
+                              const ecs::BaseComponent &base,
+                              const Vector4i &offsets);
 
   static float updateScrollbarSize(TextComponent &textComponent,
                                    const ecs::BaseComponent &base,
-                                   float textHeight);
+                                   float textHeight,
+                                   const Vector4i &offsets);
 
   static void updateScrollbarPosition(TextComponent &textComponent,
                                       const ecs::BaseComponent &base,
-                                      float textHeight);
+                                      float textHeight,
+                                      const Vector4i &offsets);
 
   static bool updateScrollbarInput(TextComponent &textComponent,
                                    const ecs::BaseComponent &base,
@@ -34,10 +38,12 @@ public:
   [[nodiscard]] static uint16_t getScrollbarWidth();
 
 private:
-  static void layout_background(const ecs::Entity &background,
-                                const ecs::BaseComponent &base);
+  static Rect layout_background(const ecs::Entity &background,
+                                const ecs::BaseComponent &base,
+                                const Vector4i &offsets);
 
-  static void layout_handle(const ecs::Entity &handle, const ecs::BaseComponent &base);
+  static void layout_handle(UI_REF(ecs::BaseComponent) handleBase,
+                            const Rect &backgroundBounds);
 
   static void set_scrollbar_visibility(UI_REF(ecs::BaseComponent) backgroundBase,
                                        UI_REF(ecs::BaseComponent) handleBase,

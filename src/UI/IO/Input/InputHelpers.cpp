@@ -17,6 +17,11 @@
 
 constexpr float SCROLL_SPEED = 25.0f;
 
+#define BORDER_TOP(b)    b.z
+#define BORDER_BOTTOM(b) b.x
+#define BORDER_LEFT(b)   b.w
+#define BORDER_RIGHT(b)  b.y
+
 using namespace ui;
 
 SystemCursors InputHelpers::initSystemCursors()
@@ -229,17 +234,30 @@ void InputHelpers::process_text_components(const InputState &inputState,
       return;
     }
 
+    Vector4i offsets = {0, 0, 0, 0};
+
+    if (entity.has<ecs::QuadRendererComponent>()) {
+      const auto &quadRenderer = entity.get<ecs::QuadRendererComponent>();
+
+      offsets = {
+        .x = static_cast<uint16_t>(quadRenderer.borderWidths.x),
+        .y = static_cast<uint16_t>(quadRenderer.borderWidths.y),
+        .z = static_cast<uint16_t>(quadRenderer.borderWidths.z),
+        .w = static_cast<uint16_t>(quadRenderer.borderWidths.w)
+      };
+    }
+
     if (textComponent.scrollbar == UI_NULL_ENTITY) {
-      ScrollArea::addScrollbarElement(&root, entity, textComponent, base);
+      ScrollArea::addScrollbarElement(&root, entity, textComponent, base, offsets);
     }
     else {
-      ScrollArea::layoutScrollbar(textComponent, base);
+      ScrollArea::layoutScrollbar(textComponent, base, offsets);
     }
 
     const float textHeight = TextUtils::computeTotalTextHeight(textComponent, base);
 
     const float scrollbarHeight =
-      ScrollArea::updateScrollbarSize(textComponent, base, textHeight);
+      ScrollArea::updateScrollbarSize(textComponent, base, textHeight, offsets);
 
     // If text fits in the viewport, no scrolling is needed
     if (textHeight <= base.rect.height) {
@@ -247,7 +265,7 @@ void InputHelpers::process_text_components(const InputState &inputState,
       return;
     }
 
-    ScrollArea::updateScrollbarPosition(textComponent, base, textHeight);
+    ScrollArea::updateScrollbarPosition(textComponent, base, textHeight, offsets);
     const bool isDragging =
       ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp);
 

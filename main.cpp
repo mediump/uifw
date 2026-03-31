@@ -125,7 +125,7 @@ int main()
 
   textDisplayEntity.set<ui::ecs::QuadRendererComponent>({
     .color = {0.11f, 0.11f, 0.11f, 1.0f},
-    .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
+    .borderRadius = {0.0f, 0.0f, 0.0f, 0.0f},
     .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
     .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });

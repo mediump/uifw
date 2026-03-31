@@ -40,7 +40,7 @@ int main()
 
   layoutComponent->type = ui::LayoutType_Horizontal;
   layoutComponent->margins = {10, 10, 10, 10};
-  layoutComponent->spacing = 10;
+  layoutComponent->spacing = 5;
 
   const auto e1 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity1",
                                         &window->canvas.entity);
@@ -81,7 +81,7 @@ int main()
   const auto e2 = ui::ecs::createEntity(&window2->ecsRoot, 0, 0, 50, 50, "Entity2",
                                         &window2->canvas.entity);
   e2.set<ui::LayoutComponent>(
-    {.type = ui::LayoutType_Vertical, .margins = {10, 10, 10, 10}, .spacing = 3});
+    {.type = ui::LayoutType_Vertical, .margins = {5, 5, 5, 5}, .spacing = 5});
 
   /* ---- TEXT DISPLAY ---- */
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
@@ -113,7 +113,7 @@ int main()
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.", {1.0f, 1.0f, 1.0f, 1.0f},
+    "jugs.\n", {1.0f, 1.0f, 1.0f, 1.0f},
     32, 16, currentY, 128, 128, "BigText", &e2);
 
   // const auto &longText =
@@ -124,7 +124,9 @@ int main()
   //   currentY, 128, 128, "BigText", &e2);
 
   textDisplayEntity.set<ui::ecs::QuadRendererComponent>({
-    .color = {0.3f, 0.3f, 0.3f, 1.0f},
+    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
+    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
     .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });
 
@@ -132,7 +134,7 @@ int main()
   textComponent->horizontalAlignment = ui::TextHAlignment_Left;
   textComponent->verticalAlignment = ui::TextVAlignment_Top;
   textComponent->isScrollable = true;
-  textComponent->padding = 5;
+  textComponent->padding = 10;
   /* ---------------------- */
 
   const auto e3 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity3",
@@ -142,13 +144,13 @@ int main()
   auto secondaryLayout = e3.get_ref<ui::LayoutComponent>();
 
   secondaryLayout->type = ui::LayoutType_Vertical;
-  secondaryLayout->spacing = 10;
+  secondaryLayout->spacing = 5;
 
   const auto e4 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity4", &e3);
   e4.set<ui::LayoutComponent>({
     .type = ui::LayoutType_Vertical,
-    .margins = {5, 5, 5, 5},
-    .spacing = 3,
+    .margins = {9, 9, 9, 9},
+    .spacing = 5,
   });
 
   /* ---------------- Create buttons ---------------- */
@@ -211,19 +213,29 @@ int main()
   constexpr ui::ecs::Color white = {0.5f, 0.5f, 0.5f, 1.0f};
 
   e1.set<ui::ecs::QuadRendererComponent>({
-    .color = red,
-    .borderRadius = {30, 30, 30, 30},
-    .borderColor = white,
-    .borderWidths = {15.0f, 15.0f, 15.0f, 15.0f},
+    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
+    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
   });
-  e4.set<ui::ecs::QuadRendererComponent>({.color = blue,
-                                          .borderRadius = {9, 9, 9, 9},
-                                          .borderColor = {0.25f, 0.25f, 0.25f, 1.0f},
-                                          .borderWidths = {0.0f, 0.0f, 0.0f, 0.0f}});
-  e5.add<ui::ecs::QuadRendererComponent>();
-  e6.add<ui::ecs::QuadRendererComponent>();
-  e5.get_ref<ui::ecs::QuadRendererComponent>()->color = white;
-  e6.get_ref<ui::ecs::QuadRendererComponent>()->color = red;
+  e4.set<ui::ecs::QuadRendererComponent>({
+    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
+    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+  });
+  e5.set<ui::ecs::QuadRendererComponent>({
+    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
+    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+  });
+  e6.set<ui::ecs::QuadRendererComponent>({
+    .color = {0.11f, 0.11f, 0.11f, 1.0f},
+    .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
+    .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
+    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+  });
   /* --------------------------------------------------------------------- */
 
   // FIXME: Currently user must call Window::relayout for input events to work

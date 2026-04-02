@@ -55,7 +55,7 @@ void Renderer::pick_window_present_mode(const RendererData *renderer)
 
   SDL_SetGPUSwapchainParameters(renderer->internals.gpuDevice,
                                 renderer->internals.sdlWindowPtr,
-                                SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode);
+                                SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX);
 }
 
 void Renderer::create_text_render_pipeline(const RendererData *renderer,

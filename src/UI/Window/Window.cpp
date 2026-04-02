@@ -98,9 +98,6 @@ void Window::relayout(WindowData *window, const uint16_t width, const uint16_t h
 
   Layout::traverseAndApplyLayout(canvasRoot);
 
-  InputHelpers::processEvents(window);
-  Renderer::draw(window);
-
   window->needsRelayout = false;
 }
 
@@ -115,10 +112,9 @@ bool Window::updateWindow(WindowData *window)
   if (inputState.windowResized) {
     relayout(window);
   } 
-  else {
-    InputHelpers::processEvents(window);
-    Renderer::draw(window);
-  }
+
+  InputHelpers::processEvents(window);
+  Renderer::draw(window);
 
   return true;
 }

@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include <SDL3/SDL_gpu.h>
+#include "SDL3/SDL_oldnames.h"
 
 using namespace ui;
 

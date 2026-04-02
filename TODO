@@ -23,7 +23,7 @@ Components:
  [-] Drop shadows/inner shadows
  [X] Functional callbacks/event handler
  [-] Bold/italic fonts
- [-] Scrollable contents
+ [X] Scrollable contents
  [-] Tabs
  [-] Docking layouts
  [-] Images/icons

@@ -2,6 +2,7 @@
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
+#include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/Text/TextHelpers.hpp"
 #include "UI/GFX/Shader.hpp"
 #include "UI/IO/Text/FontLoader.hpp"
@@ -53,11 +54,13 @@ int main()
     .spacing = 5,
   });
 
-  const auto message1 = ui::TextHelpers::createTextEntity(&window->ecsRoot, 
-    &fontData, "welcome to me buttons", {1.0f, 1.0f, 1.0f, 1.0f}, 64, 25, 9, 500, 200, "Message1");   
+  const auto message1 = ui::TextHelpers::createTextEntity(
+    &window->ecsRoot, &fontData, "welcome to me buttons", {1.0f, 1.0f, 1.0f, 1.0f}, 64,
+    25, 9, 500, 200, "Message1");
 
-  const auto message2 = ui::TextHelpers::createTextEntity(&window->ecsRoot, 
-    &fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25, 170, 500, 125, "Message2"); 
+  const auto message2 = ui::TextHelpers::createTextEntity(
+    &window->ecsRoot, &fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25,
+    170, 500, 125, "Message2");
 
   auto e1Base = e1.get_ref<ui::ecs::BaseComponent>();
 
@@ -211,10 +214,63 @@ int main()
 
   // Add spacer
   ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Spacer", &e4);
+
   /* ----------------------------------------------- */
 
   const auto e5 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity5", &e3);
   const auto e6 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity6", &e3);
+
+  /* ---- Add single-line input ---- */
+
+  auto e5Base = e5.get_ref<ui::ecs::BaseComponent>();
+  e5Base->minHeight = 80;
+  e5Base->maxHeight = 80;
+
+  e5.set<ui::LayoutComponent>({
+    .type = ui::LayoutType_Vertical,
+    .margins = {9, 9, 9, 9},
+    .spacing = 3,
+  });
+
+  // Create layout
+  const auto textFieldLayout =
+    ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "TextFieldLayout", &e5);
+
+  textFieldLayout.set<ui::LayoutComponent>({
+    .type = ui::LayoutType_Horizontal,
+    .spacing = 3,
+  });
+
+  // Create label
+  const auto inputLabel =
+    ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "FieldLabel", &textFieldLayout);
+
+  auto inputLabelBase = inputLabel.get_ref<ui::ecs::BaseComponent>();
+  inputLabelBase->minWidth = 100;
+  inputLabelBase->maxWidth = 100;
+
+  inputLabel.set<ui::TextComponent>({.text = "Input Field: ",
+                                     .font = &fontData,
+                                     .color = {0.94f, 0.94f, 0.94f, 1.0f},
+                                     .pixelSize = 16,
+                                     .horizontalAlignment = ui::TextHAlignment_Left,
+                                     .verticalAlignment = ui::TextVAlignment_Middle});
+
+  // Create input field
+  const auto inputField =
+    ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "LineInput", &textFieldLayout);
+
+  inputField.set<ui::ecs::QuadRendererComponent>({
+    .color = {0.35f, 0.35f, 0.35f, 1.0f},
+    .borderRadius = {0, 0, 0, 0},
+    .borderColor = {0.46f, 0.46f, 0.46f, 1.0f},
+    .borderWidths = {3, 3, 3, 3},
+  });
+
+  // Spacer
+  ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Spacer2", &e5);
+
+  /* ------------------------------- */
 
   auto e6Base = e6.get_ref<ui::ecs::BaseComponent>();
 

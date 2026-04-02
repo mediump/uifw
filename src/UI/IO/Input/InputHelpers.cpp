@@ -116,7 +116,8 @@ void InputHelpers::process_buttons(const InputState &inputState,
                  ecs::HoverHandlerComponent>();
 
   buttonQuery.each(
-    [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize, &windowFocused](
+    [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize,
+     &windowFocused](
       const ecs::Entity &entity, const ecs::ButtonComponent &button,
       ecs::QuadRendererComponent &quadRenderer, const ecs::BaseComponent &base,
       const ecs::HoverHandlerComponent hoverHandler) {
@@ -129,7 +130,9 @@ void InputHelpers::process_buttons(const InputState &inputState,
         clippingBounds = parentBase.rect;
       }
 
-      if (isMouseInRect(mousePos, base.rect) && isMouseInRect(mousePos, clippingBounds)) {
+      // Window must have focus AND mouse must be in button bounds for hover state
+      if (windowFocused && isMouseInRect(mousePos, base.rect) &&
+          isMouseInRect(mousePos, clippingBounds)) {
         const auto bgColorOpt = appStyle.buttonStyleHovered->backgroundColor;
         const auto borderColorOpt = appStyle.buttonStyleHovered->borderColor;
 

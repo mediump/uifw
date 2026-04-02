@@ -39,11 +39,6 @@ void InputHelpers::processEvents(const WindowData *window)
     return;
   }
 
-  if (!inputState.windowFocused && !inputState.windowResized) {
-    // Ignore events when mouse is not over window and not resizing
-    return;
-  }
-
   const auto &root = window->ecsRoot;
   const auto &appStyle = window->app->appStyle;
 
@@ -54,7 +49,7 @@ void InputHelpers::processEvents(const WindowData *window)
   process_text_components(inputState, root, &cursorShape);
   /* ------------------------ */
 
-  process_cursor_update(window->app, cursorShape);
+  process_cursor_update(window->app, inputState, cursorShape);
 }
 
 void InputHelpers::cleanupSystemCursors(const SystemCursors systemCursors)
@@ -72,8 +67,13 @@ bool InputHelpers::isMouseInRect(const Vector2i &mousePos, const Rect &rect)
 }
 
 void InputHelpers::process_cursor_update(ApplicationData *app,
+                                         const InputState &inputState,
                                          const CursorShape &cursorShape)
 {
+  if (!inputState.windowFocused) {
+    return;
+  }
+
   SDL_Cursor *targetCursor = nullptr;
 
   switch (cursorShape) {
@@ -109,13 +109,14 @@ void InputHelpers::process_buttons(const InputState &inputState,
   const auto &mouseDown = inputState.mouseDown;
   const auto &windowResized = inputState.windowResized;
   const auto &windowSize = inputState.windowSize;
+  const auto &windowFocused = inputState.windowFocused;
 
   const auto &buttonQuery =
     world->query<ecs::ButtonComponent, ecs::QuadRendererComponent, ecs::BaseComponent,
                  ecs::HoverHandlerComponent>();
 
   buttonQuery.each(
-    [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize](
+    [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize, &windowFocused](
       const ecs::Entity &entity, const ecs::ButtonComponent &button,
       ecs::QuadRendererComponent &quadRenderer, const ecs::BaseComponent &base,
       const ecs::HoverHandlerComponent hoverHandler) {
@@ -245,12 +246,10 @@ void InputHelpers::process_text_components(const InputState &inputState,
     if (entity.has<ecs::QuadRendererComponent>()) {
       const auto &quadRenderer = entity.get<ecs::QuadRendererComponent>();
 
-      offsets = {
-        .x = static_cast<uint16_t>(quadRenderer.borderWidths.x),
-        .y = static_cast<uint16_t>(quadRenderer.borderWidths.y),
-        .z = static_cast<uint16_t>(quadRenderer.borderWidths.z),
-        .w = static_cast<uint16_t>(quadRenderer.borderWidths.w)
-      };
+      offsets = {.x = static_cast<uint16_t>(quadRenderer.borderWidths.x),
+                 .y = static_cast<uint16_t>(quadRenderer.borderWidths.y),
+                 .z = static_cast<uint16_t>(quadRenderer.borderWidths.z),
+                 .w = static_cast<uint16_t>(quadRenderer.borderWidths.w)};
     }
 
     if (textComponent.scrollbar == UI_NULL_ENTITY) {
@@ -272,8 +271,8 @@ void InputHelpers::process_text_components(const InputState &inputState,
     }
 
     ScrollArea::updateScrollbarPosition(textComponent, base, textHeight, offsets);
-    const bool isDragging =
-      ScrollArea::updateScrollbarInput(textComponent, base, mousePos, mouseDown, mouseUp, cursorShape);
+    const bool isDragging = ScrollArea::updateScrollbarInput(
+      textComponent, base, mousePos, mouseDown, mouseUp, cursorShape);
 
     const float maxScrollPos = 0.0f;
     const float minScrollPos = base.rect.height - textHeight;

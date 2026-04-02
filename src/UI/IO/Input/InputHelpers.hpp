@@ -42,7 +42,9 @@ private:
                                       const ecs::ECSRoot &root,
                                       CursorShape *cursorShape);
 
-  static void process_cursor_update(ApplicationData *app, const CursorShape &cursorShape);
+  static void process_cursor_update(ApplicationData *app,
+                                    const InputState &inputState,
+                                    const CursorShape &cursorShape);
 };
 
 } // namespace ui

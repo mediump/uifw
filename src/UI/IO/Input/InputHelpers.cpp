@@ -21,6 +21,7 @@
 #include <algorithm>
 
 constexpr float SCROLL_SPEED = 25.0f;
+constexpr uint64_t CARET_BLINK_RATE = 1000;
 
 #define BORDER_TOP(b)    b.z
 #define BORDER_BOTTOM(b) b.x
@@ -371,6 +372,8 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
     auto textBaseRef = input.text.get_ref<ecs::BaseComponent>();
     auto textRef = input.text.get_ref<TextComponent>();
 
+    bool bufferChanged = false;
+
     if (input.text == UI_NULL_ENTITY) {
       return;
     }
@@ -392,6 +395,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
       // Add text in buffer
       if (!inputState.currentInputBuffer.empty()) {
         textRef->text += inputState.currentInputBuffer;
+        bufferChanged = true;
       }
       else {
         if (keyDown) {
@@ -399,6 +403,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           case SDLK_BACKSPACE:
             if (!textRef->text.empty()) {
               textRef->text.pop_back();
+              bufferChanged = true;
             }
             break;
           case SDLK_RETURN:
@@ -413,8 +418,16 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
 
         if (hoverHandler.state == HoverState_Clicked) {
-          caretBase->visible = true;
+          // Calculate caret blink state
+          if (!bufferChanged) {
+            caretBase->visible =
+              (inputState.currentTime % CARET_BLINK_RATE) < (CARET_BLINK_RATE / 2);
+          }
+          else {
+            caretBase->visible = true;
+          }
 
+          // Calculate caret position
           const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
           const float topBorder = BORDER_TOP(quadRenderer.borderWidths);
 

@@ -3,6 +3,7 @@
 #include "UI/GFX/Renderer/RendererTypes.hpp"
 
 #include <SDL3/SDL_keycode.h>
+#include <cstdint>
 
 namespace ui {
 
@@ -25,6 +26,7 @@ struct InputState
   bool keyDown = false;
   KeyCode keyCode;
   Vector2f scrollDelta = {0.0f, 0.0f};
+  uint64_t currentTime;
   std::string currentInputBuffer;
 };
 

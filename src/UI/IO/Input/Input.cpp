@@ -107,6 +107,9 @@ void Input::reset_input_state(WindowData *window)
   inputState.keyDown = false;
   inputState.scrollDelta = {0.0, 0.0};
   inputState.currentInputBuffer.clear();
+
+  // Get current time
+  inputState.currentTime = SDL_GetTicks();
 }
 
 Vector2i Input::get_window_size(const WindowData *window)

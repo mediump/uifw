@@ -340,11 +340,13 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
   const auto &world = root.world;
 
   const auto &inputFieldQuery =
-    world->query<ecs::BaseComponent, ecs::InputFieldComponent>();
+    world
+      ->query<ecs::BaseComponent, ecs::InputFieldComponent, ecs::HoverHandlerComponent>();
 
   inputFieldQuery.each([&root, &inputState, &cursorShape, &window](
                          const ecs::Entity &entity, const ecs::BaseComponent &base,
-                         ecs::InputFieldComponent &input) {
+                         ecs::InputFieldComponent &input,
+                         ecs::HoverHandlerComponent &hoverHandler) {
     const auto &mousePos = inputState.mousePosition;
     const auto &mouseDown = inputState.mouseDown;
     const auto &keyDown = inputState.keyDown;
@@ -356,11 +358,13 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
 
       if (mouseDown) {
         SDL_StartTextInput(window->sdlWindow);
+        hoverHandler.state = HoverState_Clicked;
       }
     }
     else {
       if (mouseDown) {
         SDL_StopTextInput(window->sdlWindow);
+        hoverHandler.state = HoverState_Idle;
       }
     }
 
@@ -408,20 +412,27 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
       if (input.caret != UI_NULL_ENTITY) {
         auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
 
-        const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
-        const float topBorder = BORDER_TOP(quadRenderer.borderWidths);
+        if (hoverHandler.state == HoverState_Clicked) {
+          caretBase->visible = true;
 
-        caretBase->rect.y = static_cast<uint16_t>(base.rect.y + topBorder + 2);
-        caretBase->rect.height = static_cast<uint16_t>(
-          base.rect.height - topBorder - BORDER_BOTTOM(quadRenderer.borderWidths) - 4);
+          const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
+          const float topBorder = BORDER_TOP(quadRenderer.borderWidths);
 
-        const uint16_t xPos = static_cast<uint16_t>(
-          base.rect.x + leftBorder +
-          TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font));
+          caretBase->rect.y = static_cast<uint16_t>(base.rect.y + topBorder + 2);
+          caretBase->rect.height = static_cast<uint16_t>(
+            base.rect.height - topBorder - BORDER_BOTTOM(quadRenderer.borderWidths) - 4);
 
-        caretBase->rect.x = xPos;
-        caretBase->rect.width = 2;
-        caretBase->zOrder = 90;
+          const uint16_t xPos = static_cast<uint16_t>(
+            base.rect.x + leftBorder +
+            TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font));
+
+          caretBase->rect.x = xPos;
+          caretBase->rect.width = 2;
+          caretBase->zOrder = 90;
+        }
+        else {
+          caretBase->visible = false;
+        }
       }
     }
   });

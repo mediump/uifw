@@ -393,7 +393,9 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         if (keyDown) {
           switch (keyCode) {
           case SDLK_BACKSPACE:
-            textRef->text.pop_back();
+            if (!textRef->text.empty()) {
+              textRef->text.pop_back();
+            }
             break;
           case SDLK_RETURN:
             // textRef->text += "\n";
@@ -415,8 +417,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
 
         const uint16_t xPos = static_cast<uint16_t>(
           base.rect.x + leftBorder +
-          TextRendererHelpers::getWordLength(textRef->text, *textRef.get(),
-                                             textRef->font));
+          TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font));
 
         caretBase->rect.x = xPos;
         caretBase->rect.width = 2;

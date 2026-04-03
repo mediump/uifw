@@ -87,6 +87,19 @@ public:
    */
   static float computeTotalTextHeight(const TextComponent &textComponent,
                                       const ecs::BaseComponent &baseComponent);
+
+  /**
+   * Computes the width of the last line of text (useful for caret positioning).
+   * Accounts for glyph advances and space characters between words.
+   *
+   * @param text The text to measure (may contain newlines; measures last line)
+   * @param textComponent The text component providing font and style info
+   * @param fontData The font data for glyph metrics lookup
+   * @return Total width in pixels of the last line
+   */
+  static float computeLineWidth(const std::string &text,
+                                const TextComponent &textComponent,
+                                const FontData *fontData);
 };
 
 } // namespace ui

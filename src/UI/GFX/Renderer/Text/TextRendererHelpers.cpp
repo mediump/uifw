@@ -486,6 +486,34 @@ float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
   return static_cast<float>(totalRenderedLines) * lineHeight;
 }
 
+float TextUtils::computeLineWidth(const std::string &text,
+                                  const TextComponent &textComponent,
+                                  const FontData *fontData)
+{
+  const float fontSize = static_cast<float>(textComponent.pixelSize);
+  const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
+
+  std::vector<std::string> lines = StringUtils::split(text, "\n");
+  const std::string &lastLine = lines.back();
+
+  std::vector<std::string> words = StringUtils::split(lastLine, " ");
+
+  if (words.empty() || (words.size() == 1 && words[0].empty())) {
+    return 0.0f;
+  }
+
+  float currentAdvance = 0.0f;
+
+  for (size_t i = 0; i < words.size(); i++) {
+    const float wordLength =
+      TextRendererHelpers::getWordLength(words[i], textComponent, fontData);
+
+    currentAdvance += (i > 0) ? (wordLength + spaceWidth) : wordLength;
+  }
+
+  return currentAdvance;
+}
+
 bool ui::TextRendererHelpers::is_glyph_in_clipping_mask(
   float x, float y, float w, float h, const Rect &clippingMask)
 {

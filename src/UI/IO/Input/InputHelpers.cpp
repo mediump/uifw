@@ -405,15 +405,22 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
       // Layout caret
       if (input.caret != UI_NULL_ENTITY) {
         auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
-        caretBase->rect.y = base.rect.x + 2;
-        caretBase->rect.height = base.rect.height - 4;
 
-        const uint16_t xPos = base.rect.x +
+        const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
+        const float topBorder = BORDER_TOP(quadRenderer.borderWidths);
+
+        caretBase->rect.y = static_cast<uint16_t>(base.rect.y + topBorder + 2);
+        caretBase->rect.height = static_cast<uint16_t>(
+          base.rect.height - topBorder - BORDER_BOTTOM(quadRenderer.borderWidths) - 4);
+
+        const uint16_t xPos = static_cast<uint16_t>(
+          base.rect.x + leftBorder +
           TextRendererHelpers::getWordLength(textRef->text, *textRef.get(),
-                                             textRef->font);
+                                             textRef->font));
 
         caretBase->rect.x = xPos;
-        caretBase->rect.width = 13;
+        caretBase->rect.width = 2;
+        caretBase->zOrder = 90;
       }
     }
   });

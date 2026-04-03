@@ -26,7 +26,7 @@ enum TextVAlignment
 
 struct TextComponent
 {
-  const char *text = "TextComponent";
+  std::string text = "TextComponent";
   FontData *font = nullptr;
 
   Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};

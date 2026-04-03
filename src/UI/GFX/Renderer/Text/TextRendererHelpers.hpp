@@ -19,7 +19,6 @@ public:
   static size_t recordGlyphDrawList(const Canvas *canvas,
                                     std::vector<FontGlyphInstance> &outInstances);
 
-protected:
   static float getWordLength(const std::string &wordText,
                              const TextComponent &textComponent,
                              const FontData *fontData);

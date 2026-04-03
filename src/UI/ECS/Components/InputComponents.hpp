@@ -11,6 +11,7 @@ enum CursorShape
   CursorShape_Default,
   CursorShape_Hide,
   CursorShape_Pointer,
+  CursorShape_IBeam,
   CursorShape_Grab,
   CursorShape_Move,
   CursorShape_VerticalResize,
@@ -35,6 +36,13 @@ struct HoverHandlerComponent
 struct ButtonComponent
 {
   std::function<void(const Entity &)> onClick = nullptr;
+};
+
+struct InputFieldComponent
+{
+  bool focused = false;
+  Entity text = UI_NULL_ENTITY;
+  Entity caret = UI_NULL_ENTITY;
 };
 
 } // namespace ecs

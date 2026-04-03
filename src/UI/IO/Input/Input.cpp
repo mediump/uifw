@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "SDL3/SDL_events.h"
+#include "SDL3/SDL_keyboard.h"
 #include "SDL3/SDL_mouse.h"
 #include "UI/Core/Application.hpp"
 #include "UI/Window/Window.hpp"
@@ -53,6 +54,11 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
                               static_cast<float>(event.wheel.integer_y)};
     break;
   case SDL_EVENT_KEY_DOWN:
+    inputState.keyDown = true;
+    inputState.keyCode = event.key.key;
+    break;
+  case SDL_EVENT_TEXT_INPUT:
+    inputState.currentInputBuffer += event.text.text;
     break;
   case SDL_EVENT_KEY_UP:
     break;
@@ -76,8 +82,8 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
 void Input::pollEvents(ApplicationData *app)
 {
   // Reset all window input states
-  for (const auto &[id, window] : app->windows) {
-    reset_input_state(&window->inputState);
+  for (auto &[id, window] : app->windows) {
+    reset_input_state(window);
   }
 
   // Poll all events, send events to each window
@@ -88,14 +94,19 @@ void Input::pollEvents(ApplicationData *app)
   }
 }
 
-void Input::reset_input_state(InputState *inputState)
+void Input::reset_input_state(WindowData *window)
 {
-  inputState->shouldQuit = false;
-  inputState->windowResized = false;
-  inputState->mouseMoved = false;
-  inputState->mouseDown = false;
-  inputState->mouseUp = false;
-  inputState->scrollDelta = {0.0, 0.0};
+  // Reset per-frame parameters to their defaults
+  auto &inputState = window->inputState;
+
+  inputState.shouldQuit = false;
+  inputState.windowResized = false;
+  inputState.mouseMoved = false;
+  inputState.mouseDown = false;
+  inputState.mouseUp = false;
+  inputState.keyDown = false;
+  inputState.scrollDelta = {0.0, 0.0};
+  inputState.currentInputBuffer.clear();
 }
 
 Vector2i Input::get_window_size(const WindowData *window)

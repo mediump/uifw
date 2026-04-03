@@ -1,11 +1,16 @@
 #include "InputHelpers.hpp"
 
+#include "SDL3/SDL_keyboard.h"
+#include "SDL3/SDL_keycode.h"
+#include "SDL3/SDL_mouse.h"
+#include "SDL3/SDL_oldnames.h"
 #include "UI/Core/Application.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
+#include "UI/GFX/Renderer/Text/TextHelpers.hpp"
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
 #include "UI/Utils/MathUtils.hpp"
@@ -27,7 +32,8 @@ using namespace ui;
 SystemCursors InputHelpers::initSystemCursors()
 {
   return {.defaultCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_DEFAULT),
-          .pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER)};
+          .pointerCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_POINTER),
+          .iBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT)};
 }
 
 void InputHelpers::processEvents(const WindowData *window)
@@ -47,6 +53,7 @@ void InputHelpers::processEvents(const WindowData *window)
   /* ---- Process events ---- */
   process_buttons(inputState, root, appStyle, &cursorShape);
   process_text_components(inputState, root, &cursorShape);
+  process_input_fields(window, inputState, root, &cursorShape);
   /* ------------------------ */
 
   process_cursor_update(window->app, inputState, cursorShape);
@@ -83,6 +90,9 @@ void InputHelpers::process_cursor_update(ApplicationData *app,
   case CursorShape_Pointer:
     targetCursor = app->systemCursors.pointerCursor;
     break;
+  case CursorShape_IBeam:
+    targetCursor = app->systemCursors.iBeamCursor;
+    break;
   default:
     break;
   }
@@ -117,10 +127,10 @@ void InputHelpers::process_buttons(const InputState &inputState,
 
   buttonQuery.each(
     [&cursorShape, &appStyle, &mouseDown, &mousePos, &windowResized, &windowSize,
-     &windowFocused](
-      const ecs::Entity &entity, const ecs::ButtonComponent &button,
-      ecs::QuadRendererComponent &quadRenderer, const ecs::BaseComponent &base,
-      const ecs::HoverHandlerComponent hoverHandler) {
+     &windowFocused](const ecs::Entity &entity, const ecs::ButtonComponent &button,
+                     ecs::QuadRendererComponent &quadRenderer,
+                     const ecs::BaseComponent &base,
+                     const ecs::HoverHandlerComponent hoverHandler) {
       // Get clipping bounds
       Rect clippingBounds = {0, 0, windowSize.x, windowSize.y};
       const auto parent = base.transformRel.parent;
@@ -312,7 +322,99 @@ void InputHelpers::process_text_components(const InputState &inputState,
   });
 }
 
+const char *ui::InputHelpers::keyCodeToUTF8Str(KeyCode keyCode)
+{
+  return SDL_GetKeyName(keyCode);
+}
+
 void ui::InputHelpers::process_scrollbars(const InputState &inputState,
                                           const ecs::ECSRoot &root,
                                           const AppStyle &appStyle)
 {}
+
+void ui::InputHelpers::process_input_fields(const WindowData *window,
+                                            const InputState &inputState,
+                                            const ecs::ECSRoot &root,
+                                            CursorShape *cursorShape)
+{
+  const auto &world = root.world;
+
+  const auto &inputFieldQuery =
+    world->query<ecs::BaseComponent, ecs::InputFieldComponent>();
+
+  inputFieldQuery.each([&root, &inputState, &cursorShape, &window](
+                         const ecs::Entity &entity, const ecs::BaseComponent &base,
+                         ecs::InputFieldComponent &input) {
+    const auto &mousePos = inputState.mousePosition;
+    const auto &mouseDown = inputState.mouseDown;
+    const auto &keyDown = inputState.keyDown;
+    const auto &keyCode = inputState.keyCode;
+
+    // Hover state
+    if (isMouseInRect(mousePos, base.rect)) {
+      *cursorShape = CursorShape_IBeam;
+
+      if (mouseDown) {
+        SDL_StartTextInput(window->sdlWindow);
+      }
+    }
+    else {
+      if (mouseDown) {
+        SDL_StopTextInput(window->sdlWindow);
+      }
+    }
+
+    auto textBaseRef = input.text.get_ref<ecs::BaseComponent>();
+    auto textRef = input.text.get_ref<TextComponent>();
+
+    if (input.text == UI_NULL_ENTITY) {
+      return;
+    }
+    else {
+      const auto quadRenderer = entity.get<ecs::QuadRendererComponent>();
+
+      // Layout input buffer
+      textBaseRef->rect = {
+        .x = static_cast<uint16_t>(base.rect.x + BORDER_LEFT(quadRenderer.borderWidths)),
+        .y = static_cast<uint16_t>(base.rect.y + BORDER_TOP(quadRenderer.borderWidths)),
+        .width =
+          static_cast<uint16_t>(base.rect.width - BORDER_LEFT(quadRenderer.borderWidths) -
+                                BORDER_RIGHT(quadRenderer.borderWidths)),
+        .height =
+          static_cast<uint16_t>(base.rect.height - BORDER_TOP(quadRenderer.borderWidths) -
+                                BORDER_BOTTOM(quadRenderer.borderWidths)),
+      };
+
+      // Add text in buffer
+      if (!inputState.currentInputBuffer.empty()) {
+        textRef->text += inputState.currentInputBuffer;
+      }
+      else {
+        if (keyDown) {
+          switch (keyCode) {
+          case SDLK_BACKSPACE:
+            textRef->text.pop_back();
+            break;
+          case SDLK_RETURN:
+            // textRef->text += "\n";
+            break;
+          }
+        }
+      }
+
+      // Layout caret
+      if (input.caret != UI_NULL_ENTITY) {
+        auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
+        caretBase->rect.y = base.rect.x + 2;
+        caretBase->rect.height = base.rect.height - 4;
+
+        const uint16_t xPos = base.rect.x +
+          TextRendererHelpers::getWordLength(textRef->text, *textRef.get(),
+                                             textRef->font);
+
+        caretBase->rect.x = xPos;
+        caretBase->rect.width = 13;
+      }
+    }
+  });
+}

@@ -45,6 +45,8 @@ add_library(uifw STATIC
   src/UI/Widgets/Text/ScrollArea.cpp
   src/UI/Widgets/Text/ScrollArea.hpp
   src/UI/Utils/MathUtils.hpp
+  src/UI/Widgets/Text/InputField.cpp
+  src/UI/Widgets/Text/InputField.hpp
 )
 
 target_link_libraries(uifw PUBLIC

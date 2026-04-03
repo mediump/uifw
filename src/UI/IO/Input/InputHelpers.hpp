@@ -6,6 +6,7 @@
 #include "UI/ECS/Components/StyleComponents.hpp"
 #include "UI/ECS/ECSRoot/ECSRoot.hpp"
 #include "UI/Layout/LayoutTypes.hpp"
+#include "UI/Window/Window.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -17,6 +18,7 @@ struct SystemCursors
 {
   SDL_Cursor *defaultCursor;
   SDL_Cursor *pointerCursor;
+  SDL_Cursor *iBeamCursor;
 };
 
 class InputHelpers
@@ -27,6 +29,7 @@ public:
   static void cleanupSystemCursors(SystemCursors systemCursors);
 
   static bool isMouseInRect(const Vector2i &mousePos, const Rect &rect);
+  static const char* keyCodeToUTF8Str(KeyCode keyCode);
 
 private:
   static void process_buttons(const InputState &inputState,
@@ -41,6 +44,11 @@ private:
   static void process_text_components(const InputState &inputState,
                                       const ecs::ECSRoot &root,
                                       CursorShape *cursorShape);
+
+  static void process_input_fields(const WindowData *window,
+                                   const InputState &inputState,
+                                   const ecs::ECSRoot &root,
+                                   CursorShape *cursorShape);
 
   static void process_cursor_update(ApplicationData *app,
                                     const InputState &inputState,

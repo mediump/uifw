@@ -16,6 +16,7 @@
 #include "UI/Widgets/Text/InputField.hpp"
 #include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
+#include "Utils.hpp"
 
 #include <algorithm>
 #include <numeric>
@@ -399,6 +400,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
       // Add text in buffer
       if (!inputState.currentInputBuffer.empty()) {
         textRef->text += inputState.currentInputBuffer;
+        input.cursorPos += inputState.currentInputBuffer.size();
         bufferChanged = true;
       }
       else {
@@ -406,14 +408,34 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           switch (keyCode) {
           case SDLK_BACKSPACE:
             if (!textRef->text.empty()) {
-              textRef->text.pop_back();
+              textRef->text.erase(textRef->text.begin() + input.cursorPos - 1);
+              input.cursorPos -= 1;
               bufferChanged = true;
             }
             break;
+          case SDLK_DELETE:
+            if (!textRef->text.empty() && input.cursorPos < textRef->text.size()) {
+              textRef->text.erase(textRef->text.begin() + input.cursorPos);
+              bufferChanged = true;
+            }
+            break;
+          case SDLK_RIGHT:
+            if (!textRef->text.empty()) {
+              input.cursorPos += 1;
+              bufferChanged = true;
+            }
+            break;
+          case SDLK_LEFT:
+            if (!textRef->text.empty()) {
+              input.cursorPos -= 1;
+              bufferChanged = true;
+            }
           case SDLK_RETURN:
             // textRef->text += "\n";
             break;
           }
+
+          input.cursorPos = std::clamp<size_t>(input.cursorPos, 0, textRef->text.size());
         }
       }
 
@@ -430,6 +452,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           // Calculate caret blink state
           if (bufferChanged) {
             input.lastInputTime = inputState.currentTime;
+            UI_LOG_MSG("Cursor pos: %i", input.cursorPos);
           }
 
           const uint64_t timeSinceLastInput =
@@ -452,7 +475,10 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           caretBase->rect.height = static_cast<uint16_t>(
             base.rect.height - topBorder - BORDER_BOTTOM(quadRenderer.borderWidths) - 4);
 
-          const uint16_t xPos = static_cast<uint16_t>(base.rect.x + leftBorder + fullLineWidth);
+          const float cursorOffset = std::accumulate(
+            glyphDimensions.begin(), glyphDimensions.begin() + input.cursorPos, 0.0f);
+          const uint16_t xPos =
+            static_cast<uint16_t>(base.rect.x + leftBorder + cursorOffset);
 
           caretBase->rect.x = xPos;
           caretBase->rect.width = 2;

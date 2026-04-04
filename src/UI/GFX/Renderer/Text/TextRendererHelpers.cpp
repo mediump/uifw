@@ -1,5 +1,6 @@
 #include "TextRendererHelpers.hpp"
 
+#include "SDL3/SDL_stdinc.h"
 #include "TextTypes.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
@@ -20,7 +21,7 @@ constexpr uint32_t MAX_GLYPH_COUNT = 8192;
 
 // N-pixel slop factors, used to avoid noticeable pops when culling text
 #define CULLING_SLOP 5
-#define SCROLL_SLOP 30
+#define SCROLL_SLOP  30
 
 using namespace ui;
 
@@ -166,7 +167,7 @@ void TextRendererHelpers::record_text_component(
     // if (currentBaselineY > clippingMask.height + SCROLL_SLOP) {
     //   break;
     // }
-    
+
     const float lineWidth = renderLine.width;
 
     // Calculate horizontal alignment offset for this specific rendered line
@@ -404,17 +405,25 @@ float TextRendererHelpers::getWordLength(const std::string &wordText,
 
   while (strLen > 0) {
     const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
-    auto glyphIt = fontData->glyphs.find(unicodeValue);
-
-    if (glyphIt == fontData->glyphs.end()) {
-      continue;
-    }
-
-    const auto &glyphData = glyphIt->second;
-    currentAdvance += glyphData.advance * fontSize;
+    currentAdvance += getGlyphWidth(unicodeValue, textComponent, fontData);
   }
 
   return currentAdvance;
+}
+
+float ui::TextRendererHelpers::getGlyphWidth(const uint32_t unicodeValue,
+                                             const TextComponent &textComponent,
+                                             const FontData *fontData)
+{
+  const float fontSize = textComponent.pixelSize;
+  auto glyphIt = fontData->glyphs.find(unicodeValue);
+
+  if (glyphIt == fontData->glyphs.end()) {
+    return 0.0f;
+  }
+
+  const auto &glyphData = glyphIt->second;
+  return glyphData.advance * fontSize;
 }
 
 float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
@@ -486,9 +495,9 @@ float TextUtils::computeTotalTextHeight(const TextComponent &textComponent,
   return static_cast<float>(totalRenderedLines) * lineHeight;
 }
 
-float TextUtils::computeLineWidth(const std::string &text,
-                                  const TextComponent &textComponent,
-                                  const FontData *fontData)
+std::vector<float> TextUtils::computeLineWidth(const std::string &text,
+                                               const TextComponent &textComponent,
+                                               const FontData *fontData)
 {
   const float fontSize = static_cast<float>(textComponent.pixelSize);
   const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
@@ -497,21 +506,37 @@ float TextUtils::computeLineWidth(const std::string &text,
   const std::string &lastLine = lines.back();
 
   std::vector<std::string> words = StringUtils::split(lastLine, " ");
+  std::vector<float> glyphBounds;
 
   if (words.empty() || (words.size() == 1 && words[0].empty())) {
-    return 0.0f;
+    return glyphBounds;
   }
 
-  float currentAdvance = 0.0f;
+  glyphBounds.reserve(text.size());
 
   for (size_t i = 0; i < words.size(); i++) {
+    const auto &word = words[i];
+
+    const char *strPtr = word.data();
+    size_t strLen = word.size();
+
+    while (strLen > 0) {
+      const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
+      const float width =
+        TextRendererHelpers::getGlyphWidth(unicodeValue, textComponent, fontData);
+
+      glyphBounds.emplace_back(width);
+    }
+
     const float wordLength =
       TextRendererHelpers::getWordLength(words[i], textComponent, fontData);
 
-    currentAdvance += (i > 0) ? (wordLength + spaceWidth) : wordLength;
+    if (i > 0) {
+      glyphBounds.emplace_back(spaceWidth);
+    }
   }
 
-  return currentAdvance;
+  return glyphBounds;
 }
 
 bool ui::TextRendererHelpers::is_glyph_in_clipping_mask(

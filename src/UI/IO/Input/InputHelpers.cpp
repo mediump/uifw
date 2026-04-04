@@ -17,6 +17,7 @@
 #include "UI/Window/Window.hpp"
 
 #include <algorithm>
+#include <numeric>
 
 constexpr float SCROLL_SPEED = 25.0f;
 constexpr uint64_t CARET_BLINK_RATE = 1000;
@@ -359,6 +360,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
       if (mouseDown) {
         SDL_StartTextInput(window->sdlWindow);
         hoverHandler.state = HoverState_Clicked;
+        input.lastInputTime = inputState.currentTime;
       }
     }
     else {
@@ -417,12 +419,18 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
 
         if (hoverHandler.state == HoverState_Clicked) {
+          const std::vector<float> glyphDimensions =
+            TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font);
+          const float fullLineWidth =
+            std::accumulate(glyphDimensions.begin(), glyphDimensions.end(), 0.0f);
+
           // Calculate caret blink state
           if (bufferChanged) {
             input.lastInputTime = inputState.currentTime;
           }
 
-          const uint64_t timeSinceLastInput = inputState.currentTime - input.lastInputTime;
+          const uint64_t timeSinceLastInput =
+            inputState.currentTime - input.lastInputTime;
           const bool recentlyTyped = timeSinceLastInput < CARET_VISIBLE_AFTER_INPUT;
 
           if (recentlyTyped) {
@@ -441,9 +449,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           caretBase->rect.height = static_cast<uint16_t>(
             base.rect.height - topBorder - BORDER_BOTTOM(quadRenderer.borderWidths) - 4);
 
-          const uint16_t xPos = static_cast<uint16_t>(
-            base.rect.x + leftBorder +
-            TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font));
+          const uint16_t xPos = static_cast<uint16_t>(base.rect.x + leftBorder + fullLineWidth);
 
           caretBase->rect.x = xPos;
           caretBase->rect.width = 2;

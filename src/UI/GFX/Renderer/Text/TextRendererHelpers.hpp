@@ -23,6 +23,10 @@ public:
                              const TextComponent &textComponent,
                              const FontData *fontData);
 
+  static float getGlyphWidth(const uint32_t unicodeValue,
+                             const TextComponent &textComponent,
+                             const FontData *fontData);
+
 private:
   static void record_text_component(ecs::Entity e,
                                     const ecs::BaseComponent &baseComponent,
@@ -95,11 +99,11 @@ public:
    * @param text The text to measure (may contain newlines; measures last line)
    * @param textComponent The text component providing font and style info
    * @param fontData The font data for glyph metrics lookup
-   * @return Total width in pixels of the last line
+   * @return Width in pixels of each character in the line
    */
-  static float computeLineWidth(const std::string &text,
-                                const TextComponent &textComponent,
-                                const FontData *fontData);
+  static std::vector<float> computeLineWidth(const std::string &text,
+                                             const TextComponent &textComponent,
+                                             const FontData *fontData);
 };
 
 } // namespace ui

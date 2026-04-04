@@ -269,27 +269,8 @@ int main()
   inputField.set<ui::ecs::HoverHandlerComponent>({
     .cursorShape = ui::CursorShape_IBeam,
   });
-
-  const auto &inputFieldText = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 200, 200,
-                                                     "LineInput_text", &inputField);
-
-  inputFieldText.set<ui::TextComponent>({.text = "",
-                                         .font = &fontData,
-                                         .color = {0.94f, 0.94f, 0.94f, 1.0f},
-                                         .pixelSize = 16,
-                                         .horizontalAlignment = ui::TextHAlignment_Left,
-                                         .verticalAlignment = ui::TextVAlignment_Middle});
-
-  const auto &inputFieldCaret =
-    ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "LineInput_caret", &inputField);
-  
-  inputFieldCaret.set<ui::ecs::QuadRendererComponent>({
-    .color = {1.0f, 1.0f, 1.0f, 1.0f}
-  });
-
   inputField.set<ui::ecs::InputFieldComponent>({
-    .text = inputFieldText,
-    .caret = inputFieldCaret
+    .font = &fontData
   });
 
   // Spacer

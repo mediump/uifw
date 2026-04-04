@@ -8,9 +8,12 @@
 
 namespace ui {
 
-class InputField {
+class InputField
+{
 public:
-
+  static void ensureElements(const ecs::ECSRoot *root,
+                             ecs::InputFieldComponent &inputField,
+                             const ecs::Entity &entity);
 };
 
-}
+} // namespace ui

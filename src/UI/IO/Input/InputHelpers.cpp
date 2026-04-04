@@ -13,6 +13,7 @@
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
 #include "UI/Utils/MathUtils.hpp"
+#include "UI/Widgets/Text/InputField.hpp"
 #include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
 
@@ -348,6 +349,8 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
                          const ecs::Entity &entity, const ecs::BaseComponent &base,
                          ecs::InputFieldComponent &input,
                          ecs::HoverHandlerComponent &hoverHandler) {
+    InputField::ensureElements(&root, input, entity);
+
     const auto &mousePos = inputState.mousePosition;
     const auto &mouseDown = inputState.mouseDown;
     const auto &keyDown = inputState.keyDown;

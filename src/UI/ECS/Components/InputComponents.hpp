@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/ECS/Entity/Entity.hpp"
+#include "UI/GFX/Renderer/Text/TextTypes.hpp"
 
 #include <functional>
 
@@ -45,6 +46,7 @@ struct InputFieldComponent
   Entity caret = UI_NULL_ENTITY;
   size_t cursorPos = 0;
   uint64_t lastInputTime = 0;
+  FontData *font = nullptr;
 };
 
 } // namespace ecs

@@ -3,25 +3,24 @@
 #include "SDL3/SDL_keyboard.h"
 #include "SDL3/SDL_keycode.h"
 #include "SDL3/SDL_mouse.h"
-#include "SDL3/SDL_oldnames.h"
+
 #include "UI/Core/Application.hpp"
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
-#include "UI/GFX/Renderer/Text/TextHelpers.hpp"
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
 #include "UI/Utils/MathUtils.hpp"
 #include "UI/Widgets/Text/ScrollArea.hpp"
 #include "UI/Window/Window.hpp"
-#include "Utils.hpp"
 
 #include <algorithm>
 
 constexpr float SCROLL_SPEED = 25.0f;
 constexpr uint64_t CARET_BLINK_RATE = 1000;
+constexpr uint64_t CARET_VISIBLE_AFTER_INPUT = 300;
 
 #define BORDER_TOP(b)    b.z
 #define BORDER_BOTTOM(b) b.x
@@ -419,12 +418,19 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
 
         if (hoverHandler.state == HoverState_Clicked) {
           // Calculate caret blink state
-          if (!bufferChanged) {
-            caretBase->visible =
-              (inputState.currentTime % CARET_BLINK_RATE) < (CARET_BLINK_RATE / 2);
+          if (bufferChanged) {
+            input.lastInputTime = inputState.currentTime;
+          }
+
+          const uint64_t timeSinceLastInput = inputState.currentTime - input.lastInputTime;
+          const bool recentlyTyped = timeSinceLastInput < CARET_VISIBLE_AFTER_INPUT;
+
+          if (recentlyTyped) {
+            caretBase->visible = true;
           }
           else {
-            caretBase->visible = true;
+            caretBase->visible =
+              (inputState.currentTime % CARET_BLINK_RATE) < (CARET_BLINK_RATE / 2);
           }
 
           // Calculate caret position

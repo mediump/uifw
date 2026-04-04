@@ -43,6 +43,7 @@ struct InputFieldComponent
   bool focused = false;
   Entity text = UI_NULL_ENTITY;
   Entity caret = UI_NULL_ENTITY;
+  uint64_t lastInputTime = 0;
 };
 
 } // namespace ecs

@@ -399,7 +399,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
 
       // Add text in buffer
       if (!inputState.currentInputBuffer.empty()) {
-        textRef->text += inputState.currentInputBuffer;
+        textRef->text.insert(input.cursorPos, inputState.currentInputBuffer);
         input.cursorPos += inputState.currentInputBuffer.size();
         bufferChanged = true;
       }

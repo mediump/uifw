@@ -19,6 +19,7 @@
 #include "Utils.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <numeric>
 
 constexpr float SCROLL_SPEED = 25.0f;
@@ -365,6 +366,8 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         SDL_StartTextInput(window->sdlWindow);
         hoverHandler.state = HoverState_Clicked;
         input.lastInputTime = inputState.currentTime;
+
+        InputField::setCursorToClickPoint(input, base, mousePos);
       }
     }
     else {

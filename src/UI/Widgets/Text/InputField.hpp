@@ -14,6 +14,10 @@ public:
   static void ensureElements(const ecs::ECSRoot *root,
                              ecs::InputFieldComponent &inputField,
                              const ecs::Entity &entity);
+
+  static void setCursorToClickPoint(ecs::InputFieldComponent &input,
+                                    const ecs::BaseComponent &base,
+                                    const Vector2i &mousePos);
 };
 
 } // namespace ui

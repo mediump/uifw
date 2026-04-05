@@ -1,7 +1,11 @@
 #include "InputField.hpp"
+#include <algorithm>
+
+#include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
+#include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 
 using namespace ui;
 
@@ -31,10 +35,57 @@ void InputField::ensureElements(const ecs::ECSRoot *root,
     const auto caret =
       ui::ecs::createEntity(root, 0, 0, 200, 200, caretName.c_str(), &entity);
 
-    caret.set<ecs::QuadRendererComponent>({
-      .color = {1.0f, 1.0f, 1.0f, 1.0f}
-    });
+    caret.set<ecs::QuadRendererComponent>({.color = {1.0f, 1.0f, 1.0f, 1.0f}});
 
     inputField.caret = caret;
+  }
+}
+
+void InputField::setCursorToClickPoint(ecs::InputFieldComponent &input,
+                                       const ecs::BaseComponent &base,
+                                       const Vector2i &mousePos)
+{
+  if (input.text != UI_NULL_ENTITY) {
+    const auto &inputText = input.text.get<ui::TextComponent>();
+
+    // Handle empty text - cursor position is always 0
+    if (inputText.text.empty()) {
+      input.cursorPos = 0;
+      return;
+    }
+
+    const std::vector<float> glyphDimensions =
+      TextUtils::computeLineWidth(inputText.text, inputText, inputText.font);
+
+    float totalAdvance = 0.0f;
+    std::vector<float> absoluteMidpoints;
+    absoluteMidpoints.reserve(glyphDimensions.size());
+
+    for (const auto &width : glyphDimensions) {
+      const float min = base.rect.x + totalAdvance;
+      const float max = min + width;
+
+      absoluteMidpoints.emplace_back((min + max) * 0.5f);
+      totalAdvance += width;
+    }
+
+    if (absoluteMidpoints.back() < mousePos.x) {
+      input.cursorPos = inputText.text.size();
+      return;
+    }
+
+    float minDist = std::numeric_limits<float>::max();
+    size_t minIdx = 0;
+
+    for (size_t i = 0; i < absoluteMidpoints.size(); i++) {
+      const float dist = std::abs(mousePos.x - absoluteMidpoints[i]);
+
+      if (dist < minDist) {
+        minDist = dist;
+        minIdx = i;
+      }
+    }
+
+    input.cursorPos = std::clamp<size_t>(minIdx, 0, inputText.text.size());
   }
 }

@@ -502,37 +502,28 @@ std::vector<float> TextUtils::computeLineWidth(const std::string &text,
   const float fontSize = static_cast<float>(textComponent.pixelSize);
   const float spaceWidth = SPACE_ADVANCE_MULTIPLIER * fontSize;
 
-  std::vector<std::string> lines = StringUtils::split(text, "\n");
-  const std::string &lastLine = lines.back();
+  // Find the last line (handle newlines)
+  size_t lastNewlinePos = text.rfind('\n');
+  std::string_view lastLine = (lastNewlinePos == std::string::npos)
+    ? std::string_view(text)
+    : std::string_view(text.data() + lastNewlinePos + 1, text.size() - lastNewlinePos - 1);
 
-  std::vector<std::string> words = StringUtils::split(lastLine, " ");
   std::vector<float> glyphBounds;
+  glyphBounds.reserve(lastLine.size());
 
-  if (words.empty() || (words.size() == 1 && words[0].empty())) {
-    return glyphBounds;
-  }
+  const char *strPtr = lastLine.data();
+  size_t strLen = lastLine.size();
 
-  glyphBounds.reserve(text.size());
+  while (strLen > 0) {
+    const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
 
-  for (size_t i = 0; i < words.size(); i++) {
-    const auto &word = words[i];
-
-    const char *strPtr = word.data();
-    size_t strLen = word.size();
-
-    while (strLen > 0) {
-      const uint32_t unicodeValue = SDL_StepUTF8(&strPtr, &strLen);
+    if (unicodeValue == ' ') {
+      glyphBounds.emplace_back(spaceWidth);
+    }
+    else {
       const float width =
         TextRendererHelpers::getGlyphWidth(unicodeValue, textComponent, fontData);
-
       glyphBounds.emplace_back(width);
-    }
-
-    const float wordLength =
-      TextRendererHelpers::getWordLength(words[i], textComponent, fontData);
-
-    if (i > 0) {
-      glyphBounds.emplace_back(spaceWidth);
     }
   }
 

@@ -367,7 +367,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         hoverHandler.state = HoverState_Clicked;
         input.lastInputTime = inputState.currentTime;
 
-        InputField::setCursorToClickPoint(input, base, mousePos);
+        input.cursorPos = InputField::getCursorPositionFromMouse(input, base, mousePos);
       }
     }
     else {

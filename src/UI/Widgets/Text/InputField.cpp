@@ -1,11 +1,13 @@
 #include "InputField.hpp"
-#include <algorithm>
 
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
+#include "UI/ECS/Components/InputComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
 #include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
+
+#include <algorithm>
 
 using namespace ui;
 
@@ -41,17 +43,15 @@ void InputField::ensureElements(const ecs::ECSRoot *root,
   }
 }
 
-void InputField::setCursorToClickPoint(ecs::InputFieldComponent &input,
-                                       const ecs::BaseComponent &base,
-                                       const Vector2i &mousePos)
+size_t InputField::getCursorPositionFromMouse(const ecs::InputFieldComponent &input,
+                                              const ecs::BaseComponent &base,
+                                              const Vector2i &mousePos)
 {
   if (input.text != UI_NULL_ENTITY) {
     const auto &inputText = input.text.get<ui::TextComponent>();
 
-    // Handle empty text - cursor position is always 0
     if (inputText.text.empty()) {
-      input.cursorPos = 0;
-      return;
+      return 0;
     }
 
     const std::vector<float> glyphDimensions =
@@ -70,8 +70,7 @@ void InputField::setCursorToClickPoint(ecs::InputFieldComponent &input,
     }
 
     if (absoluteMidpoints.back() < mousePos.x) {
-      input.cursorPos = inputText.text.size();
-      return;
+      return inputText.text.size();
     }
 
     float minDist = std::numeric_limits<float>::max();
@@ -86,6 +85,6 @@ void InputField::setCursorToClickPoint(ecs::InputFieldComponent &input,
       }
     }
 
-    input.cursorPos = std::clamp<size_t>(minIdx, 0, inputText.text.size());
+    return std::clamp<size_t>(minIdx, 0, inputText.text.size());
   }
 }

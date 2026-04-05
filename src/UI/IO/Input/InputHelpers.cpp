@@ -364,7 +364,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
 
       if (mouseDown) {
         SDL_StartTextInput(window->sdlWindow);
-        hoverHandler.state = HoverState_Clicked;
+        input.state = ecs::InputFieldState_Active;
         input.lastInputTime = inputState.currentTime;
 
         input.cursorPos = InputField::getCursorPositionFromMouse(input, base, mousePos);
@@ -373,7 +373,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
     else {
       if (mouseDown) {
         SDL_StopTextInput(window->sdlWindow);
-        hoverHandler.state = HoverState_Idle;
+        input.state = ecs::InputFieldState_Inactive;
       }
     }
 
@@ -446,7 +446,7 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
       if (input.caret != UI_NULL_ENTITY) {
         auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
 
-        if (hoverHandler.state == HoverState_Clicked) {
+        if (input.state == ecs::InputFieldState_Active) {
           const std::vector<float> glyphDimensions =
             TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font);
           const float fullLineWidth =

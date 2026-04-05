@@ -39,9 +39,16 @@ struct ButtonComponent
   std::function<void(const Entity &)> onClick = nullptr;
 };
 
+enum InputFieldState
+{
+  InputFieldState_Inactive,
+  InputFieldState_Active,
+};
+
 struct InputFieldComponent
 {
   bool focused = false;
+  InputFieldState state = InputFieldState_Inactive;
   Entity text = UI_NULL_ENTITY;
   Entity caret = UI_NULL_ENTITY;
   size_t cursorPos = 0;

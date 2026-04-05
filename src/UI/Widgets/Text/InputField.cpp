@@ -41,6 +41,16 @@ void InputField::ensureElements(const ecs::ECSRoot *root,
 
     inputField.caret = caret;
   }
+
+  if (inputField.selection == UI_NULL_ENTITY) {
+    const auto selectionName = UI_strcat(entity.name().c_str(), "_selection");
+    const auto selection =
+      ui::ecs::createEntity(root, 0, 0, 0, 0, selectionName.c_str(), &entity);
+
+    selection.set<ecs::QuadRendererComponent>({.color = {1.0f, 1.0f, 1.0f, 0.5f}});
+
+    inputField.selection = selection;
+  }
 }
 
 size_t InputField::getCursorPositionFromMouse(const ecs::InputFieldComponent &input,
@@ -87,4 +97,12 @@ size_t InputField::getCursorPositionFromMouse(const ecs::InputFieldComponent &in
 
     return std::clamp<size_t>(minIdx, 0, inputText.text.size());
   }
+
+  return 0;
+}
+
+void ui::InputField::clearSelection(ecs::InputFieldComponent &input)
+{
+  auto selectionBase = input.selection.get_ref<ecs::BaseComponent>();
+  selectionBase->visible = false;
 }

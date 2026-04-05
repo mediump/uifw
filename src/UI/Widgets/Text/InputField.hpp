@@ -17,6 +17,8 @@ public:
   static size_t getCursorPositionFromMouse(const ecs::InputFieldComponent &input,
                                            const ecs::BaseComponent &base,
                                            const Vector2i &mousePos);
+
+  static void clearSelection(ecs::InputFieldComponent &input);
 };
 
 } // namespace ui

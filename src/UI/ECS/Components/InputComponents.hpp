@@ -51,6 +51,7 @@ struct InputFieldComponent
   InputFieldState state = InputFieldState_Inactive;
   Entity text = UI_NULL_ENTITY;
   Entity caret = UI_NULL_ENTITY;
+  Entity selection = UI_NULL_ENTITY;
   size_t cursorPos = 0;
   uint64_t lastInputTime = 0;
   FontData *font = nullptr;

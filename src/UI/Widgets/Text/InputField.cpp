@@ -105,4 +105,7 @@ void ui::InputField::clearSelection(ecs::InputFieldComponent &input)
 {
   auto selectionBase = input.selection.get_ref<ecs::BaseComponent>();
   selectionBase->visible = false;
+
+  input.selectionStart = input.cursorPos;
+  input.selectionEnd = input.cursorPos;
 }

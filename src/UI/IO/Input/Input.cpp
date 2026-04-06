@@ -5,6 +5,7 @@
 
 #include "SDL3/SDL_events.h"
 #include "SDL3/SDL_keyboard.h"
+#include "SDL3/SDL_keycode.h"
 #include "SDL3/SDL_mouse.h"
 #include "UI/Core/Application.hpp"
 #include "UI/Window/Window.hpp"
@@ -56,11 +57,34 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
   case SDL_EVENT_KEY_DOWN:
     inputState.keyDown = true;
     inputState.keyCode = event.key.key;
+
+    // FIXME: Handle case where one modifier key is up and the other
+    // is still down
+    switch (event.key.key) {
+      case SDLK_LSHIFT:
+      case SDLK_RSHIFT:
+        inputState.modShift = true;
+        break;
+      case SDLK_LCTRL:
+      case SDLK_RCTRL:
+        inputState.modCtrl = true;
+        break;
+    }
     break;
   case SDL_EVENT_TEXT_INPUT:
     inputState.currentInputBuffer += event.text.text;
     break;
   case SDL_EVENT_KEY_UP:
+    switch (event.key.key) {
+      case SDLK_LSHIFT:
+      case SDLK_RSHIFT:
+        inputState.modShift = false;
+        break;
+      case SDLK_LCTRL:
+      case SDLK_RCTRL:
+        inputState.modCtrl = false;
+        break;
+    }
     break;
   case SDL_EVENT_WINDOW_MINIMIZED:
     inputState.windowMinimized = true;

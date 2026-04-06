@@ -53,6 +53,8 @@ struct InputFieldComponent
   Entity caret = UI_NULL_ENTITY;
   Entity selection = UI_NULL_ENTITY;
   size_t cursorPos = 0;
+  size_t selectionStart = 0;
+  size_t selectionEnd = 0;
   uint64_t lastInputTime = 0;
   FontData *font = nullptr;
 };

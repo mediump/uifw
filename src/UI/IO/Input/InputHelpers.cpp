@@ -446,6 +446,12 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           case SDLK_RETURN:
             // textRef->text += "\n";
             break;
+          case SDLK_A:
+            if (inputState.modCtrl) {
+              input.selectionStart = 0;
+              input.selectionEnd = textRef->text.size();
+            }
+            break;
           }
 
           input.cursorPos = std::clamp<size_t>(input.cursorPos, 0, textRef->text.size());
@@ -465,7 +471,6 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
           // Calculate caret blink state
           if (bufferChanged) {
             input.lastInputTime = inputState.currentTime;
-            UI_LOG_MSG("Cursor pos: %i", input.cursorPos);
           }
 
           const uint64_t timeSinceLastInput =
@@ -502,36 +507,50 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         }
       }
 
-      // Layout selection
+      // Query mouse selection state if needed
       if (input.state == ecs::InputFieldState_Active &&
-          hoverHandler.state == HoverState_Clicked && 
-          mouseMoved) {
-        size_t min = input.cursorPos;
-        size_t max = InputField::getCursorPositionFromMouse(input, base, mousePos);
+          hoverHandler.state == HoverState_Clicked && mouseMoved) {
+        input.selectionEnd =
+          InputField::getCursorPositionFromMouse(input, base, mousePos);
+      }
+
+      auto selectionBase = input.selection.get_ref<ecs::BaseComponent>();
+
+      // Layout selection
+      if (input.selectionStart != input.selectionEnd) {
+        const auto &inputText = input.text.get<TextComponent>();
+        const std::vector<float> glyphDimensions =
+          TextUtils::computeLineWidth(inputText.text, inputText, inputText.font);
+
+        selectionBase->visible = true;
+
+        const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
+
+        size_t min = input.selectionStart;
+        size_t max = input.selectionEnd;
 
         if (min > max) {
           std::swap(min, max);
         }
 
-        const auto &inputText = input.text.get<TextComponent>();
-        const std::vector<float> glyphDimensions =
-          TextUtils::computeLineWidth(inputText.text, inputText, inputText.font);
+        UI_LOG_MSG("Selection: %s", inputText.text.substr(min, max - min).c_str());
 
-        auto selectionBase = input.selection.get_ref<ecs::BaseComponent>();
-        selectionBase->visible = true;
-
-        const uint16_t baseX = base.rect.x + BORDER_LEFT(quadRenderer.borderWidths);
+        // Calculate selection start position based on glyph widths up to min
+        const float selectionOffset = std::accumulate(
+          glyphDimensions.begin(), glyphDimensions.begin() + min, 0.0f);
+        const float selectionWidth = std::accumulate(
+          glyphDimensions.begin() + min, glyphDimensions.begin() + max, 0.0f);
 
         selectionBase->rect = {
-          .x = static_cast<uint16_t>(
-            baseX +
-            std::accumulate(glyphDimensions.begin(), glyphDimensions.begin() + min, 0)),
+          .x = static_cast<uint16_t>(base.rect.x + leftBorder + selectionOffset),
           .y = static_cast<uint16_t>(base.rect.y + 6),
-          .width = static_cast<uint16_t>(std::accumulate(
-            glyphDimensions.begin() + min, glyphDimensions.begin() + max, 0)),
-          .height = static_cast<uint16_t>(base.rect.height - 12)
-        };
+          .width = static_cast<uint16_t>(selectionWidth),
+          .height = static_cast<uint16_t>(base.rect.height - 12)};
+
         selectionBase->zOrder = 80;
+      }
+      else {
+        selectionBase->visible = false;
       }
     }
   });

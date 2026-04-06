@@ -24,6 +24,8 @@ struct InputState
   bool mouseDown = false;
   bool mouseUp = false;
   bool keyDown = false;
+  bool modShift = false;
+  bool modCtrl = false;
   KeyCode keyCode;
   Vector2f scrollDelta = {0.0f, 0.0f};
   uint64_t currentTime;

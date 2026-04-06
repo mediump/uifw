@@ -412,6 +412,14 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
 
       // Add text in buffer
       if (!inputState.currentInputBuffer.empty()) {
+        // Delete selection if exists before inserting
+        if (input.selectionStart != input.selectionEnd) {
+          size_t selMin = std::min(input.selectionStart, input.selectionEnd);
+          size_t selMax = std::max(input.selectionStart, input.selectionEnd);
+          textRef->text.erase(selMin, selMax - selMin);
+          input.cursorPos = selMin;
+          InputField::clearSelection(input);
+        }
         textRef->text.insert(input.cursorPos, inputState.currentInputBuffer);
         input.cursorPos += inputState.currentInputBuffer.size();
         bufferChanged = true;
@@ -420,29 +428,62 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
         if (keyDown) {
           switch (keyCode) {
           case SDLK_BACKSPACE:
-            if (!textRef->text.empty()) {
+            if (input.selectionStart != input.selectionEnd) {
+              // Delete selected text
+              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
+              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
+              textRef->text.erase(selMin, selMax - selMin);
+              input.cursorPos = selMin;
+              InputField::clearSelection(input);
+              bufferChanged = true;
+            }
+            else if (!textRef->text.empty() && input.cursorPos > 0) {
               textRef->text.erase(textRef->text.begin() + input.cursorPos - 1);
               input.cursorPos -= 1;
               bufferChanged = true;
             }
             break;
           case SDLK_DELETE:
-            if (!textRef->text.empty() && input.cursorPos < textRef->text.size()) {
+            if (input.selectionStart != input.selectionEnd) {
+              // Delete selected text
+              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
+              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
+              textRef->text.erase(selMin, selMax - selMin);
+              input.cursorPos = selMin;
+              InputField::clearSelection(input);
+              bufferChanged = true;
+            }
+            else if (!textRef->text.empty() && input.cursorPos < textRef->text.size()) {
               textRef->text.erase(textRef->text.begin() + input.cursorPos);
               bufferChanged = true;
             }
             break;
           case SDLK_RIGHT:
             if (!textRef->text.empty()) {
-              input.cursorPos += 1;
+              if (input.selectionStart != input.selectionEnd && !inputState.modCtrl) {
+                // Collapse selection to cursor position
+                input.cursorPos = input.selectionEnd;
+                InputField::clearSelection(input);
+              }
+              else {
+                input.cursorPos += 1;
+              }
               bufferChanged = true;
             }
             break;
           case SDLK_LEFT:
             if (!textRef->text.empty()) {
-              input.cursorPos -= 1;
+              if (input.selectionStart != input.selectionEnd && !inputState.modCtrl) {
+                // Collapse selection to cursor position
+                input.cursorPos = input.selectionStart;
+                InputField::clearSelection(input);
+              }
+              else {
+                input.cursorPos -= 1;
+              }
               bufferChanged = true;
             }
+            break;
           case SDLK_RETURN:
             // textRef->text += "\n";
             break;
@@ -450,6 +491,44 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
             if (inputState.modCtrl) {
               input.selectionStart = 0;
               input.selectionEnd = textRef->text.size();
+            }
+            break;
+          case SDLK_X:
+            if (inputState.modCtrl && input.selectionStart != input.selectionEnd) {
+              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
+              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
+              std::string selectedText = textRef->text.substr(selMin, selMax - selMin);
+              SDL_SetClipboardText(selectedText.c_str());
+              textRef->text.erase(selMin, selMax - selMin);
+              input.cursorPos = selMin;
+              InputField::clearSelection(input);
+              bufferChanged = true;
+            }
+            break;
+          case SDLK_C:
+            if (inputState.modCtrl && input.selectionStart != input.selectionEnd) {
+              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
+              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
+              std::string selectedText = textRef->text.substr(selMin, selMax - selMin);
+              SDL_SetClipboardText(selectedText.c_str());
+            }
+            break;
+          case SDLK_V:
+            if (inputState.modCtrl) {
+              const char *clipboardText = SDL_GetClipboardText();
+              if (clipboardText && SDL_strlen(clipboardText) > 0) {
+                // Delete selection if exists before pasting
+                if (input.selectionStart != input.selectionEnd) {
+                  size_t selMin = std::min(input.selectionStart, input.selectionEnd);
+                  size_t selMax = std::max(input.selectionStart, input.selectionEnd);
+                  textRef->text.erase(selMin, selMax - selMin);
+                  input.cursorPos = selMin;
+                  InputField::clearSelection(input);
+                }
+                textRef->text.insert(input.cursorPos, clipboardText);
+                input.cursorPos += SDL_strlen(clipboardText);
+                bufferChanged = true;
+              }
             }
             break;
           }

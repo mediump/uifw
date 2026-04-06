@@ -1,7 +1,5 @@
 #include "InputHelpers.hpp"
 
-#include "SDL3/SDL_keyboard.h"
-#include "SDL3/SDL_keycode.h"
 #include "SDL3/SDL_mouse.h"
 
 #include "UI/Core/Application.hpp"
@@ -19,8 +17,6 @@
 #include "Utils.hpp"
 
 #include <algorithm>
-#include <limits>
-#include <numeric>
 
 constexpr float SCROLL_SPEED = 25.0f;
 constexpr uint64_t CARET_BLINK_RATE = 1000;
@@ -353,284 +349,57 @@ void ui::InputHelpers::process_input_fields(const WindowData *window,
                          ecs::HoverHandlerComponent &hoverHandler) {
     InputField::ensureElements(&root, input, entity);
 
-    const auto &mousePos = inputState.mousePosition;
-    const auto &mouseDown = inputState.mouseDown;
-    const auto &mouseUp = inputState.mouseUp;
-    const auto &mouseMoved = inputState.mouseMoved;
-    const auto &keyDown = inputState.keyDown;
-    const auto &keyCode = inputState.keyCode;
+    // Hover and focus state
+    InputField::handleMouseInteraction(base, input, hoverHandler,
+                                       inputState.mousePosition, inputState.mouseDown,
+                                       inputState.mouseUp, window->sdlWindow);
 
-    // Hover state
-    if (isMouseInRect(mousePos, base.rect)) {
+    if (isMouseInRect(inputState.mousePosition, base.rect)) {
       *cursorShape = CursorShape_IBeam;
-
-      if (mouseDown) {
-        SDL_StartTextInput(window->sdlWindow);
-        input.state = ecs::InputFieldState_Active;
-        input.lastInputTime = inputState.currentTime;
-        input.cursorPos = InputField::getCursorPositionFromMouse(input, base, mousePos);
-
-        hoverHandler.state = HoverState_Clicked;
-        InputField::clearSelection(input);
-      }
-      else if (mouseUp) {
-        hoverHandler.state = HoverState_Idle;
-      }
     }
-    else {
-      if (mouseDown) {
-        SDL_StopTextInput(window->sdlWindow);
-        input.state = ecs::InputFieldState_Inactive;
-      }
-      else if (mouseUp) {
-        hoverHandler.state = HoverState_Idle;
-      }
+
+    if (input.text == UI_NULL_ENTITY) {
+      return;
     }
 
     auto textBaseRef = input.text.get_ref<ecs::BaseComponent>();
     auto textRef = input.text.get_ref<TextComponent>();
 
-    bool bufferChanged = false;
+    const auto quadRenderer = entity.get<ecs::QuadRendererComponent>();
 
-    if (input.text == UI_NULL_ENTITY) {
-      return;
+    // Layout input buffer
+    textBaseRef->rect = {
+      .x = static_cast<uint16_t>(base.rect.x + BORDER_LEFT(quadRenderer.borderWidths)),
+      .y = static_cast<uint16_t>(base.rect.y + BORDER_TOP(quadRenderer.borderWidths)),
+      .width =
+        static_cast<uint16_t>(base.rect.width - BORDER_LEFT(quadRenderer.borderWidths) -
+                              BORDER_RIGHT(quadRenderer.borderWidths)),
+      .height =
+        static_cast<uint16_t>(base.rect.height - BORDER_TOP(quadRenderer.borderWidths) -
+                              BORDER_BOTTOM(quadRenderer.borderWidths)),
+    };
+
+    // Handle keyboard input and text buffer
+    const bool bufferChanged = InputField::handleKeyboardInput(
+      input, textRef.get(), inputState.currentInputBuffer, inputState.keyDown,
+      inputState.keyCode, inputState.modCtrl);
+
+    // Layout caret
+    if (input.caret != UI_NULL_ENTITY) {
+      auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
+      InputField::updateCaret(input, caretBase.get(), base, quadRenderer, textRef.get(),
+                              inputState.currentTime);
     }
-    else {
-      const auto quadRenderer = entity.get<ecs::QuadRendererComponent>();
 
-      // Layout input buffer
-      textBaseRef->rect = {
-        .x = static_cast<uint16_t>(base.rect.x + BORDER_LEFT(quadRenderer.borderWidths)),
-        .y = static_cast<uint16_t>(base.rect.y + BORDER_TOP(quadRenderer.borderWidths)),
-        .width =
-          static_cast<uint16_t>(base.rect.width - BORDER_LEFT(quadRenderer.borderWidths) -
-                                BORDER_RIGHT(quadRenderer.borderWidths)),
-        .height =
-          static_cast<uint16_t>(base.rect.height - BORDER_TOP(quadRenderer.borderWidths) -
-                                BORDER_BOTTOM(quadRenderer.borderWidths)),
-      };
+    // Mouse drag selection
+    InputField::updateSelectionDrag(input, base, inputState.mousePosition,
+                                    inputState.mouseMoved, hoverHandler.state);
 
-      // Add text in buffer
-      if (!inputState.currentInputBuffer.empty()) {
-        // Delete selection if exists before inserting
-        if (input.selectionStart != input.selectionEnd) {
-          size_t selMin = std::min(input.selectionStart, input.selectionEnd);
-          size_t selMax = std::max(input.selectionStart, input.selectionEnd);
-          textRef->text.erase(selMin, selMax - selMin);
-          input.cursorPos = selMin;
-          InputField::clearSelection(input);
-        }
-        textRef->text.insert(input.cursorPos, inputState.currentInputBuffer);
-        input.cursorPos += inputState.currentInputBuffer.size();
-        bufferChanged = true;
-      }
-      else {
-        if (keyDown) {
-          switch (keyCode) {
-          case SDLK_BACKSPACE:
-            if (input.selectionStart != input.selectionEnd) {
-              // Delete selected text
-              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
-              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
-              textRef->text.erase(selMin, selMax - selMin);
-              input.cursorPos = selMin;
-              InputField::clearSelection(input);
-              bufferChanged = true;
-            }
-            else if (!textRef->text.empty() && input.cursorPos > 0) {
-              textRef->text.erase(textRef->text.begin() + input.cursorPos - 1);
-              input.cursorPos -= 1;
-              bufferChanged = true;
-            }
-            break;
-          case SDLK_DELETE:
-            if (input.selectionStart != input.selectionEnd) {
-              // Delete selected text
-              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
-              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
-              textRef->text.erase(selMin, selMax - selMin);
-              input.cursorPos = selMin;
-              InputField::clearSelection(input);
-              bufferChanged = true;
-            }
-            else if (!textRef->text.empty() && input.cursorPos < textRef->text.size()) {
-              textRef->text.erase(textRef->text.begin() + input.cursorPos);
-              bufferChanged = true;
-            }
-            break;
-          case SDLK_RIGHT:
-            if (!textRef->text.empty()) {
-              if (input.selectionStart != input.selectionEnd && !inputState.modCtrl) {
-                // Collapse selection to cursor position
-                input.cursorPos = input.selectionEnd;
-                InputField::clearSelection(input);
-              }
-              else {
-                input.cursorPos += 1;
-              }
-              bufferChanged = true;
-            }
-            break;
-          case SDLK_LEFT:
-            if (!textRef->text.empty()) {
-              if (input.selectionStart != input.selectionEnd && !inputState.modCtrl) {
-                // Collapse selection to cursor position
-                input.cursorPos = input.selectionStart;
-                InputField::clearSelection(input);
-              }
-              else {
-                input.cursorPos -= 1;
-              }
-              bufferChanged = true;
-            }
-            break;
-          case SDLK_RETURN:
-            // textRef->text += "\n";
-            break;
-          case SDLK_A:
-            if (inputState.modCtrl) {
-              input.selectionStart = 0;
-              input.selectionEnd = textRef->text.size();
-            }
-            break;
-          case SDLK_X:
-            if (inputState.modCtrl && input.selectionStart != input.selectionEnd) {
-              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
-              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
-              std::string selectedText = textRef->text.substr(selMin, selMax - selMin);
-              SDL_SetClipboardText(selectedText.c_str());
-              textRef->text.erase(selMin, selMax - selMin);
-              input.cursorPos = selMin;
-              InputField::clearSelection(input);
-              bufferChanged = true;
-            }
-            break;
-          case SDLK_C:
-            if (inputState.modCtrl && input.selectionStart != input.selectionEnd) {
-              size_t selMin = std::min(input.selectionStart, input.selectionEnd);
-              size_t selMax = std::max(input.selectionStart, input.selectionEnd);
-              std::string selectedText = textRef->text.substr(selMin, selMax - selMin);
-              SDL_SetClipboardText(selectedText.c_str());
-            }
-            break;
-          case SDLK_V:
-            if (inputState.modCtrl) {
-              const char *clipboardText = SDL_GetClipboardText();
-              if (clipboardText && SDL_strlen(clipboardText) > 0) {
-                // Delete selection if exists before pasting
-                if (input.selectionStart != input.selectionEnd) {
-                  size_t selMin = std::min(input.selectionStart, input.selectionEnd);
-                  size_t selMax = std::max(input.selectionStart, input.selectionEnd);
-                  textRef->text.erase(selMin, selMax - selMin);
-                  input.cursorPos = selMin;
-                  InputField::clearSelection(input);
-                }
-                textRef->text.insert(input.cursorPos, clipboardText);
-                input.cursorPos += SDL_strlen(clipboardText);
-                bufferChanged = true;
-              }
-            }
-            break;
-          }
-
-          input.cursorPos = std::clamp<size_t>(input.cursorPos, 0, textRef->text.size());
-        }
-      }
-
-      // Layout caret
-      if (input.caret != UI_NULL_ENTITY) {
-        auto caretBase = input.caret.get_ref<ecs::BaseComponent>();
-
-        if (input.state == ecs::InputFieldState_Active) {
-          const std::vector<float> glyphDimensions =
-            TextUtils::computeLineWidth(textRef->text, *textRef.get(), textRef->font);
-          const float fullLineWidth =
-            std::accumulate(glyphDimensions.begin(), glyphDimensions.end(), 0.0f);
-
-          // Calculate caret blink state
-          if (bufferChanged) {
-            input.lastInputTime = inputState.currentTime;
-          }
-
-          const uint64_t timeSinceLastInput =
-            inputState.currentTime - input.lastInputTime;
-          const bool recentlyTyped = timeSinceLastInput < CARET_VISIBLE_AFTER_INPUT;
-
-          if (recentlyTyped) {
-            caretBase->visible = true;
-          }
-          else {
-            caretBase->visible =
-              (inputState.currentTime % CARET_BLINK_RATE) < (CARET_BLINK_RATE / 2);
-          }
-
-          // Calculate caret position
-          const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
-          const float topBorder = BORDER_TOP(quadRenderer.borderWidths);
-
-          caretBase->rect.y = static_cast<uint16_t>(base.rect.y + topBorder + 2);
-          caretBase->rect.height = static_cast<uint16_t>(
-            base.rect.height - topBorder - BORDER_BOTTOM(quadRenderer.borderWidths) - 4);
-
-          const float cursorOffset = std::accumulate(
-            glyphDimensions.begin(), glyphDimensions.begin() + input.cursorPos, 0.0f);
-          const uint16_t xPos =
-            static_cast<uint16_t>(base.rect.x + leftBorder + cursorOffset);
-
-          caretBase->rect.x = xPos;
-          caretBase->rect.width = 2;
-          caretBase->zOrder = 90;
-        }
-        else {
-          caretBase->visible = false;
-        }
-      }
-
-      // Query mouse selection state if needed
-      if (input.state == ecs::InputFieldState_Active &&
-          hoverHandler.state == HoverState_Clicked && mouseMoved) {
-        input.selectionEnd =
-          InputField::getCursorPositionFromMouse(input, base, mousePos);
-      }
-
+    // Layout selection rectangle
+    if (input.selection != UI_NULL_ENTITY) {
       auto selectionBase = input.selection.get_ref<ecs::BaseComponent>();
-
-      // Layout selection
-      if (input.selectionStart != input.selectionEnd) {
-        const auto &inputText = input.text.get<TextComponent>();
-        const std::vector<float> glyphDimensions =
-          TextUtils::computeLineWidth(inputText.text, inputText, inputText.font);
-
-        selectionBase->visible = true;
-
-        const float leftBorder = BORDER_LEFT(quadRenderer.borderWidths);
-
-        size_t min = input.selectionStart;
-        size_t max = input.selectionEnd;
-
-        if (min > max) {
-          std::swap(min, max);
-        }
-
-        UI_LOG_MSG("Selection: %s", inputText.text.substr(min, max - min).c_str());
-
-        // Calculate selection start position based on glyph widths up to min
-        const float selectionOffset = std::accumulate(
-          glyphDimensions.begin(), glyphDimensions.begin() + min, 0.0f);
-        const float selectionWidth = std::accumulate(
-          glyphDimensions.begin() + min, glyphDimensions.begin() + max, 0.0f);
-
-        selectionBase->rect = {
-          .x = static_cast<uint16_t>(base.rect.x + leftBorder + selectionOffset),
-          .y = static_cast<uint16_t>(base.rect.y + 6),
-          .width = static_cast<uint16_t>(selectionWidth),
-          .height = static_cast<uint16_t>(base.rect.height - 12)};
-
-        selectionBase->zOrder = 80;
-      }
-      else {
-        selectionBase->visible = false;
-      }
+      InputField::updateSelectionRect(input, selectionBase.get(), base, quadRenderer,
+                                      textRef.get());
     }
   });
 }

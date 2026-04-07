@@ -327,6 +327,14 @@ const char *ui::InputHelpers::keyCodeToUTF8Str(KeyCode keyCode)
   return SDL_GetKeyName(keyCode);
 }
 
+void ui::InputHelpers::process_context_menus(const WindowData *window,
+                                             const InputState &inputState,
+                                             const ecs::ECSRoot &root,
+                                             CursorShape *cursorShape)
+{
+  
+}
+
 void ui::InputHelpers::process_scrollbars(const InputState &inputState,
                                           const ecs::ECSRoot &root,
                                           const AppStyle &appStyle)

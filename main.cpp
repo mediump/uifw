@@ -269,14 +269,33 @@ int main()
   inputField.set<ui::ecs::HoverHandlerComponent>({
     .cursorShape = ui::CursorShape_IBeam,
   });
-  inputField.set<ui::ecs::InputFieldComponent>({
-    .font = &fontData
-  });
+  inputField.set<ui::ecs::InputFieldComponent>({.font = &fontData});
 
   // Spacer
   ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Spacer2", &e5);
 
   /* ------------------------------- */
+
+  /* ---- Context Menu ---- */
+
+  std::vector<ui::ecs::ContextMenuEntry> contextEntries;
+
+  contextEntries.emplace_back(
+    ui::ecs::ContextMenuEntryType_Action, "Cut", "Ctrl + X",
+    [](const ui::ecs::Entity &entity) { UI_LOG_MSG("Cut Action"); });
+  contextEntries.emplace_back(
+    ui::ecs::ContextMenuEntryType_Action, "Copy", "Ctrl + C",
+    [](const ui::ecs::Entity &entity) { UI_LOG_MSG("Copy Action"); });
+  contextEntries.emplace_back(ui::ecs::ContextMenuEntryType_Separator);
+  contextEntries.emplace_back(
+    ui::ecs::ContextMenuEntryType_Action, "Select All", "Ctrl + A",
+    [](const ui::ecs::Entity &entity) { UI_LOG_MSG("Select All Action"); });
+
+  inputField.set<ui::ecs::ContextMenuComponent>(
+    {.activationType = ui::ecs::ContextMenuActivation_RightClick,
+     .entries = contextEntries});
+
+  /* ---------------------- */
 
   auto e6Base = e6.get_ref<ui::ecs::BaseComponent>();
 

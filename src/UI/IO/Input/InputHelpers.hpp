@@ -29,9 +29,14 @@ public:
   static void cleanupSystemCursors(SystemCursors systemCursors);
 
   static bool isMouseInRect(const Vector2i &mousePos, const Rect &rect);
-  static const char* keyCodeToUTF8Str(KeyCode keyCode);
+  static const char *keyCodeToUTF8Str(KeyCode keyCode);
 
 private:
+  static void process_context_menus(const WindowData *window,
+                                    const InputState &inputState,
+                                    const ecs::ECSRoot &root,
+                                    CursorShape *cursorShape);
+
   static void process_buttons(const InputState &inputState,
                               const ecs::ECSRoot &root,
                               const AppStyle &appStyle,

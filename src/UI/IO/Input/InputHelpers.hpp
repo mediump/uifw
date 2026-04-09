@@ -25,14 +25,14 @@ class InputHelpers
 {
 public:
   static SystemCursors initSystemCursors();
-  static void processEvents(const WindowData *window);
+  static void processEvents(WindowData *window);
   static void cleanupSystemCursors(SystemCursors systemCursors);
 
   static bool isMouseInRect(const Vector2i &mousePos, const Rect &rect);
   static const char *keyCodeToUTF8Str(KeyCode keyCode);
 
 private:
-  static void process_context_menus(const WindowData *window,
+  static void process_context_menus(WindowData *window,
                                     const InputState &inputState,
                                     const ecs::ECSRoot &root,
                                     CursorShape *cursorShape);

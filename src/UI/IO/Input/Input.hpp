@@ -23,6 +23,7 @@ struct InputState
   Vector2i mousePosition = {0, 0};
   bool mouseDown = false;
   bool mouseUp = false;
+  uint8_t mouseButton = 0;
   bool keyDown = false;
   bool modShift = false;
   bool modCtrl = false;

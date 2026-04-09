@@ -74,7 +74,7 @@ struct ContextMenuEntry
 {
   ContextMenuEntryType type = ContextMenuEntryType_Action;
   std::string name = "New Action";
-  std::string hotkey = nullptr;
+  std::string hotkey = "";
   std::function<void(const Entity &)> onActivate = nullptr;
 };
 
@@ -82,7 +82,7 @@ struct ContextMenuComponent
 {
   ContextMenuActivationType activationType = ContextMenuActivation_RightClick;
   std::vector<ContextMenuEntry> entries;
-}
+};
 
 } // namespace ecs
 

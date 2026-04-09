@@ -35,8 +35,8 @@ int main()
   ui::WindowData *window2 =
     ui::Window::initializeWindow("Text/Scroll Area", 512, 512, &app);
 
-  ui::FontData fontData = ui::FontLoader::loadFont("res/fonts/_generated/Roboto.png",
-                                                   "res/fonts/_generated/Roboto.json");
+  ui::FontData *fontData = ui::FontLoader::loadFont("res/fonts/_generated/Roboto.png",
+                                                    "res/fonts/_generated/Roboto.json");
 
   /* ---------------------------- Setup scene ---------------------------- */
   auto layoutComponent = window->canvas.entity.get_ref<ui::LayoutComponent>();
@@ -55,11 +55,11 @@ int main()
   });
 
   const auto message1 = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, &fontData, "welcome to me buttons", {1.0f, 1.0f, 1.0f, 1.0f}, 64,
+    &window->ecsRoot, fontData, "welcome to me buttons", {1.0f, 1.0f, 1.0f, 1.0f}, 64,
     25, 9, 500, 200, "Message1");
 
   const auto message2 = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, &fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25,
+    &window->ecsRoot, fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25,
     170, 500, 125, "Message2");
 
   auto e1Base = e1.get_ref<ui::ecs::BaseComponent>();
@@ -74,7 +74,7 @@ int main()
   });
 
   const auto framerateEntity = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, &fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
+    &window->ecsRoot, fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
     "FramerateText");
 
   size_t currentY = 36;
@@ -102,7 +102,7 @@ int main()
 
   /* ---- TEXT DISPLAY ---- */
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
-    &window2->ecsRoot, &fontData,
+    &window2->ecsRoot, fontData,
     "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
     "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
@@ -144,7 +144,7 @@ int main()
     .color = {0.11f, 0.11f, 0.11f, 1.0f},
     .borderRadius = {0.0f, 0.0f, 0.0f, 0.0f},
     .borderColor = {0.21f, 0.21f, 0.21f, 1.0f},
-    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+    .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
   });
 
   auto textComponent = textDisplayEntity.get_ref<ui::TextComponent>();
@@ -188,7 +188,7 @@ int main()
     button.set<ui::ecs::QuadRendererComponent>({
       .color = {0.36f, 0.36f, 0.36f, 1.0f},
       .borderRadius = {6, 6, 6, 6},
-      .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+      .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
     });
     button.add<ui::ecs::HoverHandlerComponent>();
     button.set<ui::ecs::ButtonComponent>({.onClick = [](const ui::ecs::Entity &entity) {
@@ -196,14 +196,14 @@ int main()
     }});
 
     button.set<ui::TextComponent>({.text = buttonLabels[i].c_str(),
-                                   .font = &fontData,
+                                   .font = fontData,
                                    .color = {0.94f, 0.94f, 0.94f, 1.0f},
                                    .pixelSize = 14,
                                    .horizontalAlignment = ui::TextHAlignment_Center,
                                    .verticalAlignment = ui::TextVAlignment_Middle});
 
     auto buttonBaseComponent = button.get_ref<ui::ecs::BaseComponent>();
-    const uint16_t buttonHeight = fontData.metrics.lineHeight * 14 + 24;
+    const uint16_t buttonHeight = fontData->metrics.lineHeight * 14 + 24;
 
     buttonBaseComponent->inLayout = true;
     buttonBaseComponent->minHeight = buttonHeight;
@@ -250,7 +250,7 @@ int main()
   inputLabelBase->maxWidth = 100;
 
   inputLabel.set<ui::TextComponent>({.text = "Input Field: ",
-                                     .font = &fontData,
+                                     .font = fontData,
                                      .color = {0.94f, 0.94f, 0.94f, 1.0f},
                                      .pixelSize = 16,
                                      .horizontalAlignment = ui::TextHAlignment_Left,
@@ -262,14 +262,14 @@ int main()
 
   inputField.set<ui::ecs::QuadRendererComponent>({
     .color = {0.35f, 0.35f, 0.35f, 1.0f},
-    .borderRadius = {0, 0, 0, 0},
+    .borderRadius = {3.0f, 3.0f, 3.0f, 3.0f},
     .borderColor = {0.46f, 0.46f, 0.46f, 1.0f},
-    .borderWidths = {3, 3, 3, 3},
+    .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
   });
   inputField.set<ui::ecs::HoverHandlerComponent>({
     .cursorShape = ui::CursorShape_IBeam,
   });
-  inputField.set<ui::ecs::InputFieldComponent>({.font = &fontData});
+  inputField.set<ui::ecs::InputFieldComponent>({.font = fontData});
 
   // Spacer
   ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Spacer2", &e5);
@@ -286,7 +286,8 @@ int main()
   contextEntries.emplace_back(
     ui::ecs::ContextMenuEntryType_Action, "Copy", "Ctrl + C",
     [](const ui::ecs::Entity &entity) { UI_LOG_MSG("Copy Action"); });
-  contextEntries.emplace_back(ui::ecs::ContextMenuEntryType_Separator);
+  contextEntries.emplace_back(
+    ui::ecs::ContextMenuEntry{.type = ui::ecs::ContextMenuEntryType_Separator});
   contextEntries.emplace_back(
     ui::ecs::ContextMenuEntryType_Action, "Select All", "Ctrl + A",
     [](const ui::ecs::Entity &entity) { UI_LOG_MSG("Select All Action"); });
@@ -313,25 +314,25 @@ int main()
     .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
     .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
-    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+    .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
   });
   e4.set<ui::ecs::QuadRendererComponent>({
     .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
     .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
-    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+    .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
   });
   e5.set<ui::ecs::QuadRendererComponent>({
     .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
     .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
-    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+    .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
   });
   e6.set<ui::ecs::QuadRendererComponent>({
     .color = {0.18f, 0.18f, 0.18f, 1.0f},
     .borderRadius = {6.0f, 6.0f, 6.0f, 6.0f},
     .borderColor = {0.36f, 0.36f, 0.36f, 1.0f},
-    .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+    .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
   });
   /* --------------------------------------------------------------------- */
 

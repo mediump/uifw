@@ -4,6 +4,7 @@
 #include "UI/ECS/Components/BaseComponent.hpp"
 #include "UI/ECS/Components/FontComponents.hpp"
 #include "UI/ECS/Components/RenderingComponents.hpp"
+#include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/RendererTypes.hpp"
 #include "UI/GFX/Shader.hpp"
 #include "UI/IO/Image/Image.hpp"
@@ -55,7 +56,7 @@ void Renderer::pick_window_present_mode(const RendererData *renderer)
 
   SDL_SetGPUSwapchainParameters(renderer->internals.gpuDevice,
                                 renderer->internals.sdlWindowPtr,
-                                SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_MAILBOX);
+                                SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 }
 
 void Renderer::create_text_render_pipeline(const RendererData *renderer,
@@ -207,11 +208,30 @@ size_t Renderer::record_sprite_draw_list(const WindowData *window,
   quadQuery.each([&inputState, &outInstances, &counter, &windowDimensions](
                    ecs::Entity e, const ecs::BaseComponent &baseComponent,
                    const ecs::QuadRendererComponent &quadRenderer) {
+    if (counter >= MAX_SPRITE_COUNT) {
+      return;
+    }
+
     if (!baseComponent.visible) {
       return;
     }
 
-    if (counter >= MAX_SPRITE_COUNT) {
+    // Check for invisible parents
+    auto currentTransformRel = baseComponent.transformRel;
+    bool isVisible = true;
+
+    while (currentTransformRel.parent != UI_NULL_ENTITY) {
+      const auto parentBase = currentTransformRel.parent.get<ecs::BaseComponent>();
+
+      if (!parentBase.visible) {
+        isVisible = false;
+        break;
+      } else {
+        currentTransformRel = parentBase.transformRel;
+      }
+    }
+
+    if (!isVisible) {
       return;
     }
 

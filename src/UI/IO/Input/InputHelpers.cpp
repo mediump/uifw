@@ -10,6 +10,7 @@
 #include "UI/ECS/Entity/Entity.hpp"
 #include "UI/GFX/Renderer/Text/TextRendererHelpers.hpp"
 #include "UI/IO/Input/Input.hpp"
+#include "UI/Layout/LayoutTypes.hpp"
 #include "UI/Utils/MathUtils.hpp"
 #include "UI/Widgets/Text/InputField.hpp"
 #include "UI/Widgets/Text/ScrollArea.hpp"
@@ -36,7 +37,7 @@ SystemCursors InputHelpers::initSystemCursors()
           .iBeamCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_TEXT)};
 }
 
-void InputHelpers::processEvents(const WindowData *window)
+void InputHelpers::processEvents(WindowData *window)
 {
   const auto &inputState = window->inputState;
 
@@ -51,6 +52,7 @@ void InputHelpers::processEvents(const WindowData *window)
   CursorShape cursorShape = CursorShape_Default;
 
   /* ---- Process events ---- */
+  process_context_menus(window, inputState, root, &cursorShape);
   process_buttons(inputState, root, appStyle, &cursorShape);
   process_text_components(inputState, root, &cursorShape);
   process_input_fields(window, inputState, root, &cursorShape);
@@ -325,6 +327,116 @@ void InputHelpers::process_text_components(const InputState &inputState,
 const char *ui::InputHelpers::keyCodeToUTF8Str(KeyCode keyCode)
 {
   return SDL_GetKeyName(keyCode);
+}
+
+void ui::InputHelpers::process_context_menus(WindowData *window,
+                                             const InputState &inputState,
+                                             const ecs::ECSRoot &root,
+                                             CursorShape *cursorShape)
+{
+  auto &world = root.world;
+  auto &contextMenu = window->contextMenu;
+
+  auto *fontData = window->app->appStyle.font;
+
+  if (contextMenu == UI_NULL_ENTITY) {
+    contextMenu = ecs::createEntity(&root, 0, 0, 250, 250, "ContextMenu");
+    contextMenu.set<ecs::QuadRendererComponent>({
+      .color = {0.3f, 0.3f, 0.3f, 1.0f},
+      .borderRadius = {3.0f, 3.0f, 3.0f, 3.0f},
+      .borderColor = {0.1f, 0.1f, 0.1f, 1.0f},
+      .borderWidths = {2.0f, 2.0f, 2.0f, 2.0f},
+    });
+
+    auto contextBase = window->contextMenu.get_ref<ecs::BaseComponent>();
+    contextBase->zOrder = 1000;
+    contextBase->visible = false;
+
+    UI_LOG_MSG("Created initial context menu");
+  }
+
+  const auto &contextMenuQuery =
+    world->query<ecs::ContextMenuComponent, ecs::BaseComponent>();
+
+  auto contextBase = contextMenu.get_ref<ecs::BaseComponent>();
+
+  contextMenuQuery.each([&inputState, &window, &root, &contextMenu, &contextBase,
+                         &fontData](const ecs::Entity &entity,
+                                    const ecs::ContextMenuComponent &context,
+                                    const ecs::BaseComponent &base) {
+    bool displayMenu = false;
+
+    const auto &mousePos = inputState.mousePosition;
+    const auto &mouseDown = inputState.mouseDown;
+    const auto &mouseButton = inputState.mouseButton;
+
+    bool mouseInRect = isMouseInRect(mousePos, base.rect);
+
+    switch (context.activationType) {
+    case ecs::ContextMenuActivation_RightClick:
+      if (mouseDown && mouseButton == SDL_BUTTON_RIGHT) {
+        displayMenu = mouseInRect;
+      }
+      break;
+    case ecs::ContextMenuActivation_LeftClick:
+      break;
+    }
+
+    if (displayMenu) {
+      // Layout context menu
+      constexpr uint16_t BUTTON_HEIGHT = 30;
+
+      const uint16_t x = mousePos.x;
+      const uint16_t y = mousePos.y;
+      const uint16_t width = 100;
+      const uint16_t height = BUTTON_HEIGHT * context.entries.size();
+
+      contextBase->rect = {.x = x, .y = y, .width = width, .height = height};
+      contextBase->visible = true;
+
+      uint16_t currentYOffset = y;
+
+      // Add buttons
+      if (contextBase->transformRel.nChildren == 0) {
+        for (const auto &entry : context.entries) {
+          switch (entry.type) {
+          case ecs::ContextMenuEntryType_Action:
+            const auto entryName = std::string("ContextMenu_") + entry.name;
+            const auto entryEntity =
+              ecs::createEntity(&root, x, currentYOffset, width, BUTTON_HEIGHT,
+                                entryName.c_str(), &contextMenu);
+            entryEntity.get_ref<ecs::BaseComponent>()->zOrder = 1100;
+            entryEntity.set<ui::ecs::QuadRendererComponent>({
+              .color = {0.36f, 0.36f, 0.36f, 0.0f},
+              .borderRadius = {0, 0, 0, 0},
+              .borderWidths = {0.0f, 0.0f, 0.0f, 0.0f},
+            });
+            entryEntity.set<ui::ecs::HoverHandlerComponent>(
+              {.cursorShape = CursorShape_Pointer});
+            entryEntity.set<ui::TextComponent>(
+              {.text = entry.name,
+               .font = fontData,
+               .color = {0.94f, 0.94f, 0.94f, 1.0f},
+               .pixelSize = 14,
+               .horizontalAlignment = ui::TextHAlignment_Center,
+               .verticalAlignment = ui::TextVAlignment_Middle});
+
+            currentYOffset += BUTTON_HEIGHT;
+
+            UI_LOG_MSG("Creating entry: %s", entry.name.c_str());
+            break;
+          }
+        }
+      }
+      else {
+        // Lay out context menu items
+      }
+    }
+
+    if (!isMouseInRect(mousePos, contextBase->rect) && mouseButton == SDL_BUTTON_LEFT) {
+      contextBase->visible = false;
+    }
+  });
 }
 
 void ui::InputHelpers::process_scrollbars(const InputState &inputState,

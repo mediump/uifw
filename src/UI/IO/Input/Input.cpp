@@ -46,9 +46,11 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
     break;
   case SDL_EVENT_MOUSE_BUTTON_DOWN:
     inputState.mouseDown = true;
+    inputState.mouseButton = event.button.button;
     break;
   case SDL_EVENT_MOUSE_BUTTON_UP:
     inputState.mouseUp = true;
+    inputState.mouseButton = event.button.button;
     break;
   case SDL_EVENT_MOUSE_WHEEL:
     inputState.scrollDelta = {static_cast<float>(event.wheel.integer_x),
@@ -128,6 +130,7 @@ void Input::reset_input_state(WindowData *window)
   inputState.mouseMoved = false;
   inputState.mouseDown = false;
   inputState.mouseUp = false;
+  inputState.mouseButton = 0;
   inputState.keyDown = false;
   inputState.scrollDelta = {0.0, 0.0};
   inputState.currentInputBuffer.clear();

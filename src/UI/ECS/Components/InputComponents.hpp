@@ -59,6 +59,31 @@ struct InputFieldComponent
   FontData *font = nullptr;
 };
 
+enum ContextMenuActivationType
+{
+  ContextMenuActivation_LeftClick,
+  ContextMenuActivation_RightClick,
+};
+
+enum ContextMenuEntryType {
+  ContextMenuEntryType_Action,
+  ContextMenuEntryType_Separator,
+};
+
+struct ContextMenuEntry
+{
+  ContextMenuEntryType type = ContextMenuEntryType_Action;
+  std::string name = "New Action";
+  std::string hotkey = "";
+  std::function<void(const Entity &)> onActivate = nullptr;
+};
+
+struct ContextMenuComponent
+{
+  ContextMenuActivationType activationType = ContextMenuActivation_RightClick;
+  std::vector<ContextMenuEntry> entries;
+};
+
 } // namespace ecs
 
 } // namespace ui

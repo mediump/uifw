@@ -1,8 +1,9 @@
 #pragma once
 
 #include "UI/Canvas/Canvas.hpp"
-#include "UI/GFX/Renderer/Renderer.hpp"
 #include "UI/ECS/Components/StyleComponents.hpp"
+#include "UI/ECS/Entity/Entity.hpp"
+#include "UI/GFX/Renderer/Renderer.hpp"
 
 #include <SDL3/SDL.h>
 
@@ -22,6 +23,7 @@ struct WindowData
   Canvas canvas;
   ecs::ECSRoot ecsRoot;
   InputState inputState;
+  ecs::Entity contextMenu = UI_NULL_ENTITY;
 };
 
 class Window
@@ -41,4 +43,4 @@ public:
   static void destroy(const WindowData *window);
 };
 
-}  // namespace ui
+} // namespace ui

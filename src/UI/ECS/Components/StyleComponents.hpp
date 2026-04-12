@@ -3,6 +3,8 @@
 #include <optional>
 
 #include "UI/GFX/Renderer/RendererTypes.hpp"
+#include "UI/GFX/Renderer/Text/TextTypes.hpp"
+#include "UI/IO/Text/FontLoader.hpp"
 
 namespace ui {
 
@@ -16,6 +18,7 @@ struct ButtonStyle
 
 struct AppStyle
 {
+  FontData *font;
   std::optional<ButtonStyle> buttonStyle;
   std::optional<ButtonStyle> buttonStyleHovered;
   std::optional<ButtonStyle> buttonStyleClicked;
@@ -30,7 +33,11 @@ public:
     //
     // TODO: Buttons should have stroke color/width options
 
+    ui::FontData *fontData = FontLoader::loadFont("res/fonts/_generated/Roboto.png",
+                                                  "res/fonts/_generated/Roboto.json");
+
     return {
+      .font = fontData,
       .buttonStyle = std::optional(ButtonStyle{
         .backgroundColor = std::optional(Color4f{0.35f, 0.35f, 0.35f, 1.0f}),
         .borderColor = std::optional(Color4f{0.46f, 0.46f, 0.46f, 1.0f}),
@@ -53,4 +60,4 @@ public:
   }
 };
 
-}
+} // namespace ui

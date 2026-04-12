@@ -8,19 +8,19 @@
 using namespace ui;
 using json = nlohmann::json;
 
-FontData FontLoader::loadFont(const char *imagePath, const char *jsonPath)
+FontData *FontLoader::loadFont(const char *imagePath, const char *jsonPath)
 {
-  FontData fontData;
+  auto fontData = new FontData();
 
   // Store image path reference
-  fontData.imagePath = imagePath;
+  fontData->imagePath = imagePath;
 
   // Load JSON
-  load_JSON_data(jsonPath, &fontData);
+  load_JSON_data(jsonPath, fontData);
 
   // Print info
-  UI_LOG_MSG("Loaded font: '%s'", fontData.imagePath);
-  UI_LOG_MSG(" > Glyph count: %i", fontData.glyphs.size());
+  UI_LOG_MSG("Loaded font: '%s'", fontData->imagePath);
+  UI_LOG_MSG(" > Glyph count: %i", fontData->glyphs.size());
 
   return fontData;
 }

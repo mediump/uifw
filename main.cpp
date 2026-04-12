@@ -55,12 +55,12 @@ int main()
   });
 
   const auto message1 = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, fontData, "welcome to me buttons", {1.0f, 1.0f, 1.0f, 1.0f}, 64,
-    25, 9, 500, 200, "Message1");
+    &window->ecsRoot, fontData, "uifw demo\nscene", {1.0f, 1.0f, 1.0f, 1.0f}, 64, 25,
+    9, 500, 200, "Message1");
 
   const auto message2 = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25,
-    170, 500, 125, "Message2");
+    &window->ecsRoot, fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25, 170,
+    500, 125, "Message2");
 
   auto e1Base = e1.get_ref<ui::ecs::BaseComponent>();
 
@@ -103,34 +103,14 @@ int main()
   /* ---- TEXT DISPLAY ---- */
   const auto textDisplayEntity = ui::TextHelpers::createTextEntity(
     &window2->ecsRoot, fontData,
-    "Pack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\nPack my box with five-dozen liquor jugs.\nPack my box with five-dozen liquor "
-    "jugs.\n",
+    "The five boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe "
+    "five boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe five "
+    "boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe five "
+    "boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe five "
+    "boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe five "
+    "boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe five "
+    "boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\nThe five "
+    "boxing wizards jump quickly.\nThe five boxing wizards jump quickly.\n",
     {1.0f, 1.0f, 1.0f, 1.0f}, 32, 16, currentY, 128, 128, "BigText", &e2);
 
   // const auto &longText =

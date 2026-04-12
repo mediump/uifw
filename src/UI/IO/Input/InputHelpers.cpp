@@ -394,10 +394,10 @@ void ui::InputHelpers::process_context_menus(WindowData *window,
       contextBase->rect = {.x = x, .y = y, .width = width, .height = height};
       contextBase->visible = true;
 
+      uint16_t currentYOffset = y;
+
       // Add buttons
       if (contextBase->transformRel.nChildren == 0) {
-        uint16_t currentYOffset = y;
-
         for (const auto &entry : context.entries) {
           switch (entry.type) {
           case ecs::ContextMenuEntryType_Action:
@@ -407,11 +407,12 @@ void ui::InputHelpers::process_context_menus(WindowData *window,
                                 entryName.c_str(), &contextMenu);
             entryEntity.get_ref<ecs::BaseComponent>()->zOrder = 1100;
             entryEntity.set<ui::ecs::QuadRendererComponent>({
-              .color = {0.36f, 0.36f, 0.36f, 1.0f},
-              .borderRadius = {6, 6, 6, 6},
-              .borderWidths = {3.0f, 3.0f, 3.0f, 3.0f},
+              .color = {0.36f, 0.36f, 0.36f, 0.0f},
+              .borderRadius = {0, 0, 0, 0},
+              .borderWidths = {0.0f, 0.0f, 0.0f, 0.0f},
             });
-            entryEntity.add<ui::ecs::HoverHandlerComponent>();
+            entryEntity.set<ui::ecs::HoverHandlerComponent>(
+              {.cursorShape = CursorShape_Pointer});
             entryEntity.set<ui::TextComponent>(
               {.text = entry.name,
                .font = fontData,
@@ -426,6 +427,9 @@ void ui::InputHelpers::process_context_menus(WindowData *window,
             break;
           }
         }
+      }
+      else {
+        // Lay out context menu items
       }
     }
 

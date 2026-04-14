@@ -46,6 +46,25 @@ size_t TextRendererHelpers::recordGlyphDrawList(
       return;
     }
 
+    // Check for invisible parents
+    auto currentTransformRel = baseComponent.transformRel;
+    bool isVisible = true;
+
+    while (currentTransformRel.parent != UI_NULL_ENTITY) {
+      const auto parentBase = currentTransformRel.parent.get<ecs::BaseComponent>();
+
+      if (!parentBase.visible) {
+        isVisible = false;
+        break;
+      } else {
+        currentTransformRel = parentBase.transformRel;
+      }
+    }
+
+    if (!isVisible) {
+      return;
+    }
+
     record_text_component(e, baseComponent, textComponent, &outInstances, &counter);
   });
 

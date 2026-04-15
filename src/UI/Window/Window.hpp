@@ -17,6 +17,7 @@ struct ApplicationData;
 struct WindowData
 {
   bool needsRelayout = true;
+  bool needsUpdate = false;
   SDL_Window *sdlWindow = nullptr;
   ApplicationData *app = nullptr;
   RendererData renderer;

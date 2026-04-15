@@ -114,7 +114,10 @@ bool Window::updateWindow(WindowData *window)
   } 
 
   InputHelpers::processEvents(window);
-  Renderer::draw(window);
+
+  if (window->needsUpdate) {
+    Renderer::draw(window);
+  }
 
   return true;
 }

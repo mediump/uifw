@@ -63,14 +63,14 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
     // FIXME: Handle case where one modifier key is up and the other
     // is still down
     switch (event.key.key) {
-      case SDLK_LSHIFT:
-      case SDLK_RSHIFT:
-        inputState.modShift = true;
-        break;
-      case SDLK_LCTRL:
-      case SDLK_RCTRL:
-        inputState.modCtrl = true;
-        break;
+    case SDLK_LSHIFT:
+    case SDLK_RSHIFT:
+      inputState.modShift = true;
+      break;
+    case SDLK_LCTRL:
+    case SDLK_RCTRL:
+      inputState.modCtrl = true;
+      break;
     }
     break;
   case SDL_EVENT_TEXT_INPUT:
@@ -78,14 +78,14 @@ static void process_event(ApplicationData *app, const SDL_Event &event)
     break;
   case SDL_EVENT_KEY_UP:
     switch (event.key.key) {
-      case SDLK_LSHIFT:
-      case SDLK_RSHIFT:
-        inputState.modShift = false;
-        break;
-      case SDLK_LCTRL:
-      case SDLK_RCTRL:
-        inputState.modCtrl = false;
-        break;
+    case SDLK_LSHIFT:
+    case SDLK_RSHIFT:
+      inputState.modShift = false;
+      break;
+    case SDLK_LCTRL:
+    case SDLK_RCTRL:
+      inputState.modCtrl = false;
+      break;
     }
     break;
   case SDL_EVENT_WINDOW_MINIMIZED:
@@ -117,6 +117,12 @@ void Input::pollEvents(ApplicationData *app)
 
   while (SDL_PollEvent(&event)) {
     process_event(app, event);
+  }
+
+  // Get per-window update state
+  for (auto &[id, window] : app->windows) {
+    window->needsUpdate = get_window_needs_update(window);
+    window->inputState.frame += 1;
   }
 }
 
@@ -158,4 +164,24 @@ Vector2i Input::get_mouse_position(const WindowData *window)
     .x = static_cast<uint16_t>(xPos),
     .y = static_cast<uint16_t>(yPos),
   };
+}
+
+bool ui::Input::get_window_needs_update(WindowData *window)
+{
+  const auto &inputState = window->inputState;
+
+  if (inputState.frame == 0) {
+    return true;
+  }
+
+  const bool scrolled = std::abs(inputState.scrollDelta.x) > 0.0f || 
+                        std::abs(inputState.scrollDelta.y) > 0.0f;
+
+  if (inputState.windowResized || inputState.keyDown || inputState.mouseMoved ||
+      inputState.mouseDown || inputState.mouseDown || inputState.mouseUp || scrolled ||
+      !inputState.currentInputBuffer.empty()) {
+    return true;
+  }
+
+  return false;
 }

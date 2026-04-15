@@ -29,6 +29,7 @@ struct InputState
   bool modCtrl = false;
   KeyCode keyCode;
   Vector2f scrollDelta = {0.0f, 0.0f};
+  uint64_t frame = 0;
   uint64_t currentTime;
   std::string currentInputBuffer;
 };
@@ -43,6 +44,8 @@ private:
 
   static Vector2i get_window_size(const WindowData *window);
   static Vector2i get_mouse_position(const WindowData *window);
+
+  static bool get_window_needs_update(WindowData *window);
 };
 
 } // namespace ui

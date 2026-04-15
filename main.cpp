@@ -73,9 +73,9 @@ int main()
     .spacing = 0,
   });
 
-  const auto framerateEntity = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
-    "FramerateText");
+  // const auto framerateEntity = ui::TextHelpers::createTextEntity(
+  //   &window->ecsRoot, fontData, "Framerate: ", {1.0, 1.0, 0.0, 1.0}, 16, 3, 3, 250, 50,
+  //   "FramerateText");
 
   size_t currentY = 36;
 
@@ -320,18 +320,18 @@ int main()
   ui::Window::relayout(window, DEMO_WINDOW_WIDTH, DEMO_WINDOW_HEIGHT);
   ui::Window::relayout(window2, 512, 512);
 
-  auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
-  auto lastFrameTime = std::chrono::high_resolution_clock::now();
+  //auto framerateTextComponent = framerateEntity.get_ref<ui::TextComponent>();
+  //auto lastFrameTime = std::chrono::high_resolution_clock::now();
 
   while (ui::Application::update(&app)) {
-    auto currentFrameTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> deltaTime = currentFrameTime - lastFrameTime;
-    lastFrameTime = currentFrameTime;
+    //auto currentFrameTime = std::chrono::high_resolution_clock::now();
+    //std::chrono::duration<double> deltaTime = currentFrameTime - lastFrameTime;
+    //lastFrameTime = currentFrameTime;
 
-    auto fps = static_cast<uint32_t>(1.0 / deltaTime.count());
-    std::string fpsString = "FPS:" + std::to_string(fps);
+    //auto fps = static_cast<uint32_t>(1.0 / deltaTime.count());
+    //std::string fpsString = "FPS:" + std::to_string(fps);
 
-    framerateTextComponent->text = fpsString.c_str();
+    //framerateTextComponent->text = fpsString.c_str();
   }
 
   return EXIT_SUCCESS;

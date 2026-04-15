@@ -361,105 +361,113 @@ void ui::InputHelpers::process_context_menus(WindowData *window,
 
   auto contextBase = contextMenu.get_ref<ecs::BaseComponent>();
 
-  contextMenuQuery.each(
-    [&inputState, &window, &root, &contextMenu, &contextBase, &fontData](
-      const ecs::Entity &entity, const ecs::ContextMenuComponent &context,
-      const ecs::BaseComponent &base, const ecs::QuadRendererComponent &quadRenderer) {
-      bool displayMenu = false;
+  contextMenuQuery.each([&inputState, &window, &root, &contextMenu, &contextBase,
+                         &fontData](const ecs::Entity &entity,
+                                    const ecs::ContextMenuComponent &context,
+                                    const ecs::BaseComponent &base,
+                                    const ecs::QuadRendererComponent &quadRenderer) {
+    bool displayMenu = false;
 
-      const auto &mousePos = inputState.mousePosition;
-      const auto &mouseDown = inputState.mouseDown;
-      const auto &mouseButton = inputState.mouseButton;
+    const auto &mousePos = inputState.mousePosition;
+    const auto &mouseDown = inputState.mouseDown;
+    const auto &mouseButton = inputState.mouseButton;
 
-      bool mouseInRect = isMouseInRect(mousePos, base.rect);
+    bool mouseInRect = isMouseInRect(mousePos, base.rect);
 
-      switch (context.activationType) {
-      case ecs::ContextMenuActivation_RightClick:
-        if (mouseDown && mouseButton == SDL_BUTTON_RIGHT) {
-          displayMenu = mouseInRect;
-        }
-        break;
-      case ecs::ContextMenuActivation_LeftClick:
-        break;
+    switch (context.activationType) {
+    case ecs::ContextMenuActivation_RightClick:
+      if (mouseDown && mouseButton == SDL_BUTTON_RIGHT) {
+        displayMenu = mouseInRect;
       }
+      break;
+    case ecs::ContextMenuActivation_LeftClick:
+      break;
+    }
 
-      if (displayMenu) {
-        // Layout context menu
-        constexpr uint16_t BUTTON_HEIGHT = 21;
+    if (displayMenu) {
+      // Layout context menu
+      constexpr uint16_t BUTTON_HEIGHT = 26;
 
-        const uint16_t x = mousePos.x;
-        const uint16_t y = mousePos.y;
-        const uint16_t width = 100;
-        const uint16_t height = BUTTON_HEIGHT * context.entries.size();
+      const uint16_t x = mousePos.x;
+      const uint16_t y = mousePos.y;
+      const uint16_t width = 100;
+      const uint16_t height = (BUTTON_HEIGHT * (context.entries.size() - 1)) +
+        BORDER_TOP(quadRenderer.borderWidths) + BORDER_BOTTOM(quadRenderer.borderWidths);
 
-        contextBase->rect = {.x = x, .y = y, .width = width, .height = height};
-        contextBase->visible = true;
+      contextBase->rect = {.x = x, .y = y, .width = width, .height = height};
+      contextBase->visible = true;
 
-        uint16_t currentYOffset = y + BORDER_TOP(quadRenderer.borderWidths);
+      uint16_t currentYOffset = y + BORDER_TOP(quadRenderer.borderWidths);
 
-        const uint16_t itemX = x + BORDER_LEFT(quadRenderer.borderWidths);
-        const uint16_t itemWidth = width - BORDER_LEFT(quadRenderer.borderWidths) -
-          BORDER_RIGHT(quadRenderer.borderWidths);
+      const uint16_t itemX = x + BORDER_LEFT(quadRenderer.borderWidths);
+      const uint16_t itemWidth = width - BORDER_LEFT(quadRenderer.borderWidths) -
+        BORDER_RIGHT(quadRenderer.borderWidths);
 
-        // Add buttons
-        if (contextBase->transformRel.nChildren == 0) {
-          for (const auto &entry : context.entries) {
-            switch (entry.type) {
-            case ecs::ContextMenuEntryType_Action:
-              const auto entryName = std::string("ContextMenu_") + entry.name;
-              const auto entryEntity =
-                ecs::createEntity(&root, itemX, currentYOffset, itemWidth, BUTTON_HEIGHT,
-                                  entryName.c_str(), &contextMenu);
-              entryEntity.get_ref<ecs::BaseComponent>()->zOrder = 1100;
-              entryEntity.set<ui::ecs::QuadRendererComponent>({
-                .color = {0.36f, 0.36f, 0.36f, 0.0f},
-                .borderRadius = {0, 0, 0, 0},
-                .borderWidths = {0.0f, 0.0f, 0.0f, 0.0f},
-              });
-              entryEntity.set<ecs::ButtonComponent>(
-                {.onClick = [&entry](ecs::Entity entity) {
-                  entry.onActivate(entity);
-                  const auto &parent = entity.get<ecs::BaseComponent>().transformRel.parent;
-                  parent.get_ref<ecs::BaseComponent>()->visible = false;
-                }});
-              entryEntity.set<ui::ecs::HoverHandlerComponent>(
-                {.cursorShape = CursorShape_Pointer});
-              entryEntity.set<ui::TextComponent>(
-                {.text = entry.name,
-                 .font = fontData,
-                 .color = {0.94f, 0.94f, 0.94f, 1.0f},
-                 .pixelSize = 14,
-                 .horizontalAlignment = ui::TextHAlignment_Center,
-                 .verticalAlignment = ui::TextVAlignment_Middle});
+      // Add buttons
+      if (contextBase->transformRel.nChildren == 0) {
+        for (const auto &entry : context.entries) {
+          switch (entry.type) {
+          case ecs::ContextMenuEntryType_Action:
+            const auto entryName = std::string("ContextMenu_") + entry.name;
+            const auto entryEntity =
+              ecs::createEntity(&root, itemX, currentYOffset, itemWidth, BUTTON_HEIGHT,
+                                entryName.c_str(), &contextMenu);
+                                
+            entryEntity.get_ref<ecs::BaseComponent>()->zOrder = 1100;
 
-              currentYOffset += BUTTON_HEIGHT;
+            entryEntity.set<ui::ecs::QuadRendererComponent>({
+              .color = {0.36f, 0.36f, 0.36f, 0.0f},
+              .borderRadius = {0, 0, 0, 0},
+              .borderWidths = {0.0f, 0.0f, 0.0f, 0.0f},
+            });
 
-              break;
-            }
-          }
-        }
-        else {
-          // Lay out context menu items
-          auto currentEntity = contextBase->transformRel.first;
+            entryEntity.set<ecs::ButtonComponent>(
+              {.onClick = [&entry](ecs::Entity entity) {
+                entry.onActivate(entity);
+                const auto &parent = entity.get<ecs::BaseComponent>().transformRel.parent;
+                parent.get_ref<ecs::BaseComponent>()->visible = false;
+              }});
 
-          while (currentEntity != UI_NULL_ENTITY) {
-            auto currentBase = currentEntity.get_ref<ecs::BaseComponent>();
+            entryEntity.set<ui::ecs::HoverHandlerComponent>(
+              {.cursorShape = CursorShape_Pointer});
 
-            currentBase->rect.x = itemX;
-            currentBase->rect.y = currentYOffset;
-            currentBase->rect.width = itemWidth;
-            currentBase->rect.height = BUTTON_HEIGHT;
+            entryEntity.set<ui::TextComponent>(
+              {.text = entry.name,
+               .font = fontData,
+               .color = {0.94f, 0.94f, 0.94f, 1.0f},
+               .pixelSize = 14,
+               .padding = {5, 0},
+               .horizontalAlignment = ui::TextHAlignment_Left,
+               .verticalAlignment = ui::TextVAlignment_Middle});
 
             currentYOffset += BUTTON_HEIGHT;
-            currentEntity = currentBase->transformRel.next;
+
+            break;
           }
         }
       }
+      else {
+        // Lay out context menu items
+        auto currentEntity = contextBase->transformRel.first;
 
-      if (!isMouseInRect(mousePos, contextBase->rect) && mouseButton == SDL_BUTTON_LEFT) {
-        contextBase->visible = false;
+        while (currentEntity != UI_NULL_ENTITY) {
+          auto currentBase = currentEntity.get_ref<ecs::BaseComponent>();
+
+          currentBase->rect.x = itemX;
+          currentBase->rect.y = currentYOffset;
+          currentBase->rect.width = itemWidth;
+          currentBase->rect.height = BUTTON_HEIGHT;
+
+          currentYOffset += BUTTON_HEIGHT;
+          currentEntity = currentBase->transformRel.next;
+        }
       }
-    });
+    }
+
+    if (!isMouseInRect(mousePos, contextBase->rect) && mouseButton == SDL_BUTTON_LEFT) {
+      contextBase->visible = false;
+    }
+  });
 }
 
 void ui::InputHelpers::process_scrollbars(const InputState &inputState,

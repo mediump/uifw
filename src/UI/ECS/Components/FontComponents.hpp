@@ -31,7 +31,7 @@ struct TextComponent
 
   Color4f color = {1.0f, 1.0f, 1.0f, 1.0f};
   uint16_t pixelSize = 13;
-  uint16_t padding = 0;
+  Vector2i padding = {0, 0};
 
   bool isScrollable = false;
   ecs::Entity scrollbar = UI_NULL_ENTITY;

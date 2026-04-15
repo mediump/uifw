@@ -106,7 +106,7 @@ void TextRendererHelpers::record_text_component(
   const auto lineHeight =
     fontData->metrics.lineHeight * static_cast<float>(textComponent.pixelSize);
 
-  float availableWidth = baseComponent.rect.width - (textComponent.padding * 2.0f);
+  float availableWidth = baseComponent.rect.width - (textComponent.padding.x * 2.0f);
 
   if (textComponent.isScrollable && textComponent.scrollbar != UI_NULL_ENTITY) {
     if (textComponent.scrollbar.get<ecs::BaseComponent>().visible) {
@@ -175,7 +175,7 @@ void TextRendererHelpers::record_text_component(
   verticalOffset += scrollPos;
 
   float currentBaselineY = static_cast<float>(baseComponent.rect.y) +
-    textComponent.padding + (fontData->metrics.ascender * fontSize) + verticalOffset;
+    textComponent.padding.y + (fontData->metrics.ascender * fontSize) + verticalOffset;
 
   // Record each rendered line with its own alignment offset
   for (const auto &renderLine : renderLines) {
@@ -200,7 +200,7 @@ void TextRendererHelpers::record_text_component(
       break;
     case TextHAlignment_Left:
     default:
-      alignmentOffset = textComponent.padding;
+      alignmentOffset = textComponent.padding.x;
       break;
     }
 

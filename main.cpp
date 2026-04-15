@@ -131,7 +131,7 @@ int main()
   textComponent->horizontalAlignment = ui::TextHAlignment_Left;
   textComponent->verticalAlignment = ui::TextVAlignment_Top;
   textComponent->isScrollable = true;
-  textComponent->padding = 10;
+  textComponent->padding = {10, 10};
   /* ---------------------- */
 
   const auto e3 = ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "Entity3",

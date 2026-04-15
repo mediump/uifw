@@ -31,11 +31,14 @@ Components:
 
  Widgets:
  [-] Console
- [-] Input field
+ [X] Input field
  [-] Multi-line input field
  [-] Scroll box
+  [X] Text scroll box
+  [-] Layout overflow scroll box
  [-] List view
- [-] Dropdown menu/context menu
+ [-] Dropdown menu
+ [X] Context menu
  [-] Slider
  [-] Spin box
  [-] Radio button

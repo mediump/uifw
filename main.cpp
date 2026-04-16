@@ -54,13 +54,19 @@ int main()
     .spacing = 5,
   });
 
-  const auto message1 = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, fontData, "uifw demo\nscene", {1.0f, 1.0f, 1.0f, 1.0f}, 64, 25,
-    9, 500, 200, "Message1");
+  const auto graphicsContext =
+    ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "GraphicsCtx", &e1);
 
-  const auto message2 = ui::TextHelpers::createTextEntity(
-    &window->ecsRoot, fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25, 170,
-    500, 125, "Message2");
+  graphicsContext.get_ref<ui::ecs::BaseComponent>()->inLayout = true;
+  graphicsContext.set<ui::ecs::QuadRendererComponent>({.color = {1.0, 1.0, 1.0, 1.0}});
+
+  // const auto message1 = ui::TextHelpers::createTextEntity(
+  //   &window->ecsRoot, fontData, "uifw demo\nscene", {1.0f, 1.0f, 1.0f, 1.0f}, 64, 25,
+  //   9, 500, 200, "Message1");
+
+  // const auto message2 = ui::TextHelpers::createTextEntity(
+  //   &window->ecsRoot, fontData, "~!@#$%^&*()_+", {0.36f, 0.36f, 0.36f, 1.0f}, 28, 25,
+  //   170, 500, 125, "Message2");
 
   auto e1Base = e1.get_ref<ui::ecs::BaseComponent>();
 

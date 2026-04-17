@@ -1,5 +1,13 @@
 #pragma once
+
 #include "UI/GFX/Renderer/RendererTypes.hpp"
+#include "UI/Layout/LayoutTypes.hpp"
+#include "Utils.hpp"
+
+#include <functional>
+
+UI_FORWARD_DECLARE_STRUCT(SDL_GPUCommandBuffer);
+UI_FORWARD_DECLARE_STRUCT(SDL_GPURenderPass);
 
 namespace ui::ecs {
 
@@ -10,7 +18,7 @@ struct Color
   float b = 1.0f;
   float a = 1.0f;
 
-  bool operator==(const Color & color) const
+  bool operator==(const Color &color) const
   {
     return r == color.r && g == color.g && b == color.b && a == color.a;
   }
@@ -25,4 +33,15 @@ struct QuadRendererComponent
   bool clipContents = true;
 };
 
+struct GraphicsContextComponent
+{
+  Color clearColor = {1.0f, 1.0f, 1.0f, 1.0f};
+  std::function<void(SDL_GPUCommandBuffer *cmd)> onPreRender;
+  std::function<void(
+    SDL_GPUCommandBuffer *cmd, 
+    SDL_GPURenderPass *renderPass, 
+    const Rect &viewportBounds
+  )> onRender;
 }
+
+} // namespace ui::ecs

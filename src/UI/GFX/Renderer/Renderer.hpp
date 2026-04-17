@@ -86,6 +86,9 @@ private:
   static const glm::mat4& get_camera_matrix(DrawDataStorage &storage, 
                                             uint16_t windowWidth, 
                                             uint16_t windowHeight);
+
+  // static void call_embedded_pre_render(const WindowData *window, const Canvas *canvas,
+  //                                      SDL_GPUDevice *gpuDevice);                                           
 };
 
 } // namespace ui

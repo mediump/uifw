@@ -54,9 +54,9 @@ void Renderer::pick_window_present_mode(const RendererData *renderer)
   //   presentMode = SDL_GPU_PRESENTMODE_MAILBOX;
   // }
 
-  SDL_SetGPUSwapchainParameters(renderer->internals.gpuDevice,
-                                renderer->internals.sdlWindowPtr,
-                                SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+  SDL_SetGPUSwapchainParameters(
+    renderer->internals.gpuDevice, renderer->internals.sdlWindowPtr,
+    SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 }
 
 void Renderer::create_text_render_pipeline(const RendererData *renderer,
@@ -70,8 +70,8 @@ void Renderer::create_text_render_pipeline(const RendererData *renderer,
   constexpr auto TEXT_FS_PATH = "res/shaders/_compiled/SPIRV/batch_render_font.frag.spv";
 
   // Load font atlas image
-  SDL_Surface *imageData = Image::loadImageFromPath(
-    "res/fonts/_generated/Roboto.png", SDL_PIXELFORMAT_ARGB8888);
+  SDL_Surface *imageData =
+    Image::loadImageFromPath("res/fonts/_generated/Roboto.png", SDL_PIXELFORMAT_ARGB8888);
 
   if (imageData == nullptr) {
     UI_LOG_MSG("No font atlas could be loaded. Exiting...");
@@ -226,7 +226,8 @@ size_t Renderer::record_sprite_draw_list(const WindowData *window,
       if (!parentBase.visible) {
         isVisible = false;
         break;
-      } else {
+      }
+      else {
         currentTransformRel = parentBase.transformRel;
       }
     }
@@ -235,9 +236,7 @@ size_t Renderer::record_sprite_draw_list(const WindowData *window,
       return;
     }
 
-    Rect mask = {
-      0, 0, windowDimensions.x, windowDimensions.y
-    };
+    Rect mask = {0, 0, windowDimensions.x, windowDimensions.y};
     Vector4f borderRadii = {0.0f, 0.0f, 0.0f, 0.0f};
 
     const auto currentParent = baseComponent.transformRel.parent;
@@ -272,36 +271,38 @@ size_t Renderer::record_sprite_draw_list(const WindowData *window,
           static_cast<float>(baseComponent.rect.height),
         },
       .color = color,
-      .borderRadius = {
-        .x = static_cast<float>(quadRenderer.borderRadius.x),
-        .y = static_cast<float>(quadRenderer.borderRadius.y),
-        .z = static_cast<float>(quadRenderer.borderRadius.z),
-        .w = static_cast<float>(quadRenderer.borderRadius.w),
-      },
-      .borderColor = {
-        .r = static_cast<float>(quadRenderer.borderColor.r),
-        .g = static_cast<float>(quadRenderer.borderColor.g),
-        .b = static_cast<float>(quadRenderer.borderColor.b),
-        .a = static_cast<float>(quadRenderer.borderColor.a),
-      },
+      .borderRadius =
+        {
+          .x = static_cast<float>(quadRenderer.borderRadius.x),
+          .y = static_cast<float>(quadRenderer.borderRadius.y),
+          .z = static_cast<float>(quadRenderer.borderRadius.z),
+          .w = static_cast<float>(quadRenderer.borderRadius.w),
+        },
+      .borderColor =
+        {
+          .r = static_cast<float>(quadRenderer.borderColor.r),
+          .g = static_cast<float>(quadRenderer.borderColor.g),
+          .b = static_cast<float>(quadRenderer.borderColor.b),
+          .a = static_cast<float>(quadRenderer.borderColor.a),
+        },
       .borderWidths = quadRenderer.borderWidths,
-      .parentBounds = {
-        .x = static_cast<float>(mask.x),
-        .y = static_cast<float>(mask.y),
-        .z = static_cast<float>(mask.width),
-        .w = static_cast<float>(mask.height),
-      },
+      .parentBounds =
+        {
+          .x = static_cast<float>(mask.x),
+          .y = static_cast<float>(mask.y),
+          .z = static_cast<float>(mask.width),
+          .w = static_cast<float>(mask.height),
+        },
       .parentRadii = borderRadii,
     });
-    
+
     counter++;
   });
 
   // TODO: Do this using a GPU depth texture
-  std::ranges::sort(outInstances,
-    [](const SpriteInstance &a, const SpriteInstance &b) {
-      return a.position.z < b.position.z;
-    });
+  std::ranges::sort(outInstances, [](const SpriteInstance &a, const SpriteInstance &b) {
+    return a.position.z < b.position.z;
+  });
 
   return counter;
 }
@@ -391,7 +392,8 @@ DrawPipeline Renderer::create_draw_pipeline(const RendererData *renderer,
   return pipeline;
 }
 
-RendererData Renderer::createRenderer(const WindowData *window, const Canvas *canvas,
+RendererData Renderer::createRenderer(const WindowData *window,
+                                      const Canvas *canvas,
                                       SDL_GPUDevice *gpuDevice)
 {
   RendererData renderer;
@@ -513,6 +515,17 @@ void Renderer::draw(WindowData *window)
 
   SDL_EndGPUCopyPass(copyPass);
 
+  // Embedded graphics contexts: Pre-render callbacks
+  auto world = window->canvas.entity.world();
+  auto contextsQuery = world.query<ecs::BaseComponent, ecs::GraphicsContextComponent>();
+
+  contextsQuery.each([&cmd](ecs::Entity entity, ecs::BaseComponent base,
+                            ecs::GraphicsContextComponent context) {
+    if (context.onPreRender) {
+      context.onPreRender(cmd);
+    }
+  });
+
   // Render everything
   const SDL_GPUColorTargetInfo colorTargetInfo = {
     .texture = swapchainTexture,
@@ -544,6 +557,32 @@ void Renderer::draw(WindowData *window)
   SDL_BindGPUFragmentSamplers(renderPass, 0, &fontAtlasTexBinding, 1);
 
   SDL_DrawGPUPrimitives(renderPass, glyphCountToRender * 6, 1, 0, 0);
+
+  // Render embedded contexts (if any)
+  contextsQuery.each([&cmd, &renderPass](ecs::Entity entity, ecs::BaseComponent base,
+                            ecs::GraphicsContextComponent context) {
+    if (context.onRender) {
+      const SDL_GPUViewport gpuViewport = {
+        .x = static_cast<float>(base.rect.x),
+        .y = static_cast<float>(base.rect.y),
+        .w = static_cast<float>(base.rect.width),
+        .h = static_cast<float>(base.rect.height),
+        .min_depth = 0.0f,
+        .max_depth = 1.0f
+      };
+      SDL_SetGPUViewport(renderPass, &gpuViewport);
+
+      const SDL_Rect scissorRect = {
+        .x = base.rect.x,
+        .y = base.rect.y,
+        .w = base.rect.width,
+        .h = base.rect.height
+      };
+      SDL_SetGPUScissor(renderPass, &scissorRect);
+
+      context.onRender(cmd, renderPass, base.rect);
+    }
+  });
 
   SDL_EndGPURenderPass(renderPass);
   SDL_SubmitGPUCommandBuffer(cmd);

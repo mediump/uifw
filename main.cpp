@@ -58,7 +58,9 @@ int main()
     ui::ecs::createEntity(&window->ecsRoot, 0, 0, 50, 50, "GraphicsCtx", &e1);
 
   graphicsContext.get_ref<ui::ecs::BaseComponent>()->inLayout = true;
-  graphicsContext.set<ui::ecs::QuadRendererComponent>({.color = {1.0, 1.0, 1.0, 1.0}});
+  graphicsContext.set<ui::ecs::QuadRendererComponent>({
+    .color = {1.0, 1.0, 1.0, 1.0}
+  });
 
   // const auto message1 = ui::TextHelpers::createTextEntity(
   //   &window->ecsRoot, fontData, "uifw demo\nscene", {1.0f, 1.0f, 1.0f, 1.0f}, 64, 25,
